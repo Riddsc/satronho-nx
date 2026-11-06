@@ -6,6 +6,8 @@ Satronho NX es una versión propia de Riddsc del emulador **Lichii**, ajustada p
 
 - Un descriptor de textura con formato 0 (que no existe en el hardware) se trata como textura vacía en lugar de crear una imagen sobre memoria sin mapear. En The Legend of Zelda: Ocarina of Time esto hacía que los drivers de AMD perdieran la GPU (`VK_ERROR_DEVICE_LOST`).
 - Al compilar shaders ya no se leen descriptores fuera de la tabla de texturas (`index > tic_limit`).
+- Ajuste de niebla y exposición para Ocarina of Time activado por defecto (viene de la rama experimental `exp/oot-visual-workaround` de Lichii). Solo cambia dos shaders de ese juego. Se apaga con `EDEN_NX2_OOT_VISUAL_WORKAROUND=0` en `nx2_switches.txt`.
+- Ícono propio de la familia Satronho (`dist/branding/satronho-nx.svg`).
 - Nombre del programa: `satronho-nx.exe`. Solo se compila la versión de Windows (MSVC).
 
 Comparte partidas, configuración y caché de shaders con Lichii, Eglantine y Eden (`%APPDATA%\eden`).

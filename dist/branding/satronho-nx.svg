@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Satronho NX · © 2026 RiddsSatronho -->
+  <defs>
+    <radialGradient id="left" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#9ff6ff"/><stop offset=".55" stop-color="#2fd3e8"/><stop offset="1" stop-color="#0b7f95"/>
+    </radialGradient>
+    <radialGradient id="right" cx="60%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#ffb3a8"/><stop offset=".55" stop-color="#ff5d55"/><stop offset="1" stop-color="#a51f2c"/>
+    </radialGradient>
+    <clipPath id="planetClip"><circle cx="256" cy="256" r="132"/></clipPath>
+    <clipPath id="front"><rect x="-200" y="270" width="912" height="400" transform="rotate(-18 256 270)"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#0f0d17"/>
+  <circle cx="256" cy="256" r="230" fill="#1d1733"/>
+  <ellipse cx="256" cy="270" rx="214" ry="62" fill="none" stroke="#ffd166" stroke-width="26" transform="rotate(-18 256 270)"/>
+  <g clip-path="url(#planetClip)">
+    <rect x="100" y="100" width="156" height="312" fill="url(#left)"/>
+    <rect x="256" y="100" width="156" height="312" fill="url(#right)"/>
+    <rect x="250" y="100" width="12" height="312" fill="#1d1733"/>
+  </g>
+  <g clip-path="url(#front)"><ellipse cx="256" cy="270" rx="214" ry="62" fill="none" stroke="#ffd166" stroke-width="26" transform="rotate(-18 256 270)"/></g>
+  <g fill="#1b1430" opacity=".9" transform="translate(226 206)">
+    <ellipse cx="30" cy="52" rx="28" ry="24"/>
+    <ellipse cx="2" cy="16" rx="11" ry="14"/><ellipse cx="22" cy="2" rx="11" ry="14"/>
+    <ellipse cx="44" cy="2" rx="11" ry="14"/><ellipse cx="62" cy="18" rx="11" ry="14"/>
+  </g>
+  <g font-family="DejaVu Sans, Arial, sans-serif" font-weight="800" font-size="64" text-anchor="middle">
+    <text x="256" y="470" fill="#ffffff" letter-spacing="6">NX</text>
+  </g>
+</svg>

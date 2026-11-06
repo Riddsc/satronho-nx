@@ -8,6 +8,8 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
+#include <cstdlib>
+#include <string_view>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -29,6 +31,7 @@
 #include "shader_recompiler/frontend/maxwell/control_flow.h"
 #include "shader_recompiler/frontend/maxwell/translate_program.h"
 #include "shader_recompiler/ir_opt/passes.h"
+#include "shader_recompiler/ir_opt/oot_visual_workaround.h"
 #include "shader_recompiler/program_header.h"
 #include "video_core/engines/kepler_compute.h"
 #include "video_core/engines/maxwell_3d.h"
@@ -453,6 +456,12 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
       use_asynchronous_shaders{Settings::values.use_asynchronous_shaders.GetValue()},
       use_vulkan_pipeline_cache{Settings::values.use_vulkan_driver_pipeline_cache.GetValue() &&
                                 !DriverCachesPipelines(device_)},
+      // Satronho NX: the Ocarina fog/exposure workaround is on by default (it only touches two
+      // shaders of that title); EDEN_NX2_OOT_VISUAL_WORKAROUND=0 turns it off.
+      oot_visual_workaround{[] {
+          const char* value = std::getenv("EDEN_NX2_OOT_VISUAL_WORKAROUND");
+          return value == nullptr || std::string_view{value} != "0";
+      }()},
       num_pipeline_workers{device.HasBrokenParallelShaderCompiling() ? 1ULL
                                                                      : GetTotalPipelineWorkers()},
       emission_budget{num_pipeline_workers},
@@ -826,6 +835,7 @@ ComputePipeline* PipelineCache::CurrentComputePipeline() {
 
 void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
                                       const VideoCore::DiskResourceLoadCallback& callback) {
+    visual_workaround_title = title_id;
     if (title_id == 0) {
         return;
     }
@@ -1293,6 +1303,13 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
             programs[index] = MergeDualVertexPrograms(program_va, program_vb, env);
         }
 
+        if (const auto edits = Shader::Optimization::ApplyOotVisualWorkaround(
+                programs[index], visual_workaround_title, key.unique_hashes[index],
+                oot_visual_workaround)) {
+            LOG_WARNING(Render_Vulkan, "OoT visual workaround: shader {:016x}, {} scalar edits",
+                        key.unique_hashes[index], *edits);
+        }
+
         if (device.GetDriverID() != VK_DRIVER_ID_NVIDIA_PROPRIETARY && Shader::Optimization::HasBrokenPattern(programs[index])) {
             LOG_WARNING(Render_Vulkan, "0x{:016x}: Skipping shader with known issues", key.unique_hashes[index]);
             return nullptr;
@@ -1601,6 +1618,11 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(
     }
 
     auto program{TranslateProgram(pools.inst, pools.block, env, cfg, host_info)};
+    if (const auto edits = Shader::Optimization::ApplyOotVisualWorkaround(
+            program, visual_workaround_title, key.unique_hash, oot_visual_workaround)) {
+        LOG_WARNING(Render_Vulkan, "OoT visual workaround: shader {:016x}, {} scalar edits",
+                    key.unique_hash, *edits);
+    }
     const VkDriverIdKHR driver_id = device.GetDriverID();
     const bool needs_shared_mem_clamp =
         driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY ||
