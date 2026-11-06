@@ -9,6 +9,7 @@
 // A copy of the code can be obtained from https://github.com/Ryujinx/Ryujinx
 // The sections using code from Ryujinx are marked with a link to the original version
 
+#include <cstdlib>
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -841,7 +842,12 @@ bool IsValidEntry(const Tegra::MemoryManager& gpu_memory, const TICEntry& config
     // descriptors (all-zero or out-of-range TIC slots); building an image from them made the
     // lookup fall back to A8B8G8R8 over unmapped memory, and AMD drivers then lost the device a
     // few seconds later. Treat them like an unbound slot so a null image view is sampled instead.
-    if (config.format.Value() == Tegra::Texture::TextureFormat{}) {
+    // EDEN_NX2_ZERO_FORMAT_NULL=0 turns this off (to compare images).
+    static const bool zero_format_null = [] {
+        const char* value = std::getenv("EDEN_NX2_ZERO_FORMAT_NULL");
+        return value == nullptr || value[0] != '0';
+    }();
+    if (zero_format_null && config.format.Value() == Tegra::Texture::TextureFormat{}) {
         return false;
     }
     const GPUVAddr address = config.Address();
