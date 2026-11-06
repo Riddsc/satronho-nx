@@ -364,10 +364,12 @@ Id CasFunction(EmitContext& ctx, Operation operation, Id value_type) {
         result = ctx.OpFAdd(value_type, op_a, op_b);
         break;
     case Operation::FPMin:
-        result = ctx.OpFMin(value_type, op_a, op_b);
+        result = ctx.profile.nan_ignoring_min_max ? ctx.OpNMin(value_type, op_a, op_b)
+                                                  : ctx.OpFMin(value_type, op_a, op_b);
         break;
     case Operation::FPMax:
-        result = ctx.OpFMax(value_type, op_a, op_b);
+        result = ctx.profile.nan_ignoring_min_max ? ctx.OpNMax(value_type, op_a, op_b)
+                                                  : ctx.OpFMax(value_type, op_a, op_b);
         break;
     default:
         break;

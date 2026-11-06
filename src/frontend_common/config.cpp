@@ -147,6 +147,33 @@ void Config::SetUpIni() {
         seed(Settings::values.use_asynchronous_shaders, ToString(true));
         EndGroup();
     }
+
+    // Satronho NX: apply the recommended performance settings once to configs that existed
+    // before Satronho NX (Lichii only seeds brand-new configs). Decoding ASTC on the CPU stalled
+    // Ocarina for seconds at a time; the user can change any of these afterwards.
+    if (global) {
+        constexpr s64 satronho_settings_version = 1;
+        BeginGroup("SatronhoNX");
+        const s64 applied = ReadIntegerSetting("settings_version");
+        EndGroup();
+        if (applied < satronho_settings_version) {
+            BeginGroup(Settings::TranslateCategory(Settings::Category::Renderer));
+            const auto apply = [this](const Settings::BasicSetting& setting,
+                                      const std::string& value) {
+                WriteStringSetting(setting.GetLabel(), value);
+                WriteBooleanSetting(setting.GetLabel() + "\\default", false);
+            };
+            apply(Settings::values.gpu_accuracy, ToString(u32(Settings::GpuAccuracy::Low)));
+            apply(Settings::values.accelerate_astc,
+                  ToString(u32(Settings::AstcDecodeMode::Gpu)));
+            apply(Settings::values.async_presentation, ToString(true));
+            apply(Settings::values.use_asynchronous_shaders, ToString(true));
+            EndGroup();
+            BeginGroup("SatronhoNX");
+            WriteIntegerSetting("settings_version", satronho_settings_version);
+            EndGroup();
+        }
+    }
 #endif
 }
 

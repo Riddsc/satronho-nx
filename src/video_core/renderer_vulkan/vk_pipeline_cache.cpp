@@ -565,6 +565,9 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
                                        driver_id == VK_DRIVER_ID_MESA_TURNIP,
 
         .has_broken_spirv_clamp = driver_id == VK_DRIVER_ID_INTEL_PROPRIETARY_WINDOWS,
+        .nan_ignoring_min_max = driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
+                                driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
+                                driver_id == VK_DRIVER_ID_MESA_RADV,
         .has_broken_spirv_position_input = driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY,
         .has_broken_unsigned_image_offsets = false,
         .has_broken_signed_operations = false,
