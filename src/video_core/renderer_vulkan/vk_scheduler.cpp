@@ -12,6 +12,7 @@
 #include <string_view>
 #include <string>
 #include <map>
+#include <tuple>
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -45,17 +46,42 @@ std::atomic<u64> g_profile_finish_ns{};
 std::atomic<u64> g_profile_window_start{};
 std::mutex g_profile_end_mutex;
 std::map<std::string, u64> g_profile_ends;
+// Satronho NX: who submits (Flush) and who waits for the GPU to go idle (Finish), by call site.
+std::map<std::string, u64> g_profile_flush_sites;
+std::map<std::string, std::pair<u64, u64>> g_profile_finish_sites; ///< (count, ns)
+
+std::string ProfileSite(const char* file, u32 line) {
+    std::string_view name{file};
+    if (const auto slash = name.find_last_of("/\\"); slash != std::string_view::npos) {
+        name.remove_prefix(slash + 1);
+    }
+    return fmt::format("{}:{}", name, line);
+}
 
 void CountRenderPassEnd(const char* file, u32 line) {
     if (!VideoCommon::Nx2Profile::Enabled()) {
         return;
     }
-    std::string_view name{file};
-    if (const auto slash = name.find_last_of('/'); slash != std::string_view::npos) {
-        name.remove_prefix(slash + 1);
+    std::scoped_lock lock{g_profile_end_mutex};
+    ++g_profile_ends[ProfileSite(file, line)];
+}
+
+void CountFlushSite(const std::source_location& location) {
+    if (!VideoCommon::Nx2Profile::Enabled()) {
+        return;
     }
     std::scoped_lock lock{g_profile_end_mutex};
-    ++g_profile_ends[fmt::format("{}:{}", name, line)];
+    ++g_profile_flush_sites[ProfileSite(location.file_name(), location.line())];
+}
+
+void CountFinishSite(const std::source_location& location, u64 ns) {
+    if (!VideoCommon::Nx2Profile::Enabled()) {
+        return;
+    }
+    std::scoped_lock lock{g_profile_end_mutex};
+    auto& entry = g_profile_finish_sites[ProfileSite(location.file_name(), location.line())];
+    ++entry.first;
+    entry.second += ns;
 }
 
 void ReportSubmitCounts() {
@@ -89,6 +115,31 @@ void ReportSubmitCounts() {
     for (size_t i = 0; i < ends.size() && i < 16; ++i) {
         LOG_INFO(Render_Vulkan, "Render pass ends {:.0f}/s at {}",
                  static_cast<double>(ends[i].first) / seconds, ends[i].second);
+    }
+    std::vector<std::pair<u64, std::string>> flushes;
+    std::vector<std::tuple<u64, u64, std::string>> finishes;
+    {
+        std::scoped_lock lock{g_profile_end_mutex};
+        for (const auto& [site, count] : g_profile_flush_sites) {
+            flushes.emplace_back(count, site);
+        }
+        for (const auto& [site, entry] : g_profile_finish_sites) {
+            finishes.emplace_back(entry.second, entry.first, site);
+        }
+        g_profile_flush_sites.clear();
+        g_profile_finish_sites.clear();
+    }
+    std::sort(flushes.rbegin(), flushes.rend());
+    for (size_t i = 0; i < flushes.size() && i < 10; ++i) {
+        LOG_INFO(Render_Vulkan, "Submits {:.0f}/s from {}",
+                 static_cast<double>(flushes[i].first) / seconds, flushes[i].second);
+    }
+    std::sort(finishes.rbegin(), finishes.rend());
+    for (size_t i = 0; i < finishes.size() && i < 10; ++i) {
+        LOG_INFO(Render_Vulkan, "GPU idle waits {:.0f}/s ({:.1f} ms/s) from {}",
+                 static_cast<double>(std::get<1>(finishes[i])) / seconds,
+                 static_cast<double>(std::get<0>(finishes[i])) / 1e6 / seconds,
+                 std::get<2>(finishes[i]));
     }
 }
 }
@@ -171,6 +222,7 @@ u64 Scheduler::Flush(VkSemaphore signal_semaphore, VkSemaphore wait_semaphore,
     if (VideoCommon::GpuSplit::check_owner) [[unlikely]] {
         VideoCommon::GpuSplit::CheckOwner("Scheduler::Flush");
     }
+    CountFlushSite(location);
     // When flushing, we only send data to the worker thread; no waiting is necessary.
     const u64 signal_value = SubmitExecution(signal_semaphore, wait_semaphore);
     AllocateNewContext();
@@ -254,9 +306,10 @@ void Scheduler::Finish(VkSemaphore signal_semaphore, VkSemaphore wait_semaphore,
     last_flush = std::chrono::steady_clock::now();
     flush_pending = false;
     if (profile) {
+        const u64 elapsed = VideoCommon::Nx2Profile::Now() - start;
         g_profile_finishes.fetch_add(1, std::memory_order_relaxed);
-        g_profile_finish_ns.fetch_add(VideoCommon::Nx2Profile::Now() - start,
-                                      std::memory_order_relaxed);
+        g_profile_finish_ns.fetch_add(elapsed, std::memory_order_relaxed);
+        CountFinishSite(location, elapsed);
     }
 }
 
