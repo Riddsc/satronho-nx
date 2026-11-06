@@ -76,10 +76,12 @@ inline constexpr std::array<const char*, static_cast<size_t>(Zone::Count)> zone_
     "writer wait", "list submit wait", "list GPU wait",
 };
 
-// Read once at startup: Enabled() runs several times per method write (no guard to check).
-inline const bool g_enabled = std::getenv("EDEN_NX2_GPU_PROFILE") != nullptr;
+// Read once, on first use: Enabled() runs several times per method write (no guard to check).
+// Satronho NX: this used to be a namespace-scope initializer, which runs before main() loads
+// nx2_switches.txt, so the switch only worked from a real environment variable.
 
 inline bool Enabled() {
+    static const bool g_enabled = std::getenv("EDEN_NX2_GPU_PROFILE") != nullptr;
     return g_enabled;
 }
 
