@@ -642,7 +642,11 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         }
 
         // AMD drivers (2026+) have broken float16 math on DKCR
-        if (features.shader_float16_int8.shaderFloat16) {
+        // Satronho NX: EDEN_NX2_AMD_FP16=1 keeps float16 for A/B runs on RDNA (changes shaders).
+        const char* const keep_fp16 = std::getenv("EDEN_NX2_AMD_FP16");
+        if (keep_fp16 != nullptr && keep_fp16[0] == '1' && features.shader_float16_int8.shaderFloat16) {
+            LOG_WARNING(Render_Vulkan, "EDEN_NX2_AMD_FP16=1: keeping float16 on this AMD driver");
+        } else if (features.shader_float16_int8.shaderFloat16) {
             LOG_WARNING(Render_Vulkan,
                         "AMD drivers (2026+) have broken float16 math");
             features.shader_float16_int8.shaderFloat16 = false;

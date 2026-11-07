@@ -151,8 +151,11 @@ void Config::SetUpIni() {
     // Satronho NX: apply the recommended performance settings once to configs that existed
     // before Satronho NX (Lichii only seeds brand-new configs). Decoding ASTC on the CPU stalled
     // Ocarina for seconds at a time; the user can change any of these afterwards.
+    // Version 2 applies them again: configs back on "Accurate" GPU emulation kept the GPU on one
+    // thread (no split) and re-read every command list through the caches, which held Ocarina
+    // under 30 FPS on a Ryzen 7 5800XT.
     if (global) {
-        constexpr s64 satronho_settings_version = 1;
+        constexpr s64 satronho_settings_version = 2;
         BeginGroup("SatronhoNX");
         const s64 applied = ReadIntegerSetting("settings_version");
         EndGroup();
@@ -169,6 +172,8 @@ void Config::SetUpIni() {
             apply(Settings::values.async_presentation, ToString(true));
             apply(Settings::values.use_asynchronous_shaders, ToString(true));
             EndGroup();
+            LOG_INFO(Config, "Satronho NX: applied recommended settings v{} (was v{})",
+                     satronho_settings_version, applied);
             BeginGroup("SatronhoNX");
             WriteIntegerSetting("settings_version", satronho_settings_version);
             EndGroup();
