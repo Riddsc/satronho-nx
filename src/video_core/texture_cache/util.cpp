@@ -838,24 +838,29 @@ boost::container::small_vector<ImageCopy, 16> MakeReinterpretImageCopies(const I
 }
 
 bool IsValidEntry(const Tegra::MemoryManager& gpu_memory, const TICEntry& config) {
-    // Satronho NX: format 0 is not a real Maxwell texture format. Ocarina of Time binds such
-    // descriptors (all-zero or out-of-range TIC slots); building an image from them made the
-    // lookup fall back to A8B8G8R8 over unmapped memory, and AMD drivers then lost the device a
-    // few seconds later. Treat them like an unbound slot so a null image view is sampled instead.
-    // EDEN_NX2_ZERO_FORMAT_NULL=0 turns this off (to compare images).
-    static const bool zero_format_null = [] {
-        const char* value = std::getenv("EDEN_NX2_ZERO_FORMAT_NULL");
-        return value == nullptr || value[0] != '0';
-    }();
-    if (zero_format_null && config.format.Value() == Tegra::Texture::TextureFormat{}) {
-        return false;
-    }
     const GPUVAddr address = config.Address();
     if (address == 0) {
         return false;
     }
     if (address >= (1ULL << 40)) {
         return false;
+    }
+    // Satronho NX: format 0 is not a real Maxwell format, but Ocarina binds such descriptors over
+    // real images, and treating all of them as unbound blackened foliage, characters and water.
+    // Only a format-0 descriptor whose whole image is not mapped is dropped: building one over
+    // unmapped memory is what made AMD drivers lose the device. EDEN_NX2_ZERO_FORMAT_NULL=1 drops
+    // every format-0 descriptor (the old behaviour), =0 never drops them.
+    static const char zero_format_mode = [] {
+        const char* value = std::getenv("EDEN_NX2_ZERO_FORMAT_NULL");
+        return value != nullptr ? value[0] : 'm';
+    }();
+    const bool zero_format = config.format.Value() == Tegra::Texture::TextureFormat{};
+    if (zero_format && zero_format_mode == '1') {
+        return false;
+    }
+    if (zero_format && zero_format_mode != '0') {
+        const ImageInfo info{config};
+        return gpu_memory.GpuToCpuAddress(address, CalculateGuestSizeInBytes(info)).has_value();
     }
     if (gpu_memory.GpuToCpuAddress(address).has_value()) {
         return true;
