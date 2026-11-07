@@ -606,9 +606,18 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
         .support_float64 = device.IsFloat64Supported(),
         .support_float16 = device.IsFloat16Supported(),
         .support_int64 = device.IsShaderInt64Supported(),
-        .needs_demote_reorder = driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
-                                driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
-                                driver_id == VK_DRIVER_ID_SAMSUNG_PROPRIETARY,
+        // Satronho NX: EDEN_NX2_DEMOTE_REORDER=0 keeps demotes where the program has them (as on
+        // NVIDIA), =1 moves them to the end on every driver; unset keeps the per-driver choice.
+        .needs_demote_reorder = [driver_id] {
+            const char* const value = std::getenv("EDEN_NX2_DEMOTE_REORDER");
+            if (value != nullptr && (value[0] == '0' || value[0] == '1')) {
+                LOG_INFO(Render_Vulkan, "EDEN_NX2_DEMOTE_REORDER={}", value[0]);
+                return value[0] == '1';
+            }
+            return driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
+                   driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
+                   driver_id == VK_DRIVER_ID_SAMSUNG_PROPRIETARY;
+        }(),
         .support_snorm_render_buffer = true,
         .support_viewport_index_layer = device.IsExtShaderViewportIndexLayerSupported(),
         .support_viewport_mask = device.IsNvViewportArray2Supported(),
