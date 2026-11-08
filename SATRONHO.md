@@ -176,6 +176,17 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   resueltas por algún commit de Lichii posterior a bf4c42e2; candidatos: #752 (un canal espera una
   lista de comandos escrita por la GPU sin bloquear a los demás), #337 (consultas con fence
   pendientes hasta que corre su fence), #621. Sin confirmar cuál; vigilar en sesiones largas.
+  **Build-28 (20 min de juego, mediana 43 FPS): 2 esperas seguidas de 1381/1388 ms.** La línea de
+  envíos lo explicó: el tick llegó a la cola **1379 ms después** de empezar la espera y la GPU
+  estuvo parada ese tiempo (`idle 1394.9 ms`); sus comandos duraron 1.3 ms. O sea, el hilo
+  `VulkanWorker` tardó 1.4 s en llegar a enviar. Causa probable: `ComputePipeline::Configure`
+  graba en el worker una espera a que el pipeline de cómputo termine de compilarse (`RunBuild` +
+  `build_condvar.wait`), y el driver de AMD tarda ~1.4 s con ciertos shaders de cómputo nuevos.
+  Encaja con "la primera vez que peleo con un enemigo" y con que la 25 no pausara en una pelea ya
+  vista (el driver ya tenía ese pipeline en su caché). Confirmar con
+  `EDEN_NX2_PIPELINE_BUILD_TRACE=<archivo>` (líneas END compute con ms≈1400 a la hora de la
+  pausa). Arreglo ya hecho por Lichii (#781, #812): clic derecho en el juego → "Prepare shaders
+  (warm-up)"; al arrancar compila los pipelines de cómputo del juego en segundo plano.
 - **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
   como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
   muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,
