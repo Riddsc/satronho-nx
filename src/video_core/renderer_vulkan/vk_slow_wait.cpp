@@ -31,12 +31,16 @@ constexpr size_t RingSize = 4096;
 
 struct Slot {
     u64 tick{};
-    u64 hash{};
+    u64 hash{};                  ///< Compute shader hash, or hash of the graphics stage hashes
+    std::array<u64, 6> stages{}; ///< Graphics stage hashes (zero for compute)
     u32 grid_x{}, grid_y{}, grid_z{};
+    bool compute{true};
 };
 
-// Timestamp slots, reused in turn: ~2 s of dispatches at Ocarina's ~4,500 a second.
+// Timestamp slots, reused in turn: ~2 s of dispatches at Ocarina's ~4,500 a second (the scheduler
+// makes more when draws are timed too).
 const vk::Device* timestamp_device{};
+bool timestamp_host_reset{};
 VkQueryPool timestamp_pool{};
 std::vector<Slot> slots;
 u32 slot_next{};
@@ -56,6 +60,30 @@ u32 ThresholdMs() {
         return env != nullptr ? static_cast<u32>(std::strtoul(env, nullptr, 10)) : 250U;
     }();
     return value;
+}
+
+// Graphics stages in the order of the hash arrays (Maxwell's VertexA, VertexB, tessellation
+// control, tessellation evaluation, geometry, fragment); only the stages a pipeline has.
+std::string StageText(const std::array<u64, 6>& stages) {
+    static constexpr std::array<const char*, 6> names{"vsA", "vs", "tcs", "tes", "gs", "fs"};
+    std::string text;
+    for (size_t i = 0; i < stages.size(); ++i) {
+        if (stages[i] != 0) {
+            text += fmt::format("{}{} {:016x}", text.empty() ? "" : " ", names[i], stages[i]);
+        }
+    }
+    return text.empty() ? std::string{"(no stages)"} : text;
+}
+
+bool DrawTiming() {
+    return DrawTimingRequested() && timestamp_host_reset && !slots.empty();
+}
+
+// Caller holds ring_mutex and has checked that there are slots.
+u32 NextSlot() {
+    const u32 slot = slot_next;
+    slot_next = (slot_next + 1) % static_cast<u32>(slots.size());
+    return slot;
 }
 
 Entry& Last() {
@@ -109,7 +137,8 @@ std::string DispatchTimes(u64 tick, u64 known_done) {
         const double ms = static_cast<double>(ticks) * timestamp_period_ns / 1e6;
         all_ms += ms;
         ++timed;
-        const auto [it, inserted] = index.try_emplace(slot.hash, times.size());
+        const u64 key = slot.hash ^ (slot.compute ? 0x9e3779b97f4a7c15ULL : 0);
+        const auto [it, inserted] = index.try_emplace(key, times.size());
         if (inserted) {
             times.push_back({&slot});
         }
@@ -118,17 +147,25 @@ std::string DispatchTimes(u64 tick, u64 known_done) {
         time.max_ms = std::max(time.max_ms, ms);
         ++time.count;
     }
+    const bool draws = DrawTiming();
     if (timed == 0) {
-        return "no timed dispatches";
+        return draws ? "no timed dispatches or draws" : "no timed dispatches";
     }
     std::ranges::sort(times, [](const Time& a, const Time& b) { return a.total_ms > b.total_ms; });
-    std::string text = fmt::format("{} dispatches took {:.1f} ms on the GPU, slowest first:",
-                                   timed, all_ms);
+    std::string text = fmt::format("{} {} took {:.1f} ms on the GPU, slowest first:", timed,
+                                   draws ? "dispatches and draws" : "dispatches", all_ms);
     for (size_t i = 0; i < times.size() && i < 12; ++i) {
         const Time& time = times[i];
-        text += fmt::format("\n    compute {:016x} {:.1f} ms (x{}, longest {:.1f} ms) grid {}x{}x{}",
-                            time.slot->hash, time.total_ms, time.count, time.max_ms,
-                            time.slot->grid_x, time.slot->grid_y, time.slot->grid_z);
+        if (time.slot->compute) {
+            text += fmt::format(
+                "\n    compute {:016x} {:.1f} ms (x{}, longest {:.1f} ms) grid {}x{}x{}",
+                time.slot->hash, time.total_ms, time.count, time.max_ms, time.slot->grid_x,
+                time.slot->grid_y, time.slot->grid_z);
+        } else {
+            text += fmt::format("\n    graphics {:.1f} ms (x{}, longest {:.1f} ms) {}",
+                                time.total_ms, time.count, time.max_ms,
+                                StageText(time.slot->stages));
+        }
     }
     return text;
 }
@@ -139,10 +176,19 @@ bool Enabled() {
     return ThresholdMs() != 0;
 }
 
+bool DrawTimingRequested() {
+    static const bool value = [] {
+        const char* env = std::getenv("EDEN_NX2_SLOW_WAIT_DRAWS");
+        return env != nullptr && env[0] != '\0' && env[0] != '0';
+    }();
+    return value && Enabled();
+}
+
 void SetTimestampPool(const vk::Device* device, VkQueryPool pool, u32 slot_count, u32 valid_bits,
-                      float period_ns) {
+                      float period_ns, bool host_reset) {
     std::scoped_lock lock{ring_mutex};
     timestamp_device = device;
+    timestamp_host_reset = host_reset;
     timestamp_pool = pool;
     slots.assign(pool != VK_NULL_HANDLE ? slot_count : 0, Slot{});
     slot_next = 0;
@@ -157,23 +203,33 @@ VkQueryPool TimestampPool() {
     return timestamp_pool;
 }
 
-void NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes) {
+u32 NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes) {
     if (!Enabled()) {
-        return;
+        return NoSlot;
     }
     u64 pipeline_hash = 0xcbf29ce484222325ULL;
     for (const u64 stage : stage_hashes) {
         pipeline_hash = (pipeline_hash ^ stage) * 0x100000001b3ULL;
     }
     std::scoped_lock lock{ring_mutex};
+    u32 slot = NoSlot;
+    if (DrawTiming()) {
+        // Reset here, on the host: the draw is recorded inside a render pass. The slot's previous
+        // use is seconds old, long finished on the GPU.
+        slot = NextSlot();
+        slots[slot] = {.tick = tick, .hash = pipeline_hash, .stages = stage_hashes,
+                       .compute = false};
+        timestamp_device->ResetQueryPool(timestamp_pool, slot * 2, 2);
+    }
     if (ring_used != 0) {
         Entry& last = Last();
         if (!last.compute && last.tick == tick && last.hash == pipeline_hash) {
             ++last.count;
-            return;
+            return slot;
         }
     }
     Push({.tick = tick, .hash = pipeline_hash, .stages = stage_hashes, .count = 1});
+    return slot;
 }
 
 u32 NoteCompute(u64 tick, u64 shader_hash, u32 grid_x, u32 grid_y, u32 grid_z) {
@@ -183,8 +239,7 @@ u32 NoteCompute(u64 tick, u64 shader_hash, u32 grid_x, u32 grid_y, u32 grid_z) {
     std::scoped_lock lock{ring_mutex};
     u32 slot = NoSlot;
     if (!slots.empty()) {
-        slot = slot_next;
-        slot_next = (slot_next + 1) % static_cast<u32>(slots.size());
+        slot = NextSlot();
         slots[slot] = {.tick = tick, .hash = shader_hash, .grid_x = grid_x, .grid_y = grid_y,
                        .grid_z = grid_z};
     }
@@ -258,9 +313,8 @@ void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_
                 list += fmt::format("\n    compute {:016x} x{} grid {}x{}x{}", entry.hash,
                                     work[i].count, entry.grid_x, entry.grid_y, entry.grid_z);
             } else {
-                list += fmt::format("\n    graphics x{} vs {:016x} fs {:016x}", work[i].count,
-                                    entry.stages[1] != 0 ? entry.stages[1] : entry.stages[0],
-                                    entry.stages[4]);
+                list += fmt::format("\n    graphics x{} {}", work[i].count,
+                                    StageText(entry.stages));
             }
         }
         const std::string site =

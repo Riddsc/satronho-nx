@@ -18,6 +18,9 @@
 # the status bar). Satronho NX sets "Fast" once; "Accurate" costs Ocarina about a third of its FPS.
 # Performance meter: every 10 s the log shows where the GPU threads spend their time.
 #EDEN_NX2_GPU_PROFILE=1
+# Slow GPU waits (on by default, 250 ms): the log names the shaders behind them. To time graphics
+# draws as well as compute dispatches (costs some FPS, only while testing):
+#EDEN_NX2_SLOW_WAIT_DRAWS=1
 
 # --- Performance tuning defaults for Switch 2 ---
 # Offload GPU method/macro execution to the back thread (SPLIT=2 delivers up to +54% FPS alone).

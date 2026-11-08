@@ -204,7 +204,14 @@ Scheduler::Scheduler(const Device& device_, StateTracker& state_tracker_)
         const u32 valid_bits =
             physical.GetQueueFamilyProperties()[device.GetGraphicsFamily()].timestampValidBits;
         const float period = physical.GetProperties().limits.timestampPeriod;
-        constexpr u32 slots = 8192;
+        // Draws come ~10x as often as dispatches: more slots keep a few seconds of them.
+        const bool host_reset = device.IsHostQueryResetSupported();
+        const bool time_draws = SlowWait::DrawTimingRequested() && host_reset;
+        const u32 slots = time_draws ? 131072 : 8192;
+        if (SlowWait::DrawTimingRequested() && !host_reset) {
+            LOG_WARNING(Render_Vulkan, "Slow wait draw timestamps need host query reset, which "
+                                       "this device lacks: timing dispatches only");
+        }
         if (valid_bits != 0 && period > 0.0f) {
             try {
                 slow_wait_pool = device.GetLogical().CreateQueryPool({
@@ -221,7 +228,11 @@ Scheduler::Scheduler(const Device& device_, StateTracker& state_tracker_)
             }
         }
         SlowWait::SetTimestampPool(&device.GetLogical(), *slow_wait_pool, slots, valid_bits,
-                                   period);
+                                   period, host_reset);
+        if (*slow_wait_pool != VK_NULL_HANDLE) {
+            LOG_INFO(Render_Vulkan, "Slow GPU wait detector: {} timestamp slots, timing {}",
+                     slots, time_draws ? "dispatches and draws" : "dispatches");
+        }
     }
 
     AcquireNewChunk();

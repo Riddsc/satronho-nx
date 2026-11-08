@@ -15,7 +15,9 @@ namespace Vulkan::SlowWait {
 // with the command buffer tick it was recorded in, and every compute dispatch is timestamped on
 // the GPU; a wait for the GPU longer than EDEN_NX2_SLOW_WAIT_MS (default 250, 0 turns it off)
 // logs the dispatches of the ticks it waited for by GPU time, then their pipelines, most used
-// first, so a shader that runs for seconds can be named by its hash.
+// first, so a shader that runs for seconds can be named by its hash. With
+// EDEN_NX2_SLOW_WAIT_DRAWS=1 every graphics draw is timestamped as well (it costs some FPS, so
+// it is off by default).
 
 /// A dispatch without a timestamp slot.
 inline constexpr u32 NoSlot = ~0U;
@@ -23,15 +25,21 @@ inline constexpr u32 NoSlot = ~0U;
 /// Whether the detector is on (read once).
 [[nodiscard]] bool Enabled();
 
+/// Whether graphics draws are timestamped too (EDEN_NX2_SLOW_WAIT_DRAWS, read once).
+[[nodiscard]] bool DrawTimingRequested();
+
 /// Scheduler: the timestamp pool for dispatch times, `slots` pairs of queries (null pool: none).
+/// `host_reset`: the device resets queries from the host, which draw timing needs (a draw is
+/// recorded inside a render pass, where the command buffer can't reset queries).
 void SetTimestampPool(const vk::Device* device, VkQueryPool pool, u32 slots, u32 valid_bits,
-                      float period_ns);
+                      float period_ns, bool host_reset);
 
 /// The timestamp pool set by the scheduler.
 [[nodiscard]] VkQueryPool TimestampPool();
 
-/// A draw with this graphics pipeline was recorded at `tick`.
-void NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes);
+/// A draw with this graphics pipeline is being recorded at `tick`. Returns its timestamp slot for
+/// TimeDispatch when draws are timed (the slot is already reset), or NoSlot.
+[[nodiscard]] u32 NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes);
 
 /// A dispatch of this compute shader is being recorded at `tick`, with its grid size. Returns its
 /// timestamp slot for ResetSlot and TimeDispatch, or NoSlot.
@@ -45,7 +53,7 @@ inline void ResetSlot(vk::CommandBuffer cmdbuf, u32 slot) {
     }
 }
 
-/// Worker thread: timestamps the dispatch that `work` records.
+/// Worker thread: timestamps the dispatch or draw that `work` records.
 template <typename Func>
 void TimeDispatch(vk::CommandBuffer cmdbuf, u32 slot, Func&& work) {
     if (slot == NoSlot) {

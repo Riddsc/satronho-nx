@@ -52,6 +52,10 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   pone timestamps de GPU a cada despacho de cómputo y, en cada espera lenta, escribe una segunda
   línea `Slow GPU wait for tick N: X dispatches took Y ms on the GPU, slowest first` con el tiempo
   real de cada shader. `Scheduler::Wait` también anota su sitio (antes salía `(unknown)`).
+  Desde la build 24 la lista muestra todas las etapas de cada pipeline gráfico con su nombre
+  (`vsA vs tcs tes gs fs`), y con `EDEN_NX2_SLOW_WAIT_DRAWS=1` también mide en la GPU cada dibujo
+  gráfico (reinicia las consultas desde el host: necesita hostQueryReset; usa 131072 ranuras).
+  Cuesta algo de FPS, por eso va apagado por defecto.
 - Arreglo del log repetido de umbrales de la caché de texturas (`texture_cache.h`).
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,
   perfil de Ocarina de Lichii), se dispara con push a `main`, artefactos `satronho-nx-*`.
@@ -138,7 +142,13 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   sumó < 1 ms de GPU, así que `e2ce39e630ce65f3` queda descartado (0.0 ms). El único gráfico
   presente en las tres es `vs a2c7af4889370200` (nuevo sospechoso). Ojo: el detector imprime como
   "fs" el hash del índice 4, que es geometry; el fragment es el índice 5 (orden VertexA, VertexB,
-  TessCtrl, TessEval, Geometry, Fragment). Los dibujos gráficos aún no se miden en la GPU.
+  TessCtrl, TessEval, Geometry, Fragment). Corregido en la build 24, que además puede medir los
+  dibujos gráficos (`EDEN_NX2_SLOW_WAIT_DRAWS=1`).
+- **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
+  como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
+  muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,
+  basura en piedras por pesos a cero en la composición) y #820 (varyings noperspective recortados
+  junto a la cámara en AMD; viene en la build 24). Probar primero en la build 24 en el mismo punto.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.

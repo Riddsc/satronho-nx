@@ -1016,7 +1016,8 @@ void RasterizerVulkan::PrepareDraw(bool is_indexed, Func&& draw_func, bool is_in
         }
     }
 
-    SlowWait::NoteGraphics(scheduler.CurrentTick(), pipeline->ShaderHashes());
+    const u32 slow_wait_slot =
+        SlowWait::NoteGraphics(scheduler.CurrentTick(), pipeline->ShaderHashes());
 #ifdef EGLANTINE_STREAMLINE
     TrackOcarinaCamera();
     TrackOcarinaActor(pipeline->ShaderHashes()[1], is_indexed, is_indirect);
@@ -1071,7 +1072,21 @@ void RasterizerVulkan::PrepareDraw(bool is_indexed, Func&& draw_func, bool is_in
         Profile::Scope scope{Profile::Zone::DrawRecord};
         scheduler.TraceGraphicsPipeline(pipeline->ShaderHashes());
         trace_draw_hashes = {pipeline->ShaderHashes()[1], pipeline->ShaderHashes()[5]};
-        draw_func();
+        if (slow_wait_slot == SlowWait::NoSlot) {
+            draw_func();
+        } else {
+            // The timestamps bracket every command the draw records (mesh emulation included).
+            const VkQueryPool pool = SlowWait::TimestampPool();
+            scheduler.Record([pool, slow_wait_slot](vk::CommandBuffer cmdbuf) {
+                cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, pool,
+                                      slow_wait_slot * 2);
+            });
+            draw_func();
+            scheduler.Record([pool, slow_wait_slot](vk::CommandBuffer cmdbuf) {
+                cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, pool,
+                                      slow_wait_slot * 2 + 1);
+            });
+        }
     }
     submitted = true;
 #ifdef EGLANTINE_STREAMLINE
