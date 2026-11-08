@@ -12,8 +12,11 @@ proyecto: léelo antes de tocar algo.
 - Último commit de Lichii integrado: **`bf4c42e2`** (build-117 + arreglos AMD #679, #664, #659).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
-  build-16 = primer sync a 117; build-17 = duplicado de la 16 (commit re-firmado); build-18 = ajustes
-  de niebla/exposición, alineado con Lichii, actualizador; build-19 = detector de esperas lentas.
+  El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
+  2–19 se retiraron. build-20 = primera del historial reescrito: Lichii hasta bf4c42e, ajustes de
+  niebla/exposición, alineado con Lichii, actualizador propio y detector de esperas lentas.
+- Commits: autor Riddsc <richardsc921@gmail.com>, sin firmas ni menciones de IA en mensajes,
+  archivos ni releases.
 
 ## Cómo traer cambios de Lichii
 
