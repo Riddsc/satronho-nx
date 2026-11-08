@@ -134,6 +134,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   pelear las primeras veces con un enemigo: parece un límite fijo (los bucles de shader se cortan
   a 0x2000 vueltas, `emit_spirv.cpp`), sin confirmar. Sospechoso: compute `e2ce39e630ce65f3`
   (32x32, presente en las 12). La build 22 mide cada despacho para confirmarlo.
+  **Resultado build-23 (2026-11-08):** 3 pausas de 1412/1436/1471 ms; todo el cómputo de cada una
+  sumó < 1 ms de GPU, así que `e2ce39e630ce65f3` queda descartado (0.0 ms). El único gráfico
+  presente en las tres es `vs a2c7af4889370200` (nuevo sospechoso). Ojo: el detector imprime como
+  "fs" el hash del índice 4, que es geometry; el fragment es el índice 5 (orden VertexA, VertexB,
+  TessCtrl, TessEval, Geometry, Fragment). Los dibujos gráficos aún no se miden en la GPU.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.
