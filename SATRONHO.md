@@ -9,7 +9,7 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`bbf3e629`** (2026-11-08, #881; incluye #769, #621, #820, #812).
+- Último commit de Lichii integrado: **`281477ea`** (2026-11-08, #918; incluye #910/#921, cierre al cargar partida).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
@@ -196,6 +196,12 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   nuevo cada vez**: reutilizar la misma ruta envió la versión anterior en caché (el
   `nx2_switches.txt` quedó con el contenido viejo aunque la herramienta dijo "written"). Releer
   el archivo del PC después de escribirlo.
+- **Cierre al cargar la partida (builds 25 y 28, RX 6700 XT de un amigo; la 23 no):** volcados de
+  Windows con `abort()` en `ucrtbase.dll+0xa527e` (fast-fail 7) al entrar al juego; uno guardó en
+  memoria `surface.h:193:BitsPerBlock: unreachable`. Era una regresión de Lichii #858 (memo de
+  texturas preparaba la imagen nula, de formato inválido): Lichii #904, arreglado en #910, #921 y
+  #918 (Log2Ceil(0)). Integrado en la build 29. Lección: leer volcados con el paquete Python
+  `minidump` y buscar en la memoria cruda las últimas líneas del log (`[ t] Clase <Critical> …`).
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y
