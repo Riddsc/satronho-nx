@@ -9,7 +9,7 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`bf4c42e2`** (build-117 + arreglos AMD #679, #664, #659).
+- Último commit de Lichii integrado: **`bbf3e629`** (2026-11-08, #881; incluye #769, #621, #820, #812).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
