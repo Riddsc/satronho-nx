@@ -29,6 +29,20 @@ struct Entry {
 // About a second of pipeline changes at Ocarina's rate; older entries are long finished.
 constexpr size_t RingSize = 4096;
 
+struct Slot {
+    u64 tick{};
+    u64 hash{};
+    u32 grid_x{}, grid_y{}, grid_z{};
+};
+
+// Timestamp slots, reused in turn: ~2 s of dispatches at Ocarina's ~4,500 a second.
+const vk::Device* timestamp_device{};
+VkQueryPool timestamp_pool{};
+std::vector<Slot> slots;
+u32 slot_next{};
+u64 timestamp_mask{};
+double timestamp_period_ns{};
+
 std::mutex ring_mutex;
 std::array<Entry, RingSize> ring;
 size_t ring_next{};
@@ -62,10 +76,85 @@ std::string_view FileName(const char* path) {
     return name;
 }
 
+// Caller holds ring_mutex. The GPU time of the timestamped dispatches in the ticks the GPU had
+// not finished, by shader, slowest first.
+std::string DispatchTimes(u64 tick, u64 known_done) {
+    if (slots.empty() || timestamp_device == nullptr) {
+        return {};
+    }
+    struct Time {
+        const Slot* slot{};
+        double total_ms{};
+        double max_ms{};
+        u32 count{};
+    };
+    std::vector<Time> times;
+    std::unordered_map<u64, size_t> index;
+    double all_ms = 0.0;
+    u32 timed = 0;
+    for (u32 i = 0; i < slots.size(); ++i) {
+        const Slot& slot = slots[i];
+        if (slot.tick <= known_done || slot.tick > tick) {
+            continue;
+        }
+        // Each query: the 64-bit value, then its availability.
+        std::array<u64, 4> data{};
+        const VkResult result = timestamp_device->GetQueryResults(
+            timestamp_pool, i * 2, 2, sizeof(data), data.data(), sizeof(u64) * 2,
+            VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
+        if ((result != VK_SUCCESS && result != VK_NOT_READY) || data[1] == 0 || data[3] == 0) {
+            continue;
+        }
+        const u64 ticks = (data[2] - data[0]) & timestamp_mask;
+        const double ms = static_cast<double>(ticks) * timestamp_period_ns / 1e6;
+        all_ms += ms;
+        ++timed;
+        const auto [it, inserted] = index.try_emplace(slot.hash, times.size());
+        if (inserted) {
+            times.push_back({&slot});
+        }
+        Time& time = times[it->second];
+        time.total_ms += ms;
+        time.max_ms = std::max(time.max_ms, ms);
+        ++time.count;
+    }
+    if (timed == 0) {
+        return "no timed dispatches";
+    }
+    std::ranges::sort(times, [](const Time& a, const Time& b) { return a.total_ms > b.total_ms; });
+    std::string text = fmt::format("{} dispatches took {:.1f} ms on the GPU, slowest first:",
+                                   timed, all_ms);
+    for (size_t i = 0; i < times.size() && i < 12; ++i) {
+        const Time& time = times[i];
+        text += fmt::format("\n    compute {:016x} {:.1f} ms (x{}, longest {:.1f} ms) grid {}x{}x{}",
+                            time.slot->hash, time.total_ms, time.count, time.max_ms,
+                            time.slot->grid_x, time.slot->grid_y, time.slot->grid_z);
+    }
+    return text;
+}
+
 } // Anonymous namespace
 
 bool Enabled() {
     return ThresholdMs() != 0;
+}
+
+void SetTimestampPool(const vk::Device* device, VkQueryPool pool, u32 slot_count, u32 valid_bits,
+                      float period_ns) {
+    std::scoped_lock lock{ring_mutex};
+    timestamp_device = device;
+    timestamp_pool = pool;
+    slots.assign(pool != VK_NULL_HANDLE ? slot_count : 0, Slot{});
+    slot_next = 0;
+    timestamp_mask = valid_bits >= 64 ? ~0ULL : (1ULL << valid_bits) - 1;
+    timestamp_period_ns = period_ns;
+    // A new session starts its ticks over: forget the previous one's waits too.
+    ring_used = 0;
+    ring_next = 0;
+}
+
+VkQueryPool TimestampPool() {
+    return timestamp_pool;
 }
 
 void NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes) {
@@ -87,17 +176,24 @@ void NoteGraphics(u64 tick, const std::array<u64, 6>& stage_hashes) {
     Push({.tick = tick, .hash = pipeline_hash, .stages = stage_hashes, .count = 1});
 }
 
-void NoteCompute(u64 tick, u64 shader_hash, u32 grid_x, u32 grid_y, u32 grid_z) {
+u32 NoteCompute(u64 tick, u64 shader_hash, u32 grid_x, u32 grid_y, u32 grid_z) {
     if (!Enabled()) {
-        return;
+        return NoSlot;
     }
     std::scoped_lock lock{ring_mutex};
+    u32 slot = NoSlot;
+    if (!slots.empty()) {
+        slot = slot_next;
+        slot_next = (slot_next + 1) % static_cast<u32>(slots.size());
+        slots[slot] = {.tick = tick, .hash = shader_hash, .grid_x = grid_x, .grid_y = grid_y,
+                       .grid_z = grid_z};
+    }
     if (ring_used != 0) {
         Entry& last = Last();
         if (last.compute && last.tick == tick && last.hash == shader_hash &&
             last.grid_x == grid_x && last.grid_y == grid_y && last.grid_z == grid_z) {
             ++last.count;
-            return;
+            return slot;
         }
     }
     Push({.tick = tick,
@@ -107,10 +203,15 @@ void NoteCompute(u64 tick, u64 shader_hash, u32 grid_x, u32 grid_y, u32 grid_z) 
           .grid_y = grid_y,
           .grid_z = grid_z,
           .compute = true});
+    return slot;
 }
 
 void SetWaitSite(const std::source_location* site) {
     wait_site = site;
+}
+
+const std::source_location* WaitSite() {
+    return wait_site;
 }
 
 void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_done) {
@@ -149,8 +250,9 @@ void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_
             work[it->second].count += entry.count;
         }
         std::ranges::sort(work, [](const Work& a, const Work& b) { return a.count > b.count; });
+        const std::string timed = DispatchTimes(tick, known_done);
         std::string list;
-        for (size_t i = 0; i < work.size() && i < 24; ++i) {
+        for (size_t i = 0; i < work.size() && i < 64; ++i) {
             const Entry& entry = *work[i].first;
             if (entry.compute) {
                 list += fmt::format("\n    compute {:016x} x{} grid {}x{}x{}", entry.hash,
@@ -170,6 +272,9 @@ void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_
                     "{} pipelines in ticks {}-{}, most used first:{}",
                     ms, tick, site, known_done, work.size(), oldest_tick, tick,
                     list.empty() ? std::string{" (none noted)"} : list);
+        if (!timed.empty()) {
+            LOG_WARNING(Render_Vulkan, "Slow GPU wait for tick {}: {}", tick, timed);
+        }
     }
 }
 

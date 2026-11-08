@@ -23,10 +23,12 @@
 #include "common/dkb_frame_trace.h"
 #include "common/logging.h"
 #include "common/polyfill_thread.h"
+#include "common/scope_exit.h"
 #include "common/settings.h"
 #include "video_core/gpu_split.h"
 #include "video_core/renderer_vulkan/fragment_barrier_state.h"
 #include "video_core/renderer_vulkan/vk_master_semaphore.h"
+#include "video_core/renderer_vulkan/vk_slow_wait.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
 
 namespace VideoCommon {
@@ -232,7 +234,18 @@ public:
     /// into the current chunk while that thread does (corrupt command buffers, crashes). They
     /// wait for the recording thread to submit the tick instead, and give up after 20 ms (it may
     /// be waiting for them).
-    void Wait(u64 tick, double target_fps = 0.0, bool may_flush = true) {
+    void Wait(u64 tick, double target_fps = 0.0, bool may_flush = true,
+              std::source_location location = std::source_location::current()) {
+        // Finish names its own caller; other waits name theirs.
+        const bool own_site = SlowWait::WaitSite() == nullptr;
+        if (own_site) {
+            SlowWait::SetWaitSite(&location);
+        }
+        SCOPE_EXIT {
+            if (own_site) {
+                SlowWait::SetWaitSite(nullptr);
+            }
+        };
         const bool trace = Common::DkbFrameTrace::Enabled() && target_fps > 0.0;
         const auto trace_start = trace ? std::chrono::steady_clock::now()
                                        : std::chrono::steady_clock::time_point{};
@@ -446,6 +459,7 @@ private:
     StateTracker& state_tracker;
 
     std::unique_ptr<MasterSemaphore> master_semaphore;
+    vk::QueryPool slow_wait_pool; ///< Dispatch timestamps of the slow wait detector
     FragmentBarrierState fragment_barrier;
     bool render_pass_has_stores{};
     bool compute_writes_pending{};

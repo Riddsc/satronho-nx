@@ -200,7 +200,16 @@ jobs:
         shell: pwsh
         run: |
           $zip = Join-Path $env:RUNNER_TEMP 'sccache.zip'
-          Invoke-WebRequest -OutFile $zip https://github.com/mozilla/sccache/releases/download/v0.19.0/sccache-v0.19.0-x86_64-pc-windows-msvc.zip
+          $uri = 'https://github.com/mozilla/sccache/releases/download/v0.19.0/sccache-v0.19.0-x86_64-pc-windows-msvc.zip'
+          # GitHub's release downloads sometimes answer 502/504 for a while: retry before failing.
+          for ($attempt = 1; ; ++$attempt) {
+            try { Invoke-WebRequest -OutFile $zip $uri; break }
+            catch {
+              if ($attempt -ge 6) { throw }
+              Write-Host "sccache download failed (attempt $attempt): $($_.Exception.Message); retrying"
+              Start-Sleep -Seconds (20 * $attempt)
+            }
+          }
           Expand-Archive $zip -DestinationPath (Join-Path $env:RUNNER_TEMP 'sccache')
           $bin = (Get-ChildItem -Recurse -Filter sccache.exe (Join-Path $env:RUNNER_TEMP 'sccache')).DirectoryName
           $bin | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
@@ -290,6 +299,7 @@ jobs:
             flags+=" -Wno-error=profile-instr-out-of-date -Wno-error=profile-instr-unprofiled"
             flags+=" -Wno-error=backend-plugin"
           fi
+          configure() {
           cmake -S . -B build/release -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=OFF \
@@ -311,6 +321,19 @@ jobs:
             "-DCMAKE_AR=$LLVM_ROOT/bin/llvm-lib.exe" \
             "-DCMAKE_C_FLAGS=$flags" \
             "-DCMAKE_CXX_FLAGS=-EHsc $flags"
+          }
+          # CPM downloads dependencies (sirit, ...) from GitHub while configuring, and GitHub's
+          # release downloads sometimes answer 502/504 for a while: retry before failing the job.
+          for attempt in 1 2 3 4 5; do
+            if configure; then
+              break
+            fi
+            if [ "$attempt" = 5 ]; then
+              exit 1
+            fi
+            echo "Configure failed (attempt $attempt), retrying"
+            sleep $((30 * attempt))
+          done
 
       - name: Configure macOS
         if: startsWith(matrix.platform, 'macos')

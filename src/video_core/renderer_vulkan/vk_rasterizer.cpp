@@ -1796,8 +1796,11 @@ void RasterizerVulkan::DispatchCompute() {
     }
 
     const auto& qmd{kepler_compute->launch_description};
-    SlowWait::NoteCompute(scheduler.CurrentTick(), pipeline->ShaderHash(), qmd.grid_dim_x.Value(),
-                          qmd.grid_dim_y.Value(), qmd.grid_dim_z.Value());
+    const auto note_slow_wait = [&] {
+        return SlowWait::NoteCompute(scheduler.CurrentTick(), pipeline->ShaderHash(),
+                                     qmd.grid_dim_x.Value(), qmd.grid_dim_y.Value(),
+                                     qmd.grid_dim_z.Value());
+    };
     // Earlier writes must be visible to the dispatch, its indirect arguments included, and what it
     // writes to the next render pass.
     const auto record_read_barrier = [this] {
@@ -1837,12 +1840,16 @@ void RasterizerVulkan::DispatchCompute() {
         record_read_barrier();
         scheduler.TraceComputePipeline(pipeline->ShaderHash());
         scheduler.Record([this, pipeline, indirect_buffer = buffer->Handle(),
-                          indirect_offset = offset](vk::CommandBuffer cmdbuf) {
+                          indirect_offset = offset,
+                          slot = note_slow_wait()](vk::CommandBuffer cmdbuf) {
+            SlowWait::ResetSlot(cmdbuf, slot);
             if (!pipeline->IsBound()) {
                 return;
             }
             scheduler.TraceGpuWork(cmdbuf, pipeline->ShaderHash(), 0, {}, [&] {
-                cmdbuf.DispatchIndirect(indirect_buffer, indirect_offset);
+                SlowWait::TimeDispatch(cmdbuf, slot, [&] {
+                    cmdbuf.DispatchIndirect(indirect_buffer, indirect_offset);
+                });
             });
         });
         SubmitNx2ListCopies();
@@ -1866,11 +1873,13 @@ void RasterizerVulkan::DispatchCompute() {
 #else
     scheduler.TraceComputePipeline(pipeline->ShaderHash());
 #endif
-    scheduler.Record([this, pipeline, dim, byte_addressed_shadow, bind = std::move(deferred_bind)
+    scheduler.Record([this, pipeline, dim, byte_addressed_shadow, bind = std::move(deferred_bind),
+                      slot = note_slow_wait()
 #ifdef EGLANTINE_STREAMLINE
                       , replacement
 #endif
                      ](vk::CommandBuffer cmdbuf) {
+        SlowWait::ResetSlot(cmdbuf, slot);
 #ifdef EGLANTINE_STREAMLINE
         if (replacement && !replacement->EvaluationFailed()) {
             return;
@@ -1888,8 +1897,10 @@ void RasterizerVulkan::DispatchCompute() {
         if (byte_addressed_shadow) {
             TextureCacheRuntime::CopyByteAddressedShadow(cmdbuf, *byte_addressed_shadow, false);
         }
-        scheduler.TraceGpuWork(cmdbuf, pipeline->ShaderHash(), 0, dim,
-                               [&] { cmdbuf.Dispatch(dim[0], dim[1], dim[2]); });
+        scheduler.TraceGpuWork(cmdbuf, pipeline->ShaderHash(), 0, dim, [&] {
+            SlowWait::TimeDispatch(cmdbuf, slot,
+                                   [&] { cmdbuf.Dispatch(dim[0], dim[1], dim[2]); });
+        });
         if (byte_addressed_shadow) {
             TextureCacheRuntime::CopyByteAddressedShadow(cmdbuf, *byte_addressed_shadow, true);
         }

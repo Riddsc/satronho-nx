@@ -48,7 +48,10 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   v3 `native_async_draws = Bounded`. Cada versión solo escribe sus propios ajustes.
 - Diagnóstico: medidor `EDEN_NX2_GPU_PROFILE` (lectura perezosa del interruptor para que funcione
   desde `nx2_switches.txt`, sitios de Flush/Finish), y detector de esperas lentas
-  `vk_slow_wait.cpp` (`EDEN_NX2_SLOW_WAIT_MS`, por defecto 250, 0 = apagado).
+  `vk_slow_wait.cpp` (`EDEN_NX2_SLOW_WAIT_MS`, por defecto 250, 0 = apagado). Desde la build 22
+  pone timestamps de GPU a cada despacho de cómputo y, en cada espera lenta, escribe una segunda
+  línea `Slow GPU wait for tick N: X dispatches took Y ms on the GPU, slowest first` con el tiempo
+  real de cada shader. `Scheduler::Wait` también anota su sitio (antes salía `(unknown)`).
 - Arreglo del log repetido de umbrales de la caché de texturas (`texture_cache.h`).
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,
   perfil de Ocarina de Lichii), se dispara con push a `main`, artefactos `satronho-nx-*`.
@@ -86,7 +89,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
    hilo principal pasa ~2/3 esperando al secundario (`split drain`, `writer wait`) y el secundario
    ~80 % ocupado → el límite es la CPU, no la GPU real. `finishes waiting X ms` y
    `GPU idle waits … from <sitio>` = esperas completas a la GPU real.
-5. **Detector**: `Slow GPU wait: X ms … from <sitio>` + lista de pipelines/shaders en vuelo.
+5. **Detector**: `Slow GPU wait: X ms … from <sitio>` + lista de pipelines/shaders en vuelo, y
+   `Slow GPU wait for tick N: …` con el tiempo de GPU de cada shader de cómputo. Si la suma de
+   cómputo no explica la espera, el culpable es un shader gráfico.
 6. Comparar siempre a igualdad: misma resolución, misma zona, **caché de shaders caliente**.
 
 ## Herramientas de diagnóstico útiles (de Lichii, ver tabla en AGENTS.md)
@@ -123,5 +128,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   no son un fallo.
 - Ocarina tiene pausas de 1–3 s al **explotar un Deku Baba**: una espera a la GPU de 1.3–2.6 s
   desde `buffer_cache.h` (DownloadBufferMemory → Finish). También ocurre en Lichii. El detector de
-  esperas lentas (build 19) existe para nombrar el shader culpable.
+  esperas lentas (build 19) existe para nombrar el shader culpable. En la sesión de la build 19
+  (65 min, varias zonas) 12 de 13 pausas duraron casi lo mismo (1.40–1.51 s), casi siempre al
+  pelear las primeras veces con un enemigo: parece un límite fijo (los bucles de shader se cortan
+  a 0x2000 vueltas, `emit_spirv.cpp`), sin confirmar. Sospechoso: compute `e2ce39e630ce65f3`
+  (32x32, presente en las 12). La build 22 mide cada despacho para confirmarlo.
+- **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
+  desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.

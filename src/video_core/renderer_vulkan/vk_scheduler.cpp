@@ -199,6 +199,31 @@ Scheduler::Scheduler(const Device& device_, StateTracker& state_tracker_)
         }
     }
 
+    if (SlowWait::Enabled()) {
+        const auto physical = device.GetPhysical();
+        const u32 valid_bits =
+            physical.GetQueueFamilyProperties()[device.GetGraphicsFamily()].timestampValidBits;
+        const float period = physical.GetProperties().limits.timestampPeriod;
+        constexpr u32 slots = 8192;
+        if (valid_bits != 0 && period > 0.0f) {
+            try {
+                slow_wait_pool = device.GetLogical().CreateQueryPool({
+                    .sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = 0,
+                    .queryType = VK_QUERY_TYPE_TIMESTAMP,
+                    .queryCount = slots * 2,
+                    .pipelineStatistics = 0,
+                });
+            } catch (const vk::Exception& error) {
+                LOG_WARNING(Render_Vulkan, "Slow wait dispatch timestamps unavailable: {}",
+                            error.what());
+            }
+        }
+        SlowWait::SetTimestampPool(&device.GetLogical(), *slow_wait_pool, slots, valid_bits,
+                                   period);
+    }
+
     AcquireNewChunk();
     AllocateWorkerCommandBuffer();
     worker_thread = std::jthread([this](std::stop_token token) { WorkerThread(token); });

@@ -10,7 +10,18 @@ $version = '22.1.8'
 $sha256 = '16e5709785fef73c854646241c4a92c5cd574318d1b33c63330dd7721903e55c'
 
 $installer = Join-Path $env:RUNNER_TEMP 'llvm.exe'
-Invoke-WebRequest -OutFile $installer "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-win64.exe"
+$uri = "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-win64.exe"
+# GitHub's release downloads sometimes answer 502/504 for a while: retry before failing the job.
+for ($attempt = 1; ; ++$attempt) {
+    try {
+        Invoke-WebRequest -OutFile $installer $uri
+        break
+    } catch {
+        if ($attempt -ge 6) { throw }
+        Write-Host "LLVM download failed (attempt $attempt): $($_.Exception.Message); retrying"
+        Start-Sleep -Seconds (20 * $attempt)
+    }
+}
 if ((Get-FileHash -Algorithm SHA256 $installer).Hash -ne $sha256) {
     throw 'LLVM installer checksum mismatch'
 }
