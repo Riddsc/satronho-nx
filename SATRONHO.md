@@ -56,6 +56,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   (`vsA vs tcs tes gs fs`), y con `EDEN_NX2_SLOW_WAIT_DRAWS=1` también mide en la GPU cada dibujo
   gráfico (reinicia las consultas desde el host: necesita hostQueryReset; usa 131072 ranuras).
   Cuesta algo de FPS, por eso va apagado por defecto.
+  También desde la build 24, cada espera lenta añade una tercera línea con los envíos (submissions)
+  de esos ticks: cuándo llegó cada uno a la cola respecto al inicio de la espera (`submitted`), el
+  tiempo que la GPU estuvo parada antes de empezarlo (`idle`: un semáforo o un envío tardío), y la
+  duración en la GPU de sus subidas (`uploads`, el buffer que va primero: copias, decodificación de
+  ASTC) y de sus comandos (`commands`).
 - Arreglo del log repetido de umbrales de la caché de texturas (`texture_cache.h`).
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,
   perfil de Ocarina de Lichii), se dispara con push a `main`, artefactos `satronho-nx-*`.
@@ -144,6 +149,13 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   "fs" el hash del índice 4, que es geometry; el fragment es el índice 5 (orden VertexA, VertexB,
   TessCtrl, TessEval, Geometry, Fragment). Corregido en la build 24, que además puede medir los
   dibujos gráficos (`EDEN_NX2_SLOW_WAIT_DRAWS=1`).
+  **Resultado build-23, segunda sesión (peahats, con `REJECT_HASH=a2c7af4889370200`):** 15 pausas
+  de 1.42–1.86 s, casi siempre en pareja (`buffer_cache.h:404` y luego `:2801`, ~3 s por evento);
+  el rechazo no actuó ni una vez (0 líneas `rejected by`), y en varias pausas ese shader ni
+  aparece. Clave: esperas de ~1.5 s por un tick con solo 3 despachos que suman 0.1 ms de GPU y
+  ningún dibujo. El tiempo no está en los shaders: o el envío llegó tarde, o la GPU estuvo parada
+  (semáforo), o está en el buffer de subidas (copias/ASTC), que no se medía. Sin relación clara con
+  las compilaciones de pipelines.
 - **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
   como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
   muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,

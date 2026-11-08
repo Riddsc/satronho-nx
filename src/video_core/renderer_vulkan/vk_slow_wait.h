@@ -66,6 +66,20 @@ void TimeDispatch(vk::CommandBuffer cmdbuf, u32 slot, Func&& work) {
     cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, pool, slot * 2 + 1);
 }
 
+/// Scheduler: the timestamp pool for whole submissions, `entries` groups of four queries (upload
+/// buffer start and end, command buffer start and end).
+void SetSubmitPool(VkQueryPool pool, u32 entries);
+
+/// Worker thread, right after both command buffers of a submission begin: resets and writes the
+/// start timestamps. Returns the entry for EndSubmit, or NoSlot.
+[[nodiscard]] u32 BeginSubmit(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf);
+
+/// Worker thread, before both command buffers end: writes the end timestamps.
+void EndSubmit(u32 entry, vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf);
+
+/// Worker thread, after vkQueueSubmit: the entry's tick and when it reached the queue.
+void Submitted(u32 entry, u64 tick);
+
 /// The thread about to wait sets where the wait comes from; cleared after.
 void SetWaitSite(const std::source_location* site);
 

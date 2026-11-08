@@ -470,6 +470,8 @@ private:
 
     std::unique_ptr<MasterSemaphore> master_semaphore;
     vk::QueryPool slow_wait_pool; ///< Dispatch timestamps of the slow wait detector
+    vk::QueryPool slow_wait_submit_pool; ///< Submission timestamps of the slow wait detector
+    u32 slow_wait_submit = ~0U;          ///< Worker thread: entry of the submission being recorded
     FragmentBarrierState fragment_barrier;
     bool render_pass_has_stores{};
     bool compute_writes_pending{};

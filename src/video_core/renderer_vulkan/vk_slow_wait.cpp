@@ -47,6 +47,19 @@ u32 slot_next{};
 u64 timestamp_mask{};
 double timestamp_period_ns{};
 
+// Whole submissions: when each reached the queue and its GPU timestamps, so a wait can tell a late
+// submission, a GPU that sat idle before starting it (a semaphore), its uploads and its commands
+// apart. Ocarina submits ~700 times a second; 2048 entries keep ~3 s.
+struct Submit {
+    u64 tick{};
+    std::chrono::steady_clock::time_point submitted{};
+    bool valid{};
+};
+VkQueryPool submit_pool{};
+std::vector<Submit> submits;
+u32 submit_next{};
+std::mutex submit_mutex;
+
 std::mutex ring_mutex;
 std::array<Entry, RingSize> ring;
 size_t ring_next{};
@@ -170,7 +183,111 @@ std::string DispatchTimes(u64 tick, u64 known_done) {
     return text;
 }
 
+// The submissions of ticks (known_done - 1, tick], oldest first, with their GPU times.
+std::string SubmitTimes(u64 tick, u64 known_done, std::chrono::steady_clock::time_point wait_start) {
+    if (submit_pool == VK_NULL_HANDLE || timestamp_device == nullptr) {
+        return {};
+    }
+    struct Row {
+        u64 tick{};
+        double submitted_ms{};
+        std::array<u64, 8> data{}; // Four timestamps, each with its availability
+        bool timed{};
+    };
+    std::vector<Row> rows;
+    {
+        std::scoped_lock lock{submit_mutex};
+        for (u32 i = 0; i < submits.size(); ++i) {
+            const Submit& submit = submits[i];
+            if (!submit.valid || submit.tick + 1 < known_done || submit.tick > tick) {
+                continue;
+            }
+            Row row{.tick = submit.tick,
+                    .submitted_ms = std::chrono::duration<double, std::milli>(submit.submitted -
+                                                                              wait_start)
+                                        .count()};
+            const VkResult result = timestamp_device->GetQueryResults(
+                submit_pool, i * 4, 4, sizeof(row.data), row.data.data(), sizeof(u64) * 2,
+                VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WITH_AVAILABILITY_BIT);
+            row.timed = (result == VK_SUCCESS || result == VK_NOT_READY) && row.data[1] != 0 &&
+                        row.data[3] != 0 && row.data[5] != 0 && row.data[7] != 0;
+            rows.push_back(row);
+        }
+    }
+    if (rows.empty()) {
+        return {};
+    }
+    std::ranges::sort(rows, [](const Row& a, const Row& b) { return a.tick < b.tick; });
+    const auto ms = [](u64 from, u64 to) {
+        return static_cast<double>((to - from) & timestamp_mask) * timestamp_period_ns / 1e6;
+    };
+    std::string text = "submissions (submitted: ms after the wait began; idle: GPU time between "
+                       "the previous submission's end and this one's start):";
+    const Row* previous = nullptr;
+    for (const Row& row : rows) {
+        text += fmt::format("\n    tick {} submitted {:+.1f} ms", row.tick, row.submitted_ms);
+        if (!row.timed) {
+            text += ", GPU times not available";
+        } else {
+            if (previous != nullptr && previous->timed && previous->tick + 1 == row.tick) {
+                text += fmt::format(", idle {:.1f} ms", ms(previous->data[6], row.data[0]));
+            }
+            text += fmt::format(", uploads {:.1f} ms, commands {:.1f} ms",
+                                ms(row.data[0], row.data[2]), ms(row.data[4], row.data[6]));
+        }
+        previous = &row;
+    }
+    return text;
+}
+
 } // Anonymous namespace
+
+void SetSubmitPool(VkQueryPool pool, u32 entries) {
+    std::scoped_lock lock{submit_mutex};
+    submit_pool = pool;
+    submits.assign(pool != VK_NULL_HANDLE ? entries : 0, Submit{});
+    submit_next = 0;
+}
+
+u32 BeginSubmit(vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf) {
+    if (!Enabled()) {
+        return NoSlot;
+    }
+    u32 entry;
+    {
+        std::scoped_lock lock{submit_mutex};
+        if (submits.empty()) {
+            return NoSlot;
+        }
+        entry = submit_next;
+        submit_next = (submit_next + 1) % static_cast<u32>(submits.size());
+        submits[entry].valid = false;
+    }
+    // The upload buffer runs first in the same submission, so its reset comes before every write.
+    upload_cmdbuf.ResetQueryPool(submit_pool, entry * 4, 4);
+    upload_cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, submit_pool, entry * 4);
+    cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, submit_pool, entry * 4 + 2);
+    return entry;
+}
+
+void EndSubmit(u32 entry, vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmdbuf) {
+    if (entry == NoSlot) {
+        return;
+    }
+    upload_cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, submit_pool, entry * 4 + 1);
+    cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, submit_pool, entry * 4 + 3);
+}
+
+void Submitted(u32 entry, u64 tick) {
+    if (entry == NoSlot) {
+        return;
+    }
+    std::scoped_lock lock{submit_mutex};
+    if (entry < submits.size()) {
+        submits[entry] = {.tick = tick, .submitted = std::chrono::steady_clock::now(),
+                          .valid = true};
+    }
+}
 
 bool Enabled() {
     return ThresholdMs() != 0;
@@ -328,6 +445,12 @@ void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_
                     list.empty() ? std::string{" (none noted)"} : list);
         if (!timed.empty()) {
             LOG_WARNING(Render_Vulkan, "Slow GPU wait for tick {}: {}", tick, timed);
+        }
+        const auto wait_start = std::chrono::steady_clock::now() -
+                                std::chrono::duration_cast<std::chrono::steady_clock::duration>(waited);
+        if (const std::string submitted = SubmitTimes(tick, known_done, wait_start);
+            !submitted.empty()) {
+            LOG_WARNING(Render_Vulkan, "Slow GPU wait for tick {}: {}", tick, submitted);
         }
     }
 }

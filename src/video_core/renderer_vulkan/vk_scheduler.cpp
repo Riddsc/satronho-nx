@@ -229,6 +229,23 @@ Scheduler::Scheduler(const Device& device_, StateTracker& state_tracker_)
         }
         SlowWait::SetTimestampPool(&device.GetLogical(), *slow_wait_pool, slots, valid_bits,
                                    period, host_reset);
+        constexpr u32 submit_entries = 2048;
+        if (*slow_wait_pool != VK_NULL_HANDLE) {
+            try {
+                slow_wait_submit_pool = device.GetLogical().CreateQueryPool({
+                    .sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO,
+                    .pNext = nullptr,
+                    .flags = 0,
+                    .queryType = VK_QUERY_TYPE_TIMESTAMP,
+                    .queryCount = submit_entries * 4,
+                    .pipelineStatistics = 0,
+                });
+            } catch (const vk::Exception& error) {
+                LOG_WARNING(Render_Vulkan, "Slow wait submission timestamps unavailable: {}",
+                            error.what());
+            }
+        }
+        SlowWait::SetSubmitPool(*slow_wait_submit_pool, submit_entries);
         if (*slow_wait_pool != VK_NULL_HANDLE) {
             LOG_INFO(Render_Vulkan, "Slow GPU wait detector: {} timestamp slots, timing {}",
                      slots, time_draws ? "dispatches and draws" : "dispatches");
@@ -675,6 +692,7 @@ void Scheduler::AllocateWorkerCommandBuffer() {
     if (trace_query_pool && !trace_gpu_failed) {
         TraceGpuSubmission();
     }
+    slow_wait_submit = SlowWait::BeginSubmit(current_cmdbuf, current_upload_cmdbuf);
 }
 
 void Scheduler::TraceShader(u64 hash, u32 stage) {
@@ -892,6 +910,8 @@ u64 Scheduler::SubmitExecution(VkSemaphore signal_semaphore, VkSemaphore wait_se
             .dstAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT,
         };
         upload_cmdbuf.PipelineBarrier(VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, WRITE_BARRIER);
+        // Before cmdbuf ends too: both end timestamps are written here.
+        SlowWait::EndSubmit(slow_wait_submit, cmdbuf, upload_cmdbuf);
         upload_cmdbuf.End();
         if (trace_gpu_recording) {
             cmdbuf.WriteTimestamp(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, *trace_query_pool,
@@ -917,6 +937,8 @@ u64 Scheduler::SubmitExecution(VkSemaphore signal_semaphore, VkSemaphore wait_se
         switch (const VkResult result = master_semaphore->SubmitQueue(
                     cmdbuf, upload_cmdbuf, signal_semaphore, wait_semaphore, signal_value)) {
         case VK_SUCCESS:
+            SlowWait::Submitted(slow_wait_submit, signal_value);
+            slow_wait_submit = SlowWait::NoSlot;
             // Log successful queue submission
             if (GPU::Logging::IsActive() &&
                 Settings::values.gpu_log_vulkan_calls.GetValue()) {
