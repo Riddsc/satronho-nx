@@ -224,7 +224,7 @@ RequestResult Fetch(const std::string& url, const std::string& path) {
         httplib::Request request{
             .method = "GET",
             .path = path,
-            .headers = {{"Accept", "application/vnd.github+json"}, {"User-Agent", "Lichii"}},
+            .headers = {{"Accept", "application/vnd.github+json"}, {"User-Agent", "Satronho-NX"}},
         };
 
         client->set_follow_location(true);
@@ -262,7 +262,7 @@ ReleaseList GetReleases() {
     const auto response = Fetch(url, Common::g_build_auto_update_api_path);
 
     if (!response.body) {
-        LOG_WARNING(Common, "Failed to get Lichii releases");
+        LOG_WARNING(Common, "Failed to get Satronho NX releases");
         return {.status = response.status};
     }
 

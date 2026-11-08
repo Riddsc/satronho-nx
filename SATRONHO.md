@@ -41,6 +41,19 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   `src/common/net/net.cpp` busca `satronho-nx-<plataforma>[-pgo].zip`. El ejecutable auxiliar
   es `satronho-updater.exe` desde la build 26 (antes `lichii-updater.exe`; una instalación vieja
   usa su `lichii-updater.exe` para instalar la 26, que trae ya el nuevo; el viejo queda sobrante).
+- Marca completa (build 27): textos visibles con "Lichii", "Eden" o "Eglantine" pasan a "Satronho NX"
+  (firmware, migración, accesos directos, multijugador, actualizador, atajo "Exit Satronho NX" — el
+  atajo personalizado viejo "Exit Eglantine" se pierde y vuelve al de fábrica), CLI
+  `satronho-cli.exe` (`src/CMakeLists.txt` OUTPUT_NAME; antes `eden-cli.exe`), User-Agent
+  `Satronho-NX`, enlaces de "Acerca de" a Riddsc/satronho-nx con crédito a Lichii. Se quitó del
+  menú de la lista de juegos "Submit compatibility report…" (enviaba a lichii.zortos.me).
+  Se mantienen a propósito: el texto de "Acerca de" que dice que se basa en Lichii, Eglantine y Eden
+  (crédito/licencia GPL), los avisos de copyright, la carpeta de datos `AppData\Roaming\eden`
+  (compartida con Lichii: cambiarla perdería configuración y cachés), "cuenta de Eden" en
+  multijugador (es el servicio de Eden), los nombres de otros emuladores en la migración, y el ID
+  de Discord (es la aplicación de Eden; para mostrar "Satronho NX" hace falta crear una propia en
+  el portal de desarrolladores de Discord). Al integrar Lichii, estos textos pueden dar conflictos:
+  conservar los de Satronho.
 - Ajustes de Ocarina: `oot_fog_density` (0–200 %) y `oot_exposure` (25–200 %) en Gráficos;
   100 % = el juego tal cual. Se aplican al traducir dos shaders concretos
   (`src/shader_recompiler/ir_opt/oot_visual_workaround.h`), así que cambian al reiniciar el juego.

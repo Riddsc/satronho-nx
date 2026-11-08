@@ -534,11 +534,7 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
         edit_nup->setEnabled(!nup_conversion_running);
     }
     QAction* properties = context_menu.addAction(tr("Configure Game"));
-    if (program_id != 0 && program_id == reportable_program_id) {
-        auto* report = context_menu.addAction(tr("Submit compatibility report…"));
-        connect(report, &QAction::triggered, this,
-                [this, program_id] { emit ReportCompatibilityRequested(program_id); });
-    }
+    // Satronho NX: no compatibility reports; they went to Lichii's site (lichii.zortos.me).
 
     favorite->setVisible(program_id != 0);
     favorite->setCheckable(true);

@@ -1327,7 +1327,7 @@ void MainWindow::InitializeHotkeys() {
     hotkey_registry.LoadHotkeys();
 
     LinkActionShortcut(ui->action_Load_File, QStringLiteral("Load File"));
-    LinkActionShortcut(ui->action_Exit, QStringLiteral("Exit Eglantine"));
+    LinkActionShortcut(ui->action_Exit, QStringLiteral("Exit Satronho NX"));
     LinkActionShortcut(ui->action_Restart, QStringLiteral("Restart Emulation"));
     LinkActionShortcut(ui->action_Pause, QStringLiteral("Continue/Pause Emulation"));
     LinkActionShortcut(ui->action_Stop, QStringLiteral("Stop Emulation"));
@@ -4875,7 +4875,7 @@ void MainWindow::OnEmulatorUpdateAvailable() {
     const auto result = update_future.result();
     if (result.failure == UpdateChecker::Failure::RateLimited) {
         statusBar()->showMessage(
-            tr("Could not check for updates: GitHub rate limit reached. Lichii will try again at "
+            tr("Could not check for updates: GitHub rate limit reached. Satronho NX will try again at "
                "the next start."),
             15000);
         return;
