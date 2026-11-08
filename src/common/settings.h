@@ -419,6 +419,27 @@ struct Values {
     // pass, or the tonemapped image as the game renders it (video_core/oot_network.h).
     SwitchableSetting<OotAntiAliasing> oot_anti_aliasing{linkage, OotAntiAliasing::Game,
                                                          "oot_anti_aliasing", Category::Renderer};
+    // Satronho NX: Ocarina of Time's volumetric fog and exposure, in percent of what the game
+    // asks for (100 = unchanged). Applied when its shaders are translated, so they take effect
+    // when the game starts (shader_recompiler/ir_opt/oot_visual_workaround.h).
+    SwitchableSetting<int, true> oot_fog_density{linkage,
+                                                 100,
+                                                 0,
+                                                 200,
+                                                 "oot_fog_density",
+                                                 Category::Renderer,
+                                                 Specialization::Scalar | Specialization::Percentage,
+                                                 true,
+                                                 false};
+    SwitchableSetting<int, true> oot_exposure{linkage,
+                                              100,
+                                              25,
+                                              200,
+                                              "oot_exposure",
+                                              Category::Renderer,
+                                              Specialization::Scalar | Specialization::Percentage,
+                                              true,
+                                              false};
 
     SwitchableSetting<std::string> post_shader_chain{linkage,
                                                      std::string(),

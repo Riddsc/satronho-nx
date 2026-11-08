@@ -81,10 +81,6 @@ struct Profile {
 
     /// OpFClamp is broken and OpFMax + OpFMin should be used instead
     bool has_broken_spirv_clamp{};
-    /// Satronho NX: Maxwell FMNMX returns the non-NaN operand. GLSL.std.450 FMin/FMax/FClamp
-    /// leave a NaN operand undefined and AMD drivers propagate it (black foliage, yellow haze and
-    /// shimmering water in Ocarina of Time), so use NMin/NMax, which pick the non-NaN operand.
-    bool nan_ignoring_min_max{};
     /// The Position builtin needs to be wrapped in a struct when used as an input
     bool has_broken_spirv_position_input{};
     /// Offset image operands with an unsigned type do not work

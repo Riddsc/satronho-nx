@@ -177,6 +177,16 @@ std::unique_ptr<TranslationMap> InitializeTranslations(QObject* parent) {
               "network, which sharpens heavily.\nNo sharpening: the image as the game renders it, "
               "without the network (faster; pairs well with a higher resolution). Has no effect while "
               "NVIDIA DLSS is on.\nTakes effect when the game starts."));
+    INSERT(Settings, oot_fog_density, tr("Ocarina of Time fog:"),
+           tr("The Legend of Zelda: Ocarina of Time only.\nDensity of the outdoor haze (volumetric "
+              "fog), in percent of what the game draws. 100% is the game as it is; lower values "
+              "clear the air, higher values thicken it. Interiors share the same fog.\nTakes "
+              "effect when the game starts."));
+    INSERT(Settings, oot_exposure, tr("Ocarina of Time exposure:"),
+           tr("The Legend of Zelda: Ocarina of Time only.\nBrightness of the final image before "
+              "the game's tone curve, in percent of what the game asks for. 100% is the game as "
+              "it is; lower values darken highlights and glow, higher values brighten.\nTakes "
+              "effect when the game starts."));
     INSERT(Settings, post_shader_chain, QString(), QString());
     INSERT(Settings, post_shader_preset, QString(), QString());
     INSERT(Settings, post_shader_enabled, tr("Enable post-processing effects"),

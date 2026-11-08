@@ -907,7 +907,6 @@ private:
         std::vector<IR::U1> demote_conds;
         u32 num_epilogues{};
         u32 branch_depth{};
-        u32 loop_depth{};
         for (const IR::AbstractSyntaxNode& node : syntax_list) {
             if (node.type == Type::If) {
                 ++branch_depth;
@@ -915,23 +914,12 @@ private:
             if (node.type == Type::EndIf) {
                 --branch_depth;
             }
-            if (node.type == Type::Loop) {
-                ++loop_depth;
-            }
-            if (node.type == Type::Repeat) {
-                --loop_depth;
-            }
             if (node.type != Type::Block) {
                 continue;
             }
             for (const IR::Inst& inst : node.data.block->Instructions()) {
                 const IR::Opcode op{inst.GetOpcode()};
                 if (op == IR::Opcode::DemoteToHelperInvocation) {
-                    // Satronho NX: a demote inside a loop runs once per iteration; its condition
-                    // read after the loop is only the last iteration's. Leave such programs alone.
-                    if (loop_depth > 0) {
-                        return;
-                    }
                     // Skip reordering nested demote branches.
                     if (branch_depth <= 1) {
                         demote_blocks.push_back(node.data.block);
@@ -953,21 +941,8 @@ private:
             LOG_DEBUG(Shader, "Combining demotes with more than one return is not implemented.");
             return;
         }
-        auto& asl{syntax_list};
-        // Satronho NX: check every demote before changing anything. The loop below used to
-        // return at the first demote that is not the whole body of an if (KILL emits its demote
-        // at the end of the current block, which need not be the if's first block) after it had
-        // already erased the earlier ones: those invocations were never demoted and wrote their
-        // unset colours (zero). On AMD, Ocarina of Time drew the Deku Tree's beard and leaves black.
-        for (const IR::Block* demote_block : demote_blocks) {
-            const bool has_if = std::ranges::any_of(asl, [&](const IR::AbstractSyntaxNode& asn) {
-                return asn.type == Type::If && asn.data.if_node.body == demote_block;
-            });
-            if (!has_if) {
-                return;
-            }
-        }
         s64 last_iterator_offset{};
+        auto& asl{syntax_list};
         for (const IR::Block* demote_block : demote_blocks) {
             const auto start_it{asl.begin() + last_iterator_offset};
             auto asl_it{std::find_if(start_it, asl.end(), [&](const IR::AbstractSyntaxNode& asn) {

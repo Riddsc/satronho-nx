@@ -188,11 +188,12 @@ private:
     VideoCore::ShaderNotify& shader_notify;
     bool use_asynchronous_shaders{};
     bool use_vulkan_pipeline_cache{};
-    bool oot_visual_workaround{};
     const size_t num_pipeline_workers;
     EmissionBudget emission_budget;
 
     u64 visual_workaround_title{};
+    float oot_fog_scale = 1.0f;
+    float oot_exposure_scale = 1.0f;
     GraphicsPipelineCacheKey graphics_key{};
     GraphicsPipeline* current_pipeline{};
 

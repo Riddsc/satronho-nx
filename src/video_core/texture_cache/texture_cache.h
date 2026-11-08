@@ -360,11 +360,21 @@ void TextureCache<P>::TickFrame() {
                     expected_memory = critical_memory - (std::min)(margin, critical_memory / 2);
                     // Log the first values and real changes (the budget moves by a few MiB all
                     // the time).
+                    // Satronho NX: compare after ApplyThresholdOverrides caps the thresholds.
+                    // Before, the uncapped budget (14 GiB on a 16 GB card) was compared with the
+                    // capped value (5 GiB) every 30 frames, so both lines logged twice a second.
+                    ApplyThresholdOverrides(false);
                     const u64 change = critical_memory > old_critical
                                            ? critical_memory - old_critical
                                            : old_critical - critical_memory;
                     const bool log = budget_check_frames == 1 || change >= 256_MiB;
-                    ApplyThresholdOverrides(log);
+                    if (log) {
+                        LOG_INFO(HW_GPU,
+                                 "Texture cache thresholds: expected {} MiB, critical {} MiB, "
+                                 "minimum {} MiB",
+                                 expected_memory >> 20, critical_memory >> 20,
+                                 minimum_memory >> 20);
+                    }
                     if (log) {
                         LOG_INFO(HW_GPU,
                                  "Memory margins: base {} MiB, out of memory {} MiB, block slack {} MiB",

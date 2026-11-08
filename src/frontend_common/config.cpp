@@ -148,14 +148,17 @@ void Config::SetUpIni() {
         EndGroup();
     }
 
-    // Satronho NX: apply the recommended performance settings once to configs that existed
-    // before Satronho NX (Lichii only seeds brand-new configs). Decoding ASTC on the CPU stalled
-    // Ocarina for seconds at a time; the user can change any of these afterwards.
-    // Version 2 applies them again: configs back on "Accurate" GPU emulation kept the GPU on one
-    // thread (no split) and re-read every command list through the caches, which held Ocarina
-    // under 30 FPS on a Ryzen 7 5800XT.
+    // Satronho NX: apply recommended settings once per settings version to configs that existed
+    // before Satronho NX (Lichii only seeds brand-new configs). The user can change any of them
+    // afterwards; a later version only writes its own settings.
+    // v1/v2: GPU emulation "Fast" (on "Accurate" the GPU ran on one thread and re-read every
+    // command list through the caches: Ocarina under 30 FPS on a Ryzen 7 5800XT), ASTC decoded on
+    // the GPU (on the CPU it stalled Ocarina for seconds), asynchronous presentation and shaders.
+    // v3: Switch 2 draws whose pipeline is still building wait up to 8 ms a frame, then skip
+    // ("Bounded"). Lichii's "Wait" froze Ocarina for 2.5 s in 3.5 minutes on new content; the
+    // old EDEN_NX2_ASYNC_DISCARD=1 switch skipped them without waiting at all.
     if (global) {
-        constexpr s64 satronho_settings_version = 2;
+        constexpr s64 satronho_settings_version = 3;
         BeginGroup("SatronhoNX");
         const s64 applied = ReadIntegerSetting("settings_version");
         EndGroup();
@@ -166,11 +169,17 @@ void Config::SetUpIni() {
                 WriteStringSetting(setting.GetLabel(), value);
                 WriteBooleanSetting(setting.GetLabel() + "\\default", false);
             };
-            apply(Settings::values.gpu_accuracy, ToString(u32(Settings::GpuAccuracy::Low)));
-            apply(Settings::values.accelerate_astc,
-                  ToString(u32(Settings::AstcDecodeMode::Gpu)));
-            apply(Settings::values.async_presentation, ToString(true));
-            apply(Settings::values.use_asynchronous_shaders, ToString(true));
+            if (applied < 2) {
+                apply(Settings::values.gpu_accuracy, ToString(u32(Settings::GpuAccuracy::Low)));
+                apply(Settings::values.accelerate_astc,
+                      ToString(u32(Settings::AstcDecodeMode::Gpu)));
+                apply(Settings::values.async_presentation, ToString(true));
+                apply(Settings::values.use_asynchronous_shaders, ToString(true));
+            }
+            if (applied < 3) {
+                apply(Settings::values.native_async_draws,
+                      ToString(u32(Settings::NativeAsyncDraws::Bounded)));
+            }
             EndGroup();
             LOG_INFO(Config, "Satronho NX: applied recommended settings v{} (was v{})",
                      satronho_settings_version, applied);

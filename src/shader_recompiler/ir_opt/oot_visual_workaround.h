@@ -11,14 +11,22 @@
 
 namespace Shader::Optimization {
 
-// TEMPORARY opt-in visual workaround for Ocarina of Time, not an emulator fix.
+/// Satronho NX: The Legend of Zelda: Ocarina of Time's fog and exposure as user settings.
+/// fog_scale multiplies the fog integration's slice distance (its extinction and in-scattering),
+/// exposure_scale the exposure constant (cbuf 3, offset 0x38) the log-bloom final pass reads
+/// before its filmic curve. 1.0 leaves a shader untouched.
+/// Returns the number of edited instructions for an Ocarina shader it looked at (0 when the
+/// shader no longer has the expected shape), std::nullopt for every other shader.
 inline std::optional<size_t> ApplyOotVisualWorkaround(IR::Program& program, u64 title_id,
-                                                     u64 shader_hash, bool enabled) {
-    if (!enabled || title_id != 0x0400486024DEC000ULL) {
+                                                     u64 shader_hash, float fog_scale,
+                                                     float exposure_scale) {
+    if (title_id != 0x0400486024DEC000ULL) {
         return std::nullopt;
     }
-    const bool fog = shader_hash == 0x780c0536b89fc89eULL && program.stage == Stage::Compute;
-    const bool exposure = shader_hash == 0xbded5ce917183214ULL && program.stage == Stage::Fragment;
+    const bool fog = fog_scale != 1.0f && shader_hash == 0x780c0536b89fc89eULL &&
+                     program.stage == Stage::Compute;
+    const bool exposure = exposure_scale != 1.0f && shader_hash == 0xbded5ce917183214ULL &&
+                          program.stage == Stage::Fragment;
     if (!fog && !exposure) {
         return std::nullopt;
     }
@@ -60,12 +68,12 @@ inline std::optional<size_t> ApplyOotVisualWorkaround(IR::Program& program, u64 
     if ((fog && matches.size() != 1) || (exposure && (matches.empty() || matches.size() > 3))) {
         return 0;
     }
+    const float scale = fog ? fog_scale : exposure_scale;
     for (const auto& [block, inst] : matches) {
         const auto insertion = block->Instructions().iterator_to(*inst);
         const auto original = block->PrependNewInst(insertion, *inst);
         IR::IREmitter ir{*block, insertion};
-        const auto scaled = ir.FPMul(IR::F32{IR::Value{&*original}},
-                                     ir.Imm32(fog ? 0.25f : 0.65f));
+        const auto scaled = ir.FPMul(IR::F32{IR::Value{&*original}}, ir.Imm32(scale));
         inst->ReplaceUsesWith(scaled);
     }
     return matches.size();

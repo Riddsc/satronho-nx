@@ -8,8 +8,6 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
-#include <cstdlib>
-#include <string_view>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -463,12 +461,6 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
       use_asynchronous_shaders{Settings::values.use_asynchronous_shaders.GetValue()},
       use_vulkan_pipeline_cache{Settings::values.use_vulkan_driver_pipeline_cache.GetValue() &&
                                 !DriverCachesPipelines(device_)},
-      // Satronho NX: the Ocarina fog/exposure workaround is on by default (it only touches two
-      // shaders of that title); EDEN_NX2_OOT_VISUAL_WORKAROUND=0 turns it off.
-      oot_visual_workaround{[] {
-          const char* value = std::getenv("EDEN_NX2_OOT_VISUAL_WORKAROUND");
-          return value == nullptr || std::string_view{value} != "0";
-      }()},
       num_pipeline_workers{device.HasBrokenParallelShaderCompiling() ? 1ULL
                                                                      : GetTotalPipelineWorkers()},
       emission_budget{num_pipeline_workers},
@@ -572,14 +564,6 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
                                        driver_id == VK_DRIVER_ID_MESA_TURNIP,
 
         .has_broken_spirv_clamp = driver_id == VK_DRIVER_ID_INTEL_PROPRIETARY_WINDOWS,
-        // EDEN_NX2_NAN_MINMAX=0 turns it off (to compare images).
-        .nan_ignoring_min_max = (driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
-                                 driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
-                                 driver_id == VK_DRIVER_ID_MESA_RADV) &&
-                                [] {
-                                    const char* value = std::getenv("EDEN_NX2_NAN_MINMAX");
-                                    return value == nullptr || value[0] != '0';
-                                }(),
         .has_broken_spirv_position_input = driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY,
         .has_broken_unsigned_image_offsets = false,
         .has_broken_signed_operations = false,
@@ -622,18 +606,9 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
         .support_float64 = device.IsFloat64Supported(),
         .support_float16 = device.IsFloat16Supported(),
         .support_int64 = device.IsShaderInt64Supported(),
-        // Satronho NX: EDEN_NX2_DEMOTE_REORDER=0 keeps demotes where the program has them (as on
-        // NVIDIA), =1 moves them to the end on every driver; unset keeps the per-driver choice.
-        .needs_demote_reorder = [driver_id] {
-            const char* const value = std::getenv("EDEN_NX2_DEMOTE_REORDER");
-            if (value != nullptr && (value[0] == '0' || value[0] == '1')) {
-                LOG_INFO(Render_Vulkan, "EDEN_NX2_DEMOTE_REORDER={}", value[0]);
-                return value[0] == '1';
-            }
-            return driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
-                   driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
-                   driver_id == VK_DRIVER_ID_SAMSUNG_PROPRIETARY;
-        }(),
+        .needs_demote_reorder = driver_id == VK_DRIVER_ID_AMD_PROPRIETARY ||
+                                driver_id == VK_DRIVER_ID_AMD_OPEN_SOURCE ||
+                                driver_id == VK_DRIVER_ID_SAMSUNG_PROPRIETARY,
         .support_snorm_render_buffer = true,
         .support_viewport_index_layer = device.IsExtShaderViewportIndexLayerSupported(),
         .support_viewport_mask = device.IsNvViewportArray2Supported(),
@@ -954,7 +929,15 @@ ComputePipeline* PipelineCache::CurrentComputePipeline() {
 
 void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading,
                                       const VideoCore::DiskResourceLoadCallback& callback) {
+    // Satronho NX: Ocarina's fog and exposure settings, read once the game's own settings are in.
     visual_workaround_title = title_id;
+    oot_fog_scale = static_cast<float>(Settings::values.oot_fog_density.GetValue()) / 100.0f;
+    oot_exposure_scale = static_cast<float>(Settings::values.oot_exposure.GetValue()) / 100.0f;
+    if (title_id == 0x0400486024DEC000ULL) {
+        LOG_INFO(Render_Vulkan, "Ocarina of Time fog {}%, exposure {}%",
+                 Settings::values.oot_fog_density.GetValue(),
+                 Settings::values.oot_exposure.GetValue());
+    }
     if (title_id == 0) {
         return;
     }
@@ -1601,9 +1584,9 @@ std::unique_ptr<GraphicsPipeline> PipelineCache::CreateGraphicsPipeline(
         }
 
         if (const auto edits = Shader::Optimization::ApplyOotVisualWorkaround(
-                programs[index], visual_workaround_title, key.unique_hashes[index],
-                oot_visual_workaround)) {
-            LOG_WARNING(Render_Vulkan, "OoT visual workaround: shader {:016x}, {} scalar edits",
+                programs[index], visual_workaround_title, key.unique_hashes[index], oot_fog_scale,
+                oot_exposure_scale)) {
+            LOG_INFO(Render_Vulkan, "Ocarina fog/exposure: shader {:016x}, {} edits",
                         key.unique_hashes[index], *edits);
         }
 
@@ -2079,8 +2062,8 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(
 
     auto program{TranslateProgram(pools.inst, pools.block, env, cfg, host_info)};
     if (const auto edits = Shader::Optimization::ApplyOotVisualWorkaround(
-            program, visual_workaround_title, key.unique_hash, oot_visual_workaround)) {
-        LOG_WARNING(Render_Vulkan, "OoT visual workaround: shader {:016x}, {} scalar edits",
+            program, visual_workaround_title, key.unique_hash, oot_fog_scale, oot_exposure_scale)) {
+        LOG_INFO(Render_Vulkan, "Ocarina fog/exposure: shader {:016x}, {} edits",
                     key.unique_hash, *edits);
     }
     const VkDriverIdKHR driver_id = device.GetDriverID();

@@ -4,8 +4,6 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <cstdlib>
-#include <chrono>
 #include <thread>
 
 #include <ranges>
@@ -103,26 +101,6 @@ void MasterSemaphore::Wait(u64 tick) {
 
     if (IsFree(tick)) {
         return;
-    }
-
-    // Satronho NX: poll the timeline for a short while before blocking. Ocarina's front waits
-    // for GPU-written command list copies 100-200 times a second; a blocking wait on Windows adds
-    // the thread wake-up latency to each one. EDEN_NX2_GPU_SPIN_US (default 2000, 0 = off).
-    static const s64 spin_us = [] {
-        const char* value = std::getenv("EDEN_NX2_GPU_SPIN_US");
-        return value != nullptr ? static_cast<s64>(std::atoll(value)) : s64{2000};
-    }();
-    if (spin_us > 0) {
-        const auto deadline = std::chrono::steady_clock::now() + std::chrono::microseconds{spin_us};
-        for (u32 spins = 0; std::chrono::steady_clock::now() < deadline; ++spins) {
-            Refresh();
-            if (IsFree(tick)) {
-                return;
-            }
-            if (spins % 64 == 63) {
-                std::this_thread::yield();
-            }
-        }
     }
 
     // If none of the above is hit, fallback to a regular wait

@@ -9,7 +9,6 @@
 // A copy of the code can be obtained from https://github.com/Ryujinx/Ryujinx
 // The sections using code from Ryujinx are marked with a link to the original version
 
-#include <cstdlib>
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -844,23 +843,6 @@ bool IsValidEntry(const Tegra::MemoryManager& gpu_memory, const TICEntry& config
     }
     if (address >= (1ULL << 40)) {
         return false;
-    }
-    // Satronho NX: format 0 is not a real Maxwell format, but Ocarina binds such descriptors over
-    // real images, and treating all of them as unbound blackened foliage, characters and water.
-    // Only a format-0 descriptor whose whole image is not mapped is dropped: building one over
-    // unmapped memory is what made AMD drivers lose the device. EDEN_NX2_ZERO_FORMAT_NULL=1 drops
-    // every format-0 descriptor (the old behaviour), =0 never drops them.
-    static const char zero_format_mode = [] {
-        const char* value = std::getenv("EDEN_NX2_ZERO_FORMAT_NULL");
-        return value != nullptr ? value[0] : 'm';
-    }();
-    const bool zero_format = config.format.Value() == Tegra::Texture::TextureFormat{};
-    if (zero_format && zero_format_mode == '1') {
-        return false;
-    }
-    if (zero_format && zero_format_mode != '0') {
-        const ImageInfo info{config};
-        return gpu_memory.GpuToCpuAddress(address, CalculateGuestSizeInBytes(info)).has_value();
     }
     if (gpu_memory.GpuToCpuAddress(address).has_value()) {
         return true;

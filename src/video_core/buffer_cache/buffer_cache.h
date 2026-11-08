@@ -314,13 +314,6 @@ std::optional<VideoCore::RasterizerDownloadArea> BufferCache<P>::GetFlushArea(DA
 template <class P>
 void BufferCache<P>::DownloadMemory(DAddr device_addr, u64 size) {
     if constexpr (USE_MEMORY_MAPS) {
-        if (!download_cpu_read_ranges) {
-            // Satronho NX: one staging copy and one GPU wait for every buffer in the range,
-            // instead of a wait per buffer (Ocarina reads GPU-written memory ~350 times a second).
-            const std::array<std::pair<DAddr, u64>, 1> ranges{{{device_addr, size}}};
-            DownloadRangesMemory(ranges);
-            return;
-        }
         if (download_cpu_read_ranges) {
             download_cpu_read_ranges = false;
             boost::container::small_vector<std::pair<DAddr, u64>, 16> ranges{{device_addr, size}};
