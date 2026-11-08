@@ -145,9 +145,9 @@ void UpdateDialog::Restart(QWidget* window, const QString& target) {
 bool UpdateDialog::LaunchInstaller(QWidget* window, const QString& staging) {
     // The helper runs from a copy, because the installed one is replaced along with everything else.
     const QString helper =
-        QCoreApplication::applicationDirPath() + QStringLiteral("/lichii-updater.exe");
+        QCoreApplication::applicationDirPath() + QStringLiteral("/satronho-updater.exe");
     const QString copy = QDir::temp().filePath(
-        QStringLiteral("lichii-updater-%1.exe").arg(QCoreApplication::applicationPid()));
+        QStringLiteral("satronho-updater-%1.exe").arg(QCoreApplication::applicationPid()));
     QFile::remove(copy);
     if (!QFile::copy(helper, copy)) {
         LOG_ERROR(Frontend, "Could not copy the installer helper {}", helper.toStdString());
@@ -179,7 +179,7 @@ void UpdateDialog::Download() {
         const std::filesystem::path exe{QCoreApplication::applicationFilePath().toStdWString()};
         if (UpdateInstaller::CanReplace(exe) &&
             QFile::exists(QCoreApplication::applicationDirPath() +
-                          QStringLiteral("/lichii-updater.exe"))) {
+                          QStringLiteral("/satronho-updater.exe"))) {
             InstallOnRestart(exe);
             return;
         }

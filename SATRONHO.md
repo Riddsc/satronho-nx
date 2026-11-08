@@ -38,8 +38,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - Marca: nombre "Satronho NX", `satronho-nx.exe` (`src/yuzu/CMakeLists.txt` OUTPUT_NAME), ícono
   (`dist/lichii.ico/png`, 5 guías orbitando un planeta), textos de la UI.
 - Actualizador: `CMakeModules/GenerateSCMRev.cmake` apunta a `Riddsc/satronho-nx`;
-  `src/common/net/net.cpp` busca `satronho-nx-<plataforma>[-pgo].zip`. El ejecutable auxiliar se
-  sigue llamando `lichii-updater.exe` (interno).
+  `src/common/net/net.cpp` busca `satronho-nx-<plataforma>[-pgo].zip`. El ejecutable auxiliar
+  es `satronho-updater.exe` desde la build 26 (antes `lichii-updater.exe`; una instalación vieja
+  usa su `lichii-updater.exe` para instalar la 26, que trae ya el nuevo; el viejo queda sobrante).
 - Ajustes de Ocarina: `oot_fog_density` (0–200 %) y `oot_exposure` (25–200 %) en Gráficos;
   100 % = el juego tal cual. Se aplican al traducir dos shaders concretos
   (`src/shader_recompiler/ir_opt/oot_visual_workaround.h`), así que cambian al reiniciar el juego.
@@ -156,11 +157,20 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   ningún dibujo. El tiempo no está en los shaders: o el envío llegó tarde, o la GPU estuvo parada
   (semáforo), o está en el buffer de subidas (copias/ASTC), que no se medía. Sin relación clara con
   las compilaciones de pipelines.
+  **Build-25 (Lichii hasta bbf3e629), misma pelea desde el mismo guardado: 0 esperas lentas**, peor
+  cuadro 135 ms, mediana 34 FPS (sesión corta, ~2 min de juego). Las pausas de 1.5 s parecen
+  resueltas por algún commit de Lichii posterior a bf4c42e2; candidatos: #752 (un canal espera una
+  lista de comandos escrita por la GPU sin bloquear a los demás), #337 (consultas con fence
+  pendientes hasta que corre su fence), #621. Sin confirmar cuál; vigilar en sesiones largas.
 - **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
   como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
   muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,
   basura en piedras por pesos a cero en la composición) y #820 (varyings noperspective recortados
   junto a la cámara en AMD; viene en la build 24). Probar primero en la build 24 en el mismo punto.
+- **Al escribir un archivo en el PC con `device_commit_files` usar un `stagedPath` con nombre
+  nuevo cada vez**: reutilizar la misma ruta envió la versión anterior en caché (el
+  `nx2_switches.txt` quedó con el contenido viejo aunque la herramienta dijo "written"). Releer
+  el archivo del PC después de escribirlo.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.

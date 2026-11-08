@@ -370,7 +370,7 @@ jobs:
         run: |
           if command -v ccache > /dev/null; then ccache --zero-stats; else sccache --zero-stats; fi
           targets="yuzu yuzu-cmd"
-          if [[ "${{ matrix.platform }}" == windows* ]]; then targets="$targets lichii-updater"; fi
+          if [[ "${{ matrix.platform }}" == windows* ]]; then targets="$targets satronho-updater"; fi
           cmake --build build/release --target $targets --parallel
           if command -v ccache > /dev/null; then ccache --show-stats; else sccache --show-stats; fi
 
