@@ -64,7 +64,8 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - Descargar el asset `satronho-nx-windows-x86_64-pgo.zip` de la release con
   `gh api -H "Accept: application/octet-stream" repos/Riddsc/satronho-nx/releases/assets/<id>`.
 - Entregar descomprimido en `R:\Claude\APK-APPS\Switch Satronho\Satronho NX build-N` (una carpeta
-  por build, junto a las anteriores). Los .exe grandes (satronho-nx.exe, eden-cli.exe) no pasan por
+  por build, junto a las anteriores), y dentro de esa carpeta también el zip tal cual
+  (`Satronho NX build-N (PGO).zip`) para que el usuario lo comparta sin bajarlo de GitHub. Los .exe grandes (satronho-nx.exe, eden-cli.exe) no pasan por
   `stagedPath`: enviarlos con SendUserFile y copiar con su `fileUuid`.
 
 ## Datos del usuario y de su PC (para interpretar resultados)
@@ -136,3 +137,8 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.
+- **Líneas negras en cuadrícula sobre el campo de Hyrule** (se ven de lejos y desaparecen al
+  acercarse): fallo abierto en Lichii (#603 build 95, #709 y #675 build 117), todos en AMD (RX 6000,
+  RX 7900 XTX; el usuario lo vio en Lichii 117 con su RX 9070 XT). Al 2026-11-08 Lichii no lo ha
+  arreglado. Que dependa de la distancia apunta a mips/LOD o al filtrado del terreno, sin confirmar.
+  Plan: volcado de un cuadro con `EDEN_NX2_FRAME_DUMP_SAMPLED=1` mirando las líneas desde lejos.
