@@ -138,7 +138,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.
 - **Líneas negras en cuadrícula sobre el campo de Hyrule** (se ven de lejos y desaparecen al
-  acercarse): fallo abierto en Lichii (#603 build 95, #709 y #675 build 117), todos en AMD (RX 6000,
-  RX 7900 XTX; el usuario lo vio en Lichii 117 con su RX 9070 XT). Al 2026-11-08 Lichii no lo ha
-  arreglado. Que dependa de la distancia apunta a mips/LOD o al filtrado del terreno, sin confirmar.
-  Plan: volcado de un cuadro con `EDEN_NX2_FRAME_DUMP_SAMPLED=1` mirando las líneas desde lejos.
+  acercarse; issues abiertos de Lichii #603, #709, #675, todos en AMD): **ya corregido por Lichii** en
+  `bf4c42e2` (#679, "#448 uneven BCn mips stay RGBA8 on AMD"), posterior a su build 117 y ya integrado
+  aquí. Causa: ASTC recomprimido a BC1/BC3 con mips de tamaño en bloques desigual; el driver AMD los
+  muestrea mal en las costuras del terreno lejano, así que esas texturas quedan en RGBA8. Solo actúa
+  con ASTC decodificado en GPU y recompresión distinta de "Uncompressed". Verificado por el usuario
+  en build-23 (RX 9070 XT) en el mismo punto donde Lichii 117 mostraba las líneas.
