@@ -61,6 +61,7 @@
 #include "video_core/renderer_vulkan/vk_query_cache.h"
 #include "video_core/renderer_vulkan/vk_rasterizer.h"
 #include "video_core/renderer_vulkan/vk_scheduler.h"
+#include "video_core/renderer_vulkan/vk_slow_wait.h"
 #include "video_core/renderer_vulkan/vk_staging_buffer_pool.h"
 #include "video_core/renderer_vulkan/vk_state_tracker.h"
 #include "video_core/renderer_vulkan/vk_texture_cache.h"
@@ -768,6 +769,7 @@ void RasterizerVulkan::PrepareDraw(bool is_indexed, Func&& draw_func, bool is_in
         return;
     }
 
+    SlowWait::NoteGraphics(scheduler.CurrentTick(), pipeline->ShaderHashes());
 #ifdef EGLANTINE_STREAMLINE
     TrackOcarinaCamera();
     TrackOcarinaActor(pipeline->ShaderHashes()[1], is_indexed, is_indirect);
@@ -1794,6 +1796,8 @@ void RasterizerVulkan::DispatchCompute() {
     }
 
     const auto& qmd{kepler_compute->launch_description};
+    SlowWait::NoteCompute(scheduler.CurrentTick(), pipeline->ShaderHash(), qmd.grid_dim_x.Value(),
+                          qmd.grid_dim_y.Value(), qmd.grid_dim_z.Value());
     // Earlier writes must be visible to the dispatch, its indirect arguments included, and what it
     // writes to the next render pass.
     const auto record_read_barrier = [this] {

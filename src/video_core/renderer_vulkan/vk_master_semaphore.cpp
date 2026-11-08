@@ -4,7 +4,10 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <chrono>
 #include <thread>
+
+#include "video_core/renderer_vulkan/vk_slow_wait.h"
 
 #include <ranges>
 #include "common/settings.h"
@@ -104,9 +107,13 @@ void MasterSemaphore::Wait(u64 tick) {
     }
 
     // If none of the above is hit, fallback to a regular wait
+    // Satronho NX: time the waits that reach the GPU; long ones name the work behind them.
+    const u64 known_done = KnownGpuTick();
+    const auto wait_start = std::chrono::steady_clock::now();
     try {
         while (!semaphore.Wait(tick)) {
         }
+        SlowWait::ReportWait(std::chrono::steady_clock::now() - wait_start, tick, known_done);
     } catch (const vk::Exception& exception) {
         // The throw ends the process; say why first (a device loss reached nothing else here).
         LOG_CRITICAL(Render_Vulkan, "Waiting for GPU tick {} failed: {}", tick, exception.what());

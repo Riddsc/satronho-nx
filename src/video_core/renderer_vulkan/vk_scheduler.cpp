@@ -22,6 +22,7 @@
 #include "video_core/renderer_vulkan/vk_query_cache.h"
 
 #include "common/logging.h"
+#include "video_core/renderer_vulkan/vk_slow_wait.h"
 #include "common/settings.h"
 #include "common/dkb_cpu_trace.h"
 #include "common/thread.h"
@@ -301,7 +302,9 @@ void Scheduler::Finish(VkSemaphore signal_semaphore, VkSemaphore wait_semaphore,
     const bool profile = VideoCommon::Nx2Profile::Enabled();
     const u64 start = profile ? VideoCommon::Nx2Profile::Now() : 0;
     SubmitExecution(signal_semaphore, wait_semaphore);
+    SlowWait::SetWaitSite(&location);
     Wait(presubmit_tick);
+    SlowWait::SetWaitSite(nullptr);
     AllocateNewContext();
     last_flush = std::chrono::steady_clock::now();
     flush_pending = false;
