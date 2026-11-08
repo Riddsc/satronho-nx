@@ -13,7 +13,7 @@ proyecto: léelo antes de tocar algo.
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
-  2–19 se retiraron. build-20 = primera del historial reescrito: Lichii hasta bf4c42e, ajustes de
+  2–20 se retiraron. build-21 = primera del historial reescrito: Lichii hasta bf4c42e, ajustes de
   niebla/exposición, alineado con Lichii, actualizador propio y detector de esperas lentas.
 - Commits: autor Riddsc <richardsc921@gmail.com>, sin firmas ni menciones de IA en mensajes,
   archivos ni releases.
