@@ -45,12 +45,13 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   (firmware, migración, accesos directos, multijugador, actualizador, atajo "Exit Satronho NX" — el
   atajo personalizado viejo "Exit Eglantine" se pierde y vuelve al de fábrica), CLI
   `satronho-cli.exe` (`src/CMakeLists.txt` OUTPUT_NAME; antes `eden-cli.exe`), User-Agent
-  `Satronho-NX`, enlaces de "Acerca de" a Riddsc/satronho-nx con crédito a Lichii. Se quitó del
-  menú de la lista de juegos "Submit compatibility report…" (enviaba a lichii.zortos.me).
+  `Satronho-NX`, enlaces de "Acerca de" a Riddsc/satronho-nx con crédito a Lichii. Los informes
+  de compatibilidad siguen yendo al sitio de Lichii (lichii.zortos.me): el usuario quiere
+  compartirlos; ya se identifican como "Satronho NX, fork of Lichii build-N (commit)".
   Se mantienen a propósito: el texto de "Acerca de" que dice que se basa en Lichii, Eglantine y Eden
   (crédito/licencia GPL), los avisos de copyright, la carpeta de datos `AppData\Roaming\eden`
   (compartida con Lichii: cambiarla perdería configuración y cachés), "cuenta de Eden" en
-  multijugador (es el servicio de Eden), los nombres de otros emuladores en la migración, y el ID
+  multijugador (los servidores de Eden; al usuario le parece bien), los nombres de otros emuladores en la migración, y el ID
   de Discord (es la aplicación de Eden; para mostrar "Satronho NX" hace falta crear una propia en
   el portal de desarrolladores de Discord). Al integrar Lichii, estos textos pueden dar conflictos:
   conservar los de Satronho.
@@ -186,7 +187,10 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   el archivo del PC después de escribirlo.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
-- El usuario no quiere enviar pull requests a Lichii; los aportes se quedan en Satronho NX.
+- No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y
+  compartir informes de compatibilidad con ellos sí está bien (es un fork), siempre que quede
+  claro que viene de Satronho NX. La carpeta `AppData\Roaming\eden` se queda así a propósito
+  (trazabilidad de partidas y datos anteriores).
 - **Líneas negras en cuadrícula sobre el campo de Hyrule** (se ven de lejos y desaparecen al
   acercarse; issues abiertos de Lichii #603, #709, #675, todos en AMD): **ya corregido por Lichii** en
   `bf4c42e2` (#679, "#448 uneven BCn mips stay RGBA8 on AMD"), posterior a su build 117 y ya integrado
