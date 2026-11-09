@@ -44,11 +44,11 @@ const std::array<Guide, 5>& Guides() {
          Tr("Pitbull terrier café con blanco. Te explica los juegos, los complementos, los "
             "controles, los atajos y las carpetas."),
          QColor(0xff, 0xb2, 0x3e), 54},
-        {GuideId::Troya, "troya", QStringLiteral("Troya"), Tr("Gráficos e imagen"),
+        {GuideId::Troya, "troya", QStringLiteral("Troya"), Tr("Gráficos y texturas"),
          Tr("Pitbull malinois de cejitas amarillas y gafitas. Sabe de resolución, filtros, "
-            "antialiasing y de la niebla y la exposición de Ocarina."),
+            "antialiasing, texturas, el modo de la GPU y la niebla y la exposición de Ocarina."),
          QColor(0x9b, 0x8c, 0xff), 58},
-        {GuideId::Nono, "nono", QStringLiteral("Ñoño"), Tr("Configuraciones y rendimiento"),
+        {GuideId::Nono, "nono", QStringLiteral("Ñoño"), Tr("Configuración para tu equipo"),
          Tr("Labrabull blanco con negro, el más grande. Revisa tu equipo y te dice qué "
             "configuración le conviene."),
          QColor(0x4f, 0xd1, 0xc5), 64},

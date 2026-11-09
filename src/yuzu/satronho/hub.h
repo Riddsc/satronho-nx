@@ -37,12 +37,13 @@ public:
     enum class Page { Novedades, Sugeridas, Preguntas, Guias };
 
     Hub(const std::vector<VkDeviceInfo::Record>& records, bool emulation_running,
-        std::function<void()> save_config, Page page, QWidget* parent);
+        std::function<void()> save_config, Page page, const QString& topic, QWidget* parent);
     ~Hub() override;
 
-    /// Opens the window at `page`.
+    /// Opens the window at `page`. With a `topic` id, Preguntas opens on that topic's answer.
     static void Open(const std::vector<VkDeviceInfo::Record>& records, bool emulation_running,
-                     std::function<void()> save_config, Page page, QWidget* parent);
+                     std::function<void()> save_config, Page page, QWidget* parent,
+                     const QString& topic = {});
 
 private:
     QWidget* BuildNovedades();

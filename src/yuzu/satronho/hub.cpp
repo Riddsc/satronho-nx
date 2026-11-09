@@ -19,6 +19,7 @@
 #include <QUrl>
 #include <QVBoxLayout>
 
+#include "qt_common/config/uisettings.h"
 #include "qt_common/util/vk.h"
 #include "yuzu/satronho/hub.h"
 #include "yuzu/satronho/knowledge.h"
@@ -59,7 +60,7 @@ QString Tr(const char* text) {
 } // Anonymous namespace
 
 Hub::Hub(const std::vector<VkDeviceInfo::Record>& records, bool emulation_running_,
-         std::function<void()> save_config_, Page page, QWidget* parent)
+         std::function<void()> save_config_, Page page, const QString& topic, QWidget* parent)
     : QDialog(parent), save_config{std::move(save_config_)},
       emulation_running{emulation_running_}, hardware{DetectHardware(records)} {
     setObjectName(QStringLiteral("satronhoHub"));
@@ -81,13 +82,20 @@ Hub::Hub(const std::vector<VkDeviceInfo::Record>& records, bool emulation_runnin
     layout->addWidget(buttons);
 
     tabs->setCurrentIndex(static_cast<int>(page));
+    if (page == Page::Preguntas && !topic.isEmpty()) {
+        if (const Topic* found = FindTopic(topic)) {
+            SayUser(found->question);
+            ShowTopic(*found);
+        }
+    }
 }
 
 Hub::~Hub() = default;
 
 void Hub::Open(const std::vector<VkDeviceInfo::Record>& records, bool emulation_running,
-               std::function<void()> save_config, Page page, QWidget* parent) {
-    Hub hub(records, emulation_running, std::move(save_config), page, parent);
+               std::function<void()> save_config, Page page, QWidget* parent,
+               const QString& topic) {
+    Hub hub(records, emulation_running, std::move(save_config), page, topic, parent);
     hub.exec();
 }
 
@@ -95,7 +103,9 @@ void Hub::SetBanner(QVBoxLayout* layout, QWidget*& banner, GuideId guide, const 
     QWidget* replacement = MakeGuideBanner(guide, text, layout->parentWidget());
     if (banner != nullptr) {
         layout->replaceWidget(banner, replacement);
-        banner->deleteLater();
+        // Deleted now: a deferred delete would wait for the window's own event loop to end, and
+        // the replaced banner would stay on screen in a corner until then.
+        delete banner;
     } else {
         layout->insertWidget(0, replacement);
     }
@@ -382,6 +392,21 @@ void Hub::Greet() {
         Tr("¡Hola! Pregúntanos lo que quieras sobre las funciones del emulador, las "
            "configuraciones o las actualizaciones. Escríbelo con tus palabras o elige un tema de "
            "abajo."));
+    const auto link = [](const char* id) {
+        const Topic* topic = FindTopic(QLatin1String(id));
+        return topic == nullptr ? QString()
+                                : QStringLiteral("• <a href=\"tema:%1\" style=\"color:#4fd1c5\">"
+                                                 "%2</a><br>")
+                                      .arg(topic->id, topic->question.toHtmlEscaped());
+    };
+    const QString samy = link("juegos") + link("complementos");
+    if (!samy.isEmpty() && GuideEnabled(GuideId::Samy)) {
+        Say(GuideId::Samy, Tr("Si no sabes por dónde empezar, mira esto:<br>%1").arg(samy));
+    }
+    const QString troya = link("resolucion") + link("escalado");
+    if (!troya.isEmpty() && GuideEnabled(GuideId::Troya)) {
+        Say(GuideId::Troya, Tr("Y para que el juego se vea mejor:<br>%1").arg(troya));
+    }
 }
 
 void Hub::Ask(const QString& text) {
@@ -453,6 +478,19 @@ QWidget* Hub::BuildGuias() {
     all->setChecked(GuidesEnabled());
     guias_layout->addWidget(all);
 
+    auto* bubble = new QCheckBox(
+        Tr("Mostrar la burbuja de los guías en la esquina de la lista de juegos"), page);
+    bubble->setChecked(UISettings::values.satronho_bubble.GetValue());
+    bubble->setEnabled(GuidesEnabled());
+    bubble->setToolTip(Tr("Haz clic en la burbuja y te dan un consejo. Mientras juegas no se ve."));
+    guias_layout->addWidget(bubble);
+    connect(bubble, &QCheckBox::toggled, this, [this](bool checked) {
+        UISettings::values.satronho_bubble.SetValue(checked);
+        if (save_config) {
+            save_config();
+        }
+    });
+
     auto* grid = new QGridLayout;
     grid->setSpacing(10);
     std::vector<QCheckBox*> pet_boxes;
@@ -497,8 +535,9 @@ QWidget* Hub::BuildGuias() {
     guias_layout->addLayout(grid);
     guias_layout->addStretch(1);
 
-    connect(all, &QCheckBox::toggled, this, [this, pet_boxes](bool checked) {
+    connect(all, &QCheckBox::toggled, this, [this, pet_boxes, bubble](bool checked) {
         SetGuideEnabled(GuideId::MechaRidds, checked);
+        bubble->setEnabled(checked);
         for (QCheckBox* box : pet_boxes) {
             box->setEnabled(checked);
         }

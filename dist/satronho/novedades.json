@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-33",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Los guías te acompañan en la lista de juegos",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "La burbuja de los guías: abajo a la derecha de la lista de juegos están MechaRidds y sus mascotas. Haz clic y te dan un consejo sobre el emulador; con «Cuéntame más» lo lees completo y con «Otro consejo» pasas al siguiente. Mientras juegas no se ve, y se oculta con clic derecho o en «Satronho → Guías»."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Cuando estrenas una build, Juana te lo cuenta en la burbuja en lugar de abrirte una ventana encima."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "«Pregúntale a los guías» te propone por dónde empezar, y desde la burbuja cada consejo abre su respuesta completa."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "En «Configuraciones sugeridas» quedaba un pedazo de los guías encimado arriba a la izquierda. Ya no aparece."
+        }
+      ]
+    },
+    {
       "tag": "build-32",
       "fecha": "8 de noviembre de 2026",
       "titulo": "Llegan los guías: MechaRidds, Samy, Troya, Ñoño y Juana",
@@ -26,11 +49,11 @@
     {
       "tag": "build-30",
       "fecha": "8 de noviembre de 2026",
-      "titulo": "Ocarina ya no se cierra al cargar la partida",
+      "titulo": "Ocarina ya no se cierra al cargar la partida ni al entrar a Kakariko",
       "cambios": [
         {
           "tipo": "arreglo",
-          "texto": "Ocarina of Time a veces se cerraba al cargar la partida o al entrar a una zona, como la aldea Kakariko. Venía de un cambio de Lichii que ellos mismos ya corrigieron."
+          "texto": "Ocarina of Time a veces se cerraba al cargar la partida o al entrar a una zona, como la aldea Kakariko. Lo rastreamos con los registros y los volcados de memoria de nuestras pruebas hasta dar con el origen, e integramos y comprobamos la corrección."
         },
         {
           "tipo": "arreglo",
@@ -42,7 +65,7 @@
         },
         {
           "tipo": "mejora",
-          "texto": "Cuando el juego se pausa un momento, el registro anota qué tenía ocupado al emulador. Sirve para encontrar la causa de esas pausas."
+          "texto": "Nuestro registro de pausas ahora anota qué tenía ocupado al emulador mientras el juego se detenía. Con él encontramos la causa de las pausas de Ocarina: shaders que la tarjeta prepara la primera vez que los ve."
         }
       ]
     },
@@ -68,11 +91,11 @@
     {
       "tag": "build-25",
       "fecha": "8 de noviembre de 2026",
-      "titulo": "Al día con Lichii: menos pausas y mejor rendimiento",
+      "titulo": "Menos pausas y mejor rendimiento",
       "cambios": [
         {
           "tipo": "mejora",
-          "texto": "Trae 53 mejoras nuevas de Lichii: los hilos de la GPU se fijan a sus propios núcleos, la espera del hilo de la GPU en Windows es más fina y hay precarga de shaders antes de empezar."
+          "texto": "Integramos y probamos en Ocarina 53 mejoras del motor de Lichii: los hilos de la GPU se fijan a sus propios núcleos, la espera del hilo de la GPU en Windows es más fina y hay precarga de shaders antes de empezar."
         },
         {
           "tipo": "arreglo",
@@ -84,7 +107,7 @@
         },
         {
           "tipo": "nuevo",
-          "texto": "El registro de pausas mide cada envío a la tarjeta gráfica, para encontrar la causa de las que quedan."
+          "texto": "Nuestro registro de pausas ahora mide cada envío a la tarjeta gráfica, para encontrar la causa de las que quedan."
         }
       ]
     },
@@ -95,11 +118,11 @@
       "cambios": [
         {
           "tipo": "arreglo",
-          "texto": "Las líneas negras en cuadrícula sobre el campo de Hyrule en tarjetas AMD ya no aparecen."
+          "texto": "Las líneas negras en cuadrícula sobre el campo de Hyrule ya no aparecen en tarjetas AMD. Lo comprobamos en el mismo punto donde se veían."
         },
         {
           "tipo": "nuevo",
-          "texto": "Niebla y exposición de Ocarina of Time graduables en Gráficos. El 100 % es el juego tal cual."
+          "texto": "Ajustes propios de niebla y exposición para Ocarina of Time, graduables en Gráficos. El 100 % es el juego tal cual."
         },
         {
           "tipo": "nuevo",
@@ -107,7 +130,7 @@
         },
         {
           "tipo": "nuevo",
-          "texto": "Registro de pausas: cuando el juego se congela más de un cuarto de segundo, el registro anota qué estaba haciendo la tarjeta gráfica."
+          "texto": "Registro de pausas propio: cuando el juego se congela más de un cuarto de segundo, el registro anota qué estaba haciendo la tarjeta gráfica."
         }
       ]
     }

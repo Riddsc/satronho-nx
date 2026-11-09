@@ -136,6 +136,10 @@ namespace Ui {
 class MainWindow;
 }
 
+namespace Satronho {
+class GuideDock;
+}
+
 enum class EmulatedDirectoryTarget {
     NAND,
     SDMC,
@@ -518,6 +522,7 @@ private:
 
     GRenderWindow* render_window = nullptr;
     GameList* game_list = nullptr;
+    Satronho::GuideDock* guide_dock = nullptr;
     LoadingScreen* loading_screen = nullptr;
     QTimer shutdown_timer;
     QTimer emu_terminate_timer;

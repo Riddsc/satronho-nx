@@ -166,6 +166,7 @@ struct Values {
     Setting<bool> satronho_guide_troya{linkage, true, "satronho_guide_troya", Category::Ui};
     Setting<bool> satronho_guide_nono{linkage, true, "satronho_guide_nono", Category::Ui};
     Setting<bool> satronho_guide_juana{linkage, true, "satronho_guide_juana", Category::Ui};
+    Setting<bool> satronho_bubble{linkage, true, "satronho_bubble", Category::Ui};
     /// Build tag whose "what's new" list was last shown.
     Setting<std::string> satronho_seen_novedades{linkage, {}, "satronho_seen_novedades",
                                                  Category::Ui};

@@ -196,6 +196,12 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   salían de la caché (0 ms) y en la primera sesión de la build 30 se compilaron otra vez (2–5 s
   cada uno): tras una build que cambia la traducción de shaders, el driver no los reconoce. Por eso
   la primera sesión después de actualizar tiene pausas y texturas tardías; el precache las evita.
+  **Sesión de 67 min con la build 30 (2026-11-08):** solo 3 pausas (2369, 2243, 2330 ms), cada
+  una un shader de cómputo nuevo (5dbb633ac79d913f, fd6880439158691e, ade9ffd111cf30a1) que nunca
+  se había visto; los de las pausas anteriores (a2a69408…, 34c23e5e…) ya salieron de la caché del
+  driver en 0.6 y 0.2 ms. Sin cierres (el PANIC del final es del cierre forzado al salir). Idea para
+  quitar también esas: compilar primero sin optimizar (`VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT`,
+  ya usado en `pipeline_optimization.h`) y cambiar a la versión optimizada cuando termine.
 - **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
   como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
   muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,
@@ -216,9 +222,16 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Configuraciones sugeridas con botón automático y base de conocimiento local (código en
   `src/yuzu/satronho/`, datos en `dist/satronho/`). Sale en la build 32 (la 31 falló al compilar por una función sin usar: el CI usa -Werror=unused; revisar en local con esas mismas opciones). La base de conocimiento
   se probó con una réplica en Python del buscador (192 preguntas).
-  Pendiente que pidió Riddsc: los guías deben ir donde no interfieran con nada, quizá en la
-  esquina inferior derecha (por ahora salen dentro de la ventana Satronho y del aviso de
-  actualización). Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
+  **Build 33:** burbuja de los guías en la esquina inferior derecha de la lista de juegos
+  (`dock.cpp`, hija de `game_list`, así que se oculta sola mientras se juega; máscara para no
+  tapar clics; se apaga con clic derecho o en Guías, ajuste `satronho_bubble`). Da consejos de la
+  base de conocimiento y Juana anuncia ahí la build nueva (si la burbuja está apagada, se abre la
+  ventana de Novedades como antes). Arreglado el recuadro de guías encimado arriba a la izquierda
+  en Configuraciones sugeridas: `deleteLater` dentro de `exec()` no borraba el banner viejo hasta
+  cerrar la ventana; ahora se borra en el momento. Las novedades se redactan destacando nuestro
+  trabajo (integramos, probamos, rastreamos), sin atribuirnos arreglos ajenos.
+  Revisión visual local: arnés offscreen con Qt 6.8.3 de la rueda de PySide6 (trae `uic` y `rcc`,
+  no `moc`); con `uic` también se puede revisar `main_window.cpp`. Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
   integradas), NVIDIA (RTX 50/40/30/20, GTX 16/10, profesionales) e Intel (Arc A/B, Arc
   integrada, UHD/Iris Xe); el clasificador se probó con 31 nombres reales de Vulkan.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):

@@ -55,7 +55,7 @@
         "perro",
         "perrita"
       ],
-      "respuesta": "Somos cinco. Yo, MechaRidds, los acompaño en todo. Juana, la viejita sabia, se encarga de las novedades y las actualizaciones. Ñoño, el más grande, de las configuraciones y el rendimiento. Troya, la de las gafitas, de los gráficos y la imagen. Samy, de las funciones del emulador: complementos, juegos, controles y demás. Si apagas a alguno, yo respondo por él.",
+      "respuesta": "Somos cinco. Yo, MechaRidds, los acompaño en todo. Samy se encarga de las funciones del emulador: juegos, complementos, controles, atajos y demás. Troya, la de las gafitas, de los gráficos: la imagen, las texturas y el modo de la GPU. Ñoño, el más grande, revisa tu equipo y te dice qué configuración le conviene. Juana, la viejita sabia, te cuenta las novedades y te avisa de las actualizaciones. Nos encuentras en el menú «Satronho» y en la burbuja de la esquina de la lista de juegos. Si apagas a alguno, yo respondo por él.",
       "ver": [
         "apagar-guias",
         "preguntar"
@@ -103,7 +103,7 @@
         "encender",
         "guia"
       ],
-      "respuesta": "En «Satronho → Guías» hay un interruptor para todos y uno para cada mascota. Si apagas a todos, el emulador deja de mostrarnos: las novedades y los avisos de actualización salen en una ventana normal, y las preguntas se siguen respondiendo, pero sin personajes. Si apagas solo a una mascota, MechaRidds responde en su lugar.",
+      "respuesta": "En «Satronho → Guías» hay un interruptor para todos, uno para cada mascota y otro para la burbuja de la esquina de la lista de juegos. La burbuja también se oculta con clic derecho sobre ella. Si apagas a todos, el emulador deja de mostrarnos: las novedades y los avisos de actualización salen en una ventana normal, y las preguntas se siguen respondiendo, pero sin personajes. Si apagas solo a una mascota, MechaRidds responde en su lugar.",
       "ver": [
         "guias"
       ]
@@ -211,7 +211,9 @@
         "me salio un aviso de actualizacion",
         "bajo la ultima build",
         "bajar la ultima version",
-        "descargar la ultima build"
+        "descargar la ultima build",
+        "actualizar manualmente",
+        "descargar la actualizacion a mano"
       ],
       "claves": [
         "actualizar",
@@ -672,8 +674,8 @@
     },
     {
       "id": "gpu-modo",
-      "guia": "nono",
-      "tema": "Configuraciones",
+      "guia": "troya",
+      "tema": "Gráficos",
       "pregunta": "¿GPU en Fast o Accurate?",
       "frases": [
         "fast o accurate",
@@ -697,8 +699,8 @@
     },
     {
       "id": "dibujos-sin-pipeline",
-      "guia": "nono",
-      "tema": "Configuraciones",
+      "guia": "troya",
+      "tema": "Gráficos",
       "pregunta": "¿Qué es «Switch 2 draws with unbuilt pipelines» (Wait, Bounded, Skip)?",
       "frases": [
         "wait bounded skip",
@@ -790,8 +792,8 @@
     },
     {
       "id": "astc",
-      "guia": "nono",
-      "tema": "Configuraciones",
+      "guia": "troya",
+      "tema": "Gráficos",
       "pregunta": "¿Qué son ASTC y la recompresión de texturas?",
       "frases": [
         "que es astc",
@@ -819,8 +821,8 @@
     },
     {
       "id": "vram",
-      "guia": "nono",
-      "tema": "Configuraciones",
+      "guia": "troya",
+      "tema": "Gráficos",
       "pregunta": "¿Qué hace «VRAM Usage Mode»?",
       "frases": [
         "vram usage mode",
@@ -880,8 +882,8 @@
     },
     {
       "id": "fps",
-      "guia": "nono",
-      "tema": "Configuraciones",
+      "guia": "samy",
+      "tema": "Funciones",
       "pregunta": "¿Cómo veo los FPS y de qué dependen?",
       "frases": [
         "cuantos fps",
@@ -941,6 +943,42 @@
       "ver": [
         "complementos",
         "fps"
+      ]
+    },
+    {
+      "id": "burbuja",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué es la burbuja de la esquina?",
+      "frases": [
+        "que es la burbuja",
+        "burbuja de la esquina",
+        "los perritos de la esquina",
+        "las mascotas de abajo",
+        "como oculto la burbuja",
+        "quitar la burbuja",
+        "consejos de la esquina",
+        "la burbuja de los guias",
+        "que hacen los guias en la esquina",
+        "los perritos de abajo",
+        "abajo a la derecha",
+        "el robot de la esquina"
+      ],
+      "claves": [
+        "burbuja",
+        "esquina",
+        "consejo",
+        "consejos",
+        "ocultar",
+        "flotante",
+        "perrito",
+        "perritos"
+      ],
+      "respuesta": "En la esquina de abajo a la derecha de la lista de juegos estamos MechaRidds y una de las mascotas. Haz clic y te damos un consejo sobre el emulador; con «Cuéntame más» lo ves completo y con «Otro consejo» pasas al siguiente. Cuando sale una build nueva, Juana te cuenta ahí qué trae. Mientras juegas no se ve. Para ocultarla, haz clic derecho sobre ella o ve a «Satronho → Guías».",
+      "ver": [
+        "guias",
+        "apagar-guias",
+        "preguntar"
       ]
     },
     {

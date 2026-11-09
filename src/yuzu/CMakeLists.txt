@@ -229,6 +229,8 @@ add_executable(yuzu
 
     user_data_migration.h user_data_migration.cpp
 
+    satronho/dock.cpp
+    satronho/dock.h
     satronho/guides.cpp
     satronho/guides.h
     satronho/hub.cpp

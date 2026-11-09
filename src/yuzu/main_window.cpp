@@ -46,7 +46,9 @@
 #include "yuzu/game/game_list.h"
 #include "yuzu/nup_dialogs.h"
 #include "yuzu/shader_warm_dialog.h"
+#include "yuzu/satronho/dock.h"
 #include "yuzu/satronho/hub.h"
+#include "yuzu/satronho/novedades.h"
 #include "video_core/shader_warm/shader_warm_builder.h"
 
 #include "applets/qt_amiibo_settings.h"
@@ -443,15 +445,23 @@ MainWindow::MainWindow(bool has_broken_vulkan)
     ConnectMenuEvents();
     ConnectWidgetEvents();
 
-    // Satronho NX: the guides' menu, before Help.
+    // Satronho NX: the guides' menu, before Help, and their bubble on the game list.
     {
+        const auto open_hub = [this](Satronho::Hub::Page page, const QString& topic) {
+            Satronho::Hub::Open(vk_device_records, emulation_running, [this] { OnSaveConfig(); },
+                                page, this, topic);
+            if (guide_dock != nullptr) {
+                guide_dock->Refresh();
+            }
+        };
+        guide_dock = new Satronho::GuideDock(game_list, open_hub, [this] { OnSaveConfig(); });
+
         auto* satronho_menu = new QMenu(tr("&Satronho"), ui->menubar);
-        const auto add = [this, satronho_menu](const QString& text, Satronho::Hub::Page page) {
+        const auto add = [this, satronho_menu, open_hub](const QString& text,
+                                                         Satronho::Hub::Page page) {
             QAction* action = satronho_menu->addAction(text);
-            connect(action, &QAction::triggered, this, [this, page] {
-                Satronho::Hub::Open(vk_device_records, emulation_running,
-                                    [this] { OnSaveConfig(); }, page, this);
-            });
+            connect(action, &QAction::triggered, this,
+                    [open_hub, page] { open_hub(page, QString()); });
         };
         add(tr("Novedades"), Satronho::Hub::Page::Novedades);
         add(tr("Configuraciones sugeridas"), Satronho::Hub::Page::Sugeridas);
@@ -528,11 +538,21 @@ MainWindow::MainWindow(bool has_broken_vulkan)
         VkDeviceInfo::PopulateRecords(vk_device_records, this->window()->windowHandle());
     }
 
-    // Satronho NX: the first start of a newly installed build shows what it brings.
+    // Satronho NX: the first start of a newly installed build shows what it brings, through the
+    // guides' bubble when it is on.
     QTimer::singleShot(800, this, [this] {
-        if (!emulation_running) {
-            Satronho::ShowNovedadesIfNew(vk_device_records, [this] { OnSaveConfig(); }, this);
+        if (emulation_running) {
+            return;
         }
+        if (guide_dock != nullptr && guide_dock->Available() && game_list->isVisible()) {
+            if (Satronho::HasUnseenNotes()) {
+                Satronho::MarkNotesSeen();
+                OnSaveConfig();
+                guide_dock->AnnounceNovedades(Satronho::CurrentBuildTag());
+            }
+            return;
+        }
+        Satronho::ShowNovedadesIfNew(vk_device_records, [this] { OnSaveConfig(); }, this);
     });
 
     // On macOS, SDL video would pump AppKit events alongside Qt and disrupt native menus.
