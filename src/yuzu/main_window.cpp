@@ -46,6 +46,7 @@
 #include "yuzu/game/game_list.h"
 #include "yuzu/nup_dialogs.h"
 #include "yuzu/shader_warm_dialog.h"
+#include "yuzu/satronho/hub.h"
 #include "video_core/shader_warm/shader_warm_builder.h"
 
 #include "applets/qt_amiibo_settings.h"
@@ -74,6 +75,8 @@
 #endif
 
 #include <QActionGroup>
+#include <QMenu>
+#include <QTimer>
 #include <QCheckBox>
 #include <QClipboard>
 #include <QDesktopServices>
@@ -440,6 +443,24 @@ MainWindow::MainWindow(bool has_broken_vulkan)
     ConnectMenuEvents();
     ConnectWidgetEvents();
 
+    // Satronho NX: the guides' menu, before Help.
+    {
+        auto* satronho_menu = new QMenu(tr("&Satronho"), ui->menubar);
+        const auto add = [this, satronho_menu](const QString& text, Satronho::Hub::Page page) {
+            QAction* action = satronho_menu->addAction(text);
+            connect(action, &QAction::triggered, this, [this, page] {
+                Satronho::Hub::Open(vk_device_records, emulation_running,
+                                    [this] { OnSaveConfig(); }, page, this);
+            });
+        };
+        add(tr("Novedades"), Satronho::Hub::Page::Novedades);
+        add(tr("Configuraciones sugeridas"), Satronho::Hub::Page::Sugeridas);
+        add(tr("Pregúntale a los guías"), Satronho::Hub::Page::Preguntas);
+        satronho_menu->addSeparator();
+        add(tr("Guías"), Satronho::Hub::Page::Guias);
+        ui->menubar->insertMenu(ui->menu_Help->menuAction(), satronho_menu);
+    }
+
     QtCommon::SetupHID();
     controller_dialog->refreshConfiguration();
 
@@ -506,6 +527,13 @@ MainWindow::MainWindow(bool has_broken_vulkan)
     } else {
         VkDeviceInfo::PopulateRecords(vk_device_records, this->window()->windowHandle());
     }
+
+    // Satronho NX: the first start of a newly installed build shows what it brings.
+    QTimer::singleShot(800, this, [this] {
+        if (!emulation_running) {
+            Satronho::ShowNovedadesIfNew(vk_device_records, [this] { OnSaveConfig(); }, this);
+        }
+    });
 
     // On macOS, SDL video would pump AppKit events alongside Qt and disrupt native menus.
 #if !defined(_WIN32) && !defined(__APPLE__)

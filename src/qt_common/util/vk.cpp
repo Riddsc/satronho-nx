@@ -4,6 +4,7 @@
 // SPDX-FileCopyrightText: 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -23,8 +24,10 @@ class QWindow;
 
 namespace VkDeviceInfo {
 Record::Record(std::string_view name_, const std::vector<VkPresentModeKHR>& vsync_modes_,
-               bool has_broken_compute_)
-    : name{name_}, vsync_support{vsync_modes_}, has_broken_compute{has_broken_compute_} {}
+               bool has_broken_compute_, std::string_view device_name_, u32 vendor_id_,
+               u64 device_local_bytes_)
+    : name{name_}, vsync_support{vsync_modes_}, has_broken_compute{has_broken_compute_},
+      device_name{device_name_}, vendor_id{vendor_id_}, device_local_bytes{device_local_bytes_} {}
 
 Record::~Record() = default;
 
@@ -70,9 +73,22 @@ void PopulateRecords(std::vector<Record>& records, QWindow* window) try {
         if (driver_string.empty())
             driver_string = "Unknown";
 
+        const std::string device_name = name;
         name = fmt::format("{} ({})", name, driver_string);
 
-        records.push_back(VkDeviceInfo::Record(name, present_modes, has_broken_compute));
+        // Satronho NX: the largest device-local heap is the card's video memory.
+        u64 device_local_bytes = 0;
+        const VkPhysicalDeviceMemoryProperties2 memory = physical_device.GetMemoryProperties();
+        for (u32 i = 0; i < memory.memoryProperties.memoryHeapCount; ++i) {
+            const VkMemoryHeap& heap = memory.memoryProperties.memoryHeaps[i];
+            if ((heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0) {
+                device_local_bytes = (std::max)(device_local_bytes, u64{heap.size});
+            }
+        }
+
+        records.push_back(VkDeviceInfo::Record(name, present_modes, has_broken_compute,
+                                               device_name, properties.properties.vendorID,
+                                               device_local_bytes));
     }
 } catch (const Vulkan::vk::Exception& exception) {
     LOG_ERROR(Frontend, "Failed to enumerate devices with error: {}", exception.what());

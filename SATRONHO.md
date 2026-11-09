@@ -9,7 +9,7 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`281477ea`** (2026-11-08, #918; incluye #910/#921, cierre al cargar partida).
+- Último commit de Lichii integrado: **`cbb512ee`** (2026-11-08, #932; incluye #910/#921/#918, cierre al cargar partida).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
@@ -188,8 +188,14 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Encaja con "la primera vez que peleo con un enemigo" y con que la 25 no pausara en una pelea ya
   vista (el driver ya tenía ese pipeline en su caché). Confirmar con
   `EDEN_NX2_PIPELINE_BUILD_TRACE=<archivo>` (líneas END compute con ms≈1400 a la hora de la
-  pausa). Arreglo ya hecho por Lichii (#781, #812): clic derecho en el juego → "Prepare shaders
-  (warm-up)"; al arrancar compila los pipelines de cómputo del juego en segundo plano.
+  pausa). Arreglo ya hecho por Lichii (#781, #812): clic derecho en el juego → "Build Shader
+  Precache" y "Precache shaders before game start" (Graphics → Advanced) en Ask o Always.
+  **Confirmado en la build 30:** las dos pausas de la sesión (2555 y 2021 ms) coincidieron al
+  milisegundo con `Compute pipeline a2a69408ebf4ba53 / 34c23e5edd42e3c5 kept the Vulkan worker
+  waiting …`. El rastro de compilaciones mostró ~125 shaders de cómputo que en sesiones anteriores
+  salían de la caché (0 ms) y en la primera sesión de la build 30 se compilaron otra vez (2–5 s
+  cada uno): tras una build que cambia la traducción de shaders, el driver no los reconoce. Por eso
+  la primera sesión después de actualizar tiene pausas y texturas tardías; el precache las evita.
 - **Cementerio de Kakariko (build-23, video de un amigo, de noche con lluvia)**: paredes y lápidas
   como bloques oscuros con rayas verticales, sobre todo cerca de la cámara; en otra zona, paredes
   muy verdes. Sin diagnosticar. Relacionados en Lichii: #760 (luz del cementerio), #441 (AMD,
@@ -206,10 +212,15 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   #918 (Log2Ceil(0)). La build 29 se canceló; sale en la build 30. También se cerraba así en la PC
   de Riddsc al entrar a Kakariko (dos veces con la build 28). Lección: leer volcados con el paquete Python
   `minidump` y buscar en la memoria cruda las últimas líneas del log (`[ t] Clase <Critical> …`).
-- **Trabajo en curso (no publicado):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
-  Configuraciones sugeridas con botón automático y base de conocimiento local. Está en la rama
-  `satronho-guias` (código en `src/yuzu/satronho/`, datos en `dist/satronho/`); se une a `main`
-  para la build 31. La base de conocimiento se probó con una réplica en Python del buscador.
+- **Guías (build 31):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
+  Configuraciones sugeridas con botón automático y base de conocimiento local (código en
+  `src/yuzu/satronho/`, datos en `dist/satronho/`). Sale en la build 31. La base de conocimiento
+  se probó con una réplica en Python del buscador (192 preguntas).
+  Pendiente que pidió Riddsc: los guías deben ir donde no interfieran con nada, quizá en la
+  esquina inferior derecha (por ahora salen dentro de la ventana Satronho y del aviso de
+  actualización). Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
+  integradas), NVIDIA (RTX 50/40/30/20, GTX 16/10, profesionales) e Intel (Arc A/B, Arc
+  integrada, UHD/Iris Xe); el clasificador se probó con 31 nombres reales de Vulkan.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y

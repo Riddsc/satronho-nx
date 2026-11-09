@@ -1,0 +1,115 @@
+{
+  "builds": [
+    {
+      "tag": "build-31",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Llegan los guías: MechaRidds, Samy, Troya, Ñoño y Juana",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Guías: MechaRidds y sus mascotas, Samy, Troya, Ñoño y Juana, te acompañan en el menú «Satronho». Cada uno se encarga de un tema y puedes preguntarles por las funciones, las configuraciones y las actualizaciones del emulador. Se pueden apagar todos o uno por uno."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Novedades: esta lista de lo nuevo, las mejoras y los arreglos de cada versión. Se abre sola la primera vez que estrenas una build y siempre está en «Satronho → Novedades»."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Configuraciones sugeridas: Ñoño revisa tu tarjeta gráfica, tu procesador y tu RAM, y te dice qué conviene para tu equipo. Con el botón «Aplícalo por mí» se configura todo solo. También hay una guía por cada generación de tarjetas."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El aviso de que hay una build nueva ahora lo da Juana, y trae la lista de novedades de esa versión."
+        }
+      ]
+    },
+    {
+      "tag": "build-30",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Ocarina ya no se cierra al cargar la partida",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Ocarina of Time a veces se cerraba al cargar la partida o al entrar a una zona, como la aldea Kakariko. Venía de un cambio de Lichii que ellos mismos ya corrigieron."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "En tarjetas AMD de 8 a 12 GB, el emulador ya no se cierra cuando se llena la memoria de video."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Las cinemáticas en video eligen mejor su decodificador y usan menos hilos del procesador."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Cuando el juego se pausa un momento, el registro anota qué tenía ocupado al emulador. Sirve para encontrar la causa de esas pausas."
+        }
+      ]
+    },
+    {
+      "tag": "build-28",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Todo a nombre de Satronho NX",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "El actualizador y el programa de línea de comandos ahora son nuestros: «satronho-updater.exe» y «satronho-cli.exe»."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Los mensajes del emulador, el acceso directo al escritorio y la ventana «Acerca de» dicen Satronho NX. «Acerca de» lleva a nuestro repositorio y da el crédito a Lichii, Eglantine y Eden."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Los informes de compatibilidad que envías a Lichii dicen que vienen de Satronho NX y de qué versión."
+        }
+      ]
+    },
+    {
+      "tag": "build-25",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Al día con Lichii: menos pausas y mejor rendimiento",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "Trae 53 mejoras nuevas de Lichii: los hilos de la GPU se fijan a sus propios núcleos, la espera del hilo de la GPU en Windows es más fina y hay precarga de shaders antes de empezar."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "En nuestras pruebas, las pausas de casi un segundo y medio al pelear con un enemigo por primera vez salieron mucho menos."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "La línea roja punteada de la tumba de la familia real ya no aparece en tarjetas AMD."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "El registro de pausas mide cada envío a la tarjeta gráfica, para encontrar la causa de las que quedan."
+        }
+      ]
+    },
+    {
+      "tag": "build-23",
+      "fecha": "8 de noviembre de 2026",
+      "titulo": "Las primeras builds de Satronho NX (21 a 23)",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Las líneas negras en cuadrícula sobre el campo de Hyrule en tarjetas AMD ya no aparecen."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Niebla y exposición de Ocarina of Time graduables en Gráficos. El 100 % es el juego tal cual."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Actualizador propio: Satronho NX avisa cuando hay una build nueva y se actualiza solo."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Registro de pausas: cuando el juego se congela más de un cuarto de segundo, el registro anota qué estaba haciendo la tarjeta gráfica."
+        }
+      ]
+    }
+  ]
+}

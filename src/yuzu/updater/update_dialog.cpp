@@ -32,6 +32,8 @@
 
 #include <QDesktopServices>
 
+#include "yuzu/satronho/guides.h"
+
 #undef GetSaveFileName
 
 UpdateDialog::UpdateDialog(const Common::Net::Release& release, QWidget* parent)
@@ -49,6 +51,14 @@ UpdateDialog::UpdateDialog(const Common::Net::Release& release, QWidget* parent)
     }
 
     ui->body->setMarkdown(QString::fromStdString(text));
+
+    // Satronho NX: Juana announces new builds (a plain line when the guides are off).
+    ui->guideBanner->addWidget(Satronho::MakeGuideBanner(
+        Satronho::GuideId::Juana,
+        tr("¡Salió la %1! Abajo tienes lo que trae. Tus partidas y tu configuración se quedan "
+           "donde están.")
+            .arg(QString::fromStdString(release.title).toHtmlEscaped()),
+        this));
 
     ui->buttonBox->button(QDialogButtonBox::No)->setText(tr("Remind Me Later"));
     auto* skip = ui->buttonBox->addButton(tr("Skip This Version"), QDialogButtonBox::ActionRole);
