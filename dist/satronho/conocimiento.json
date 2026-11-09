@@ -725,7 +725,7 @@
         "congelado",
         "congelada"
       ],
-      "respuesta": "Decide qué hace el emulador cuando el juego quiere dibujar algo cuyo shader todavía se está preparando. Wait espera a que esté listo: lo dibuja todo bien, pero la primera vez puede congelarse un momento. Bounded espera hasta unos milisegundos por cuadro y después se lo salta. Skip se lo salta siempre, y eso puede dejar efectos faltantes o colores raros mientras se preparan los shaders. Para verse como en la consola, lo recomendado es Wait junto con el precache de shaders. Está en «Graphics → Advanced».",
+      "respuesta": "Decide qué hace el emulador cuando el juego quiere dibujar algo cuyo shader todavía se está preparando. Bounded espera unos milisegundos por cuadro y, si el shader tarda más, sigue sin congelar el juego: es lo recomendado. Wait espera siempre a que esté listo, y en zonas nuevas el juego se congela a cada rato. Skip se lo salta siempre, y eso puede dejar efectos faltantes o colores raros mientras se preparan los shaders. El precache de shaders ayuda en cualquiera de los tres. Está en «Graphics → Advanced».",
       "ver": [
         "shaders-cache",
         "precache",
@@ -843,7 +843,7 @@
         "agresivo",
         "conservador"
       ],
-      "respuesta": "Decide cuánta memoria de la tarjeta gráfica deja usar el emulador antes de liberar texturas viejas. Conservative deja margen y es lo mejor en tarjetas de 8 o 12 GB. Aggressive aprovecha más memoria y conviene en tarjetas de 16 GB o más. Está en «Graphics → Advanced».",
+      "respuesta": "Decide cuánta memoria de la tarjeta gráfica deja usar el emulador antes de liberar texturas viejas. Conservative deja margen y es lo recomendado en tarjetas de hasta 16 GB. Aggressive aprovecha más memoria y solo conviene en tarjetas de 20 GB o más. Está en «Graphics → Advanced».",
       "ver": [
         "astc",
         "generaciones"

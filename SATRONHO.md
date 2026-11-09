@@ -231,7 +231,15 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   cerrar la ventana; ahora se borra en el momento. Las novedades se redactan destacando nuestro
   trabajo (integramos, probamos, rastreamos), sin atribuirnos arreglos ajenos.
   Revisión visual local: arnés offscreen con Qt 6.8.3 de la rueda de PySide6 (trae `uic` y `rcc`,
-  no `moc`); con `uic` también se puede revisar `main_window.cpp`. Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
+  no `moc`); con `uic` también se puede revisar `main_window.cpp`.
+  **Error de la build 32-33, corregido en la 34:** Configuraciones sugeridas recomendaba Wait y
+  VRAM Aggressive (≥15 GiB). Sesión de Riddsc con la 33 tras «Aplícalo por mí» (y en stream): 100
+  esperas lentas (total 103 s, máx. 14.5 s, 26 de más de 1 s) contra 3 con la 30 en Bounded; el
+  Vulkan worker se quedaba ejecutando un trozo de comandos 1–3 s esperando pipelines gráficos
+  nuevos (Wait). Se vuelve a Bounded (también por migración de ajustes v4) y Conservative hasta
+  16 GB. ASTC no cambia nada aquí: bajo 20 GB Satronho usa BC3 igual (`UseBc3ForSwitch2OnSmallCards`).
+  Regla: no recomendar un ajuste que contradiga lo que ya se eligió y probó antes (v3 = Bounded).
+  Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
   integradas), NVIDIA (RTX 50/40/30/20, GTX 16/10, profesionales) e Intel (Arc A/B, Arc
   integrada, UHD/Iris Xe); el clasificador se probó con 31 nombres reales de Vulkan.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):

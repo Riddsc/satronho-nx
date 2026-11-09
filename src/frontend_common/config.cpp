@@ -158,7 +158,7 @@ void Config::SetUpIni() {
     // ("Bounded"). Lichii's "Wait" froze Ocarina for 2.5 s in 3.5 minutes on new content; the
     // old EDEN_NX2_ASYNC_DISCARD=1 switch skipped them without waiting at all.
     if (global) {
-        constexpr s64 satronho_settings_version = 3;
+        constexpr s64 satronho_settings_version = 4;
         BeginGroup("SatronhoNX");
         const s64 applied = ReadIntegerSetting("settings_version");
         EndGroup();
@@ -176,7 +176,9 @@ void Config::SetUpIni() {
                 apply(Settings::values.async_presentation, ToString(true));
                 apply(Settings::values.use_asynchronous_shaders, ToString(true));
             }
-            if (applied < 3) {
+            // v4: the build 32-33 suggested settings set Wait, which stalls on every new
+            // pipeline; back to Bounded.
+            if (applied < 4) {
                 apply(Settings::values.native_async_draws,
                       ToString(u32(Settings::NativeAsyncDraws::Bounded)));
             }

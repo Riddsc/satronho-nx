@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-34",
+      "fecha": "9 de noviembre de 2026",
+      "titulo": "Menos tirones: vuelve Bounded",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "«Configuraciones sugeridas» ponía «Switch 2 draws with unbuilt pipelines» en Wait, y en zonas nuevas el juego se congelaba a cada rato mientras preparaba shaders. Lo detectamos con nuestro registro de pausas: ahora se recomienda Bounded y esta build lo deja así sola, aunque hayas usado «Aplícalo por mí»."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "La memoria de video se sugiere en Conservative en tarjetas de hasta 16 GB; Aggressive queda para las de 20 GB o más."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "La guía por generaciones y las respuestas de los guías explican mejor qué hace cada modo y cuál conviene."
+        }
+      ]
+    },
+    {
       "tag": "build-33",
       "fecha": "8 de noviembre de 2026",
       "titulo": "Los guías te acompañan en la lista de juegos",

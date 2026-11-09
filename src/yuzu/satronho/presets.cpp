@@ -288,16 +288,18 @@ Suggestion Suggest(const Hardware& hardware) {
               QStringLiteral("Anti-Aliasing Method"), Tr("Graphics"),
               AaText(v.anti_aliasing.GetValue(true)), QStringLiteral("SMAA"),
               Tr("El suavizado de bordes de mejor calidad."));
-    AddChange(suggestion, v.native_async_draws, Settings::NativeAsyncDraws::Wait,
+    AddChange(suggestion, v.native_async_draws, Settings::NativeAsyncDraws::Bounded,
               QStringLiteral("Switch 2 draws with unbuilt pipelines"), Tr("Graphics → Advanced"),
-              DrawsText(v.native_async_draws.GetValue(true)), QStringLiteral("Wait"),
-              Tr("Lo dibuja todo, como en la consola. Bounded y Skip saltan dibujos mientras se "
-                 "preparan los shaders, y eso puede dejar efectos faltantes o colores raros."));
+              DrawsText(v.native_async_draws.GetValue(true)), QStringLiteral("Bounded"),
+              Tr("Espera unos milisegundos por cuadro a que cada shader nuevo esté listo y, si "
+                 "tarda más, sigue sin congelar el juego. Wait congela el juego mientras se "
+                 "prepara cada shader nuevo, y Skip puede dejar efectos faltantes o colores "
+                 "raros."));
     AddChange(suggestion, v.precache_shaders, Settings::PrecacheShaders::Ask,
               QStringLiteral("Precache shaders before game start"), Tr("Graphics → Advanced"),
               PrecacheText(v.precache_shaders.GetValue(true)), QStringLiteral("Ask"),
-              Tr("Te ofrece preparar los shaders en la pantalla de carga para que no haya "
-                 "tirones la primera vez. Va muy bien con Wait."));
+              Tr("Te ofrece preparar los shaders en la pantalla de carga, para que queden menos "
+                 "por preparar mientras juegas."));
     AddChange(suggestion, v.use_asynchronous_shaders, true,
               QStringLiteral("Enable asynchronous shader compilation"), Tr("Graphics → Extra"),
               OnOff(v.use_asynchronous_shaders.GetValue(true)), OnOff(true),
@@ -321,11 +323,11 @@ Suggestion Suggest(const Hardware& hardware) {
                         : Tr("Ocupa mucha menos memoria de video. Con menos de unos 20 GB, "
                              "Satronho la usa igual aunque elijas Uncompressed."));
     const auto vram_mode =
-        big_vram ? Settings::VramUsageMode::Aggressive : Settings::VramUsageMode::Conservative;
+        huge_vram ? Settings::VramUsageMode::Aggressive : Settings::VramUsageMode::Conservative;
     AddChange(suggestion, v.vram_usage_mode, vram_mode, QStringLiteral("VRAM Usage Mode"),
               Tr("Graphics → Advanced"), VramText(v.vram_usage_mode.GetValue(true)),
               VramText(vram_mode),
-              big_vram ? Tr("Tu tarjeta tiene memoria de sobra: Aggressive la aprovecha.")
+              huge_vram ? Tr("Tu tarjeta tiene memoria de sobra: Aggressive la aprovecha.")
                        : Tr("Deja margen para que la memoria de video no se llene."));
 
     // The paragraph and notes.
@@ -410,11 +412,13 @@ QString GenerationGuideHtml() {
     static const Row rows[] = {
         {"AMD Radeon RX 9000 (RDNA 4)",
          "1x con AMD FSR o ScaleForce y SMAA; puede subir a 1.5x o 2x (en una RX 9070 XT, 2x "
-         "costó cerca de un 20 % de FPS). Memoria de video en Aggressive. Probada a fondo."},
+         "costó cerca de un 20 % de FPS). Memoria de video en Conservative y Bounded. Probada a "
+         "fondo."},
         {"AMD Radeon RX 7000 (RDNA 3)",
-         "Como la RX 9000: 1x con FSR y SMAA. Con 16 GB o más, Aggressive y hasta 1.5x."},
+         "Como la RX 9000: 1x con FSR y SMAA, Conservative y Bounded. Con 16 GB o más, hasta "
+         "1.5x."},
         {"AMD Radeon RX 6000 (RDNA 2)",
-         "1x, texturas en BC3, memoria en Conservative (12 GB o menos), Wait y precache de "
+         "1x, texturas en BC3, memoria en Conservative, Bounded y precache de "
          "shaders. Evita Skip: deja colores raros mientras se preparan los shaders. Probada en una "
          "RX 6700 XT."},
         {"AMD RX 5000, Vega, Polaris",
@@ -423,14 +427,14 @@ QString GenerationGuideHtml() {
          "1x con FSR y SMAA; con 16 GB puede subir a 1.5x. Opcional: DLSS de NVIDIA en lugar del "
          "escalado del juego (experimental)."},
         {"NVIDIA GeForce RTX 30 y 20",
-         "1x, BC3 y memoria en Conservative en las de 8 a 12 GB. Wait y precache de shaders."},
+         "1x, BC3 y memoria en Conservative en las de 8 a 12 GB. Bounded y precache de shaders."},
         {"NVIDIA GTX 16, GTX 10 o anteriores",
          "La GTX 16 es lo mínimo razonable; la GTX 10 puede no funcionar. 1x, BC3, Conservative."},
         {"NVIDIA RTX profesional / Quadro",
          "Se configuran como la GeForce de su misma generación, según su memoria de video."},
         {"Intel Arc A y B (dedicadas)",
          "Sin pruebas propias todavía. Empieza con la configuración general: 1x, FSR, SMAA, BC3, "
-         "Wait y memoria en Conservative; con 16 GB, Aggressive."},
+         "Bounded y memoria en Conservative."},
         {"Gráficos integrados de AMD (Radeon 680M, 780M, 890M)",
          "Comparten la RAM del PC. Lo más liviano: 1x, BC3, Conservative, y 32 GB de RAM en doble "
          "canal. Espera pocos FPS en zonas grandes."},
