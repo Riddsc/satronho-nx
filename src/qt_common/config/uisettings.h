@@ -160,6 +160,16 @@ struct Values {
     // Discord RPC
     Setting<bool> enable_discord_presence{linkage, false, "enable_discord_presence", Category::Ui};
 
+    // Satronho NX: the guides (MechaRidds and his pets) and the "what's new" list.
+    Setting<bool> satronho_guides{linkage, true, "satronho_guides", Category::Ui};
+    Setting<bool> satronho_guide_samy{linkage, true, "satronho_guide_samy", Category::Ui};
+    Setting<bool> satronho_guide_troya{linkage, true, "satronho_guide_troya", Category::Ui};
+    Setting<bool> satronho_guide_nono{linkage, true, "satronho_guide_nono", Category::Ui};
+    Setting<bool> satronho_guide_juana{linkage, true, "satronho_guide_juana", Category::Ui};
+    /// Build tag whose "what's new" list was last shown.
+    Setting<std::string> satronho_seen_novedades{linkage, {}, "satronho_seen_novedades",
+                                                 Category::Ui};
+
     // logging
     Setting<bool> show_console{linkage, false, "showConsole", Category::Ui};
 

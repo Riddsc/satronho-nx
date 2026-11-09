@@ -229,6 +229,17 @@ add_executable(yuzu
 
     user_data_migration.h user_data_migration.cpp
 
+    satronho/guides.cpp
+    satronho/guides.h
+    satronho/hub.cpp
+    satronho/hub.h
+    satronho/knowledge.cpp
+    satronho/knowledge.h
+    satronho/novedades.cpp
+    satronho/novedades.h
+    satronho/presets.cpp
+    satronho/presets.h
+
     yuzu.qrc
     yuzu.rc
     migration_dialog.h migration_dialog.cpp

@@ -7,4 +7,13 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <qresource prefix="/img">
         <file alias="lichii.ico">../../dist/lichii.ico</file>
     </qresource>
+    <qresource prefix="/satronho">
+        <file alias="novedades.json">../../dist/satronho/novedades.json</file>
+        <file alias="conocimiento.json">../../dist/satronho/conocimiento.json</file>
+        <file alias="guias/mecharidds.png">../../dist/satronho/guias/mecharidds.png</file>
+        <file alias="guias/samy.png">../../dist/satronho/guias/samy.png</file>
+        <file alias="guias/troya.png">../../dist/satronho/guias/troya.png</file>
+        <file alias="guias/nono.png">../../dist/satronho/guias/nono.png</file>
+        <file alias="guias/juana.png">../../dist/satronho/guias/juana.png</file>
+    </qresource>
 </RCC>

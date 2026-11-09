@@ -1,0 +1,1275 @@
+{
+  "entradas": [
+    {
+      "id": "que-es",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "¿Qué es Satronho NX?",
+      "frases": [
+        "que es satronho",
+        "que es satronho nx",
+        "quien hizo satronho",
+        "de donde sale satronho",
+        "quien te creo",
+        "quien creo satronho",
+        "quien lo hizo",
+        "quien hizo el emulador"
+      ],
+      "claves": [
+        "que",
+        "fork",
+        "lichii",
+        "proyecto",
+        "satronho",
+        "switch"
+      ],
+      "respuesta": "Satronho NX es un emulador de Nintendo Switch 2 para PC. Es un fork de Lichii, que a su vez viene de Eglantine, Eden y yuzu. Recibimos las mejoras de Lichii y les sumamos lo nuestro: los guías, las novedades, las configuraciones sugeridas, los ajustes de niebla y exposición de Ocarina of Time y un registro que ayuda a encontrar las pausas. Lo hace Riddsc, con pruebas en su PC y en la de amigos.",
+      "ver": [
+        "guias",
+        "lichii",
+        "datos"
+      ]
+    },
+    {
+      "id": "guias",
+      "guia": "mecharidds",
+      "tema": "Los guías",
+      "pregunta": "¿Quiénes son los guías?",
+      "frases": [
+        "quienes son los guias",
+        "quien es mecharidds",
+        "quien es samy",
+        "quien es troya",
+        "quien es nono",
+        "quien es juana",
+        "que hace cada guia"
+      ],
+      "claves": [
+        "guia",
+        "mecharidds",
+        "samy",
+        "troya",
+        "nono",
+        "juana",
+        "mascota",
+        "perro",
+        "perrita"
+      ],
+      "respuesta": "Somos cinco. Yo, MechaRidds, los acompaño en todo. Juana, la viejita sabia, se encarga de las novedades y las actualizaciones. Ñoño, el más grande, de las configuraciones y el rendimiento. Troya, la de las gafitas, de los gráficos y la imagen. Samy, de las funciones del emulador: complementos, juegos, controles y demás. Si apagas a alguno, yo respondo por él.",
+      "ver": [
+        "apagar-guias",
+        "preguntar"
+      ]
+    },
+    {
+      "id": "apagar-guias",
+      "guia": "mecharidds",
+      "tema": "Los guías",
+      "pregunta": "¿Cómo apago o prendo a los guías?",
+      "frases": [
+        "apagar guias",
+        "desactivar guias",
+        "quitar guias",
+        "prender guias",
+        "activar guias",
+        "no quiero guias",
+        "ocultar guias",
+        "desactivar a samy",
+        "desactivar a troya",
+        "desactivar a nono",
+        "desactivar a juana",
+        "desactivar a mecharidds",
+        "apagar a samy",
+        "apagar a troya",
+        "apagar a nono",
+        "apagar a juana",
+        "apagar a mecharidds",
+        "quitar a samy",
+        "quitar a troya",
+        "quitar a nono",
+        "quitar a juana",
+        "quitar a mecharidds",
+        "apagar a las mascotas",
+        "apagar las mascotas",
+        "apagar a todos"
+      ],
+      "claves": [
+        "apagar",
+        "desactivar",
+        "quitar",
+        "ocultar",
+        "prender",
+        "activar",
+        "encender",
+        "guia"
+      ],
+      "respuesta": "En «Satronho → Guías» hay un interruptor para todos y uno para cada mascota. Si apagas a todos, el emulador deja de mostrarnos: las novedades y los avisos de actualización salen en una ventana normal, y las preguntas se siguen respondiendo, pero sin personajes. Si apagas solo a una mascota, MechaRidds responde en su lugar.",
+      "ver": [
+        "guias"
+      ]
+    },
+    {
+      "id": "preguntar",
+      "guia": "mecharidds",
+      "tema": "Los guías",
+      "pregunta": "¿Qué les puedo preguntar?",
+      "frases": [
+        "que puedo preguntar",
+        "en que me ayudan",
+        "para que sirven los guias",
+        "que saben",
+        "en que me pueden ayudar",
+        "que me pueden responder"
+      ],
+      "claves": [
+        "preguntar",
+        "ayuda",
+        "ayudar",
+        "sirven",
+        "saben",
+        "temas"
+      ],
+      "respuesta": "Pregúntanos por las funciones del emulador, por qué hace cada opción, qué configuración te conviene y cómo funcionan las actualizaciones. Usa tus palabras, por ejemplo: «¿qué hace la resolución?», «¿cómo actualizo?» o «¿qué es el precache de shaders?». Las respuestas salen de lo que sabemos hasta esta versión, sin internet. Si no estamos seguros, te lo decimos y te mostramos temas parecidos.",
+      "ver": [
+        "guias",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "lichii",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "¿Qué relación tiene con Lichii?",
+      "frases": [
+        "relacion con lichii",
+        "diferencia con lichii",
+        "es igual a lichii",
+        "por que no usar lichii",
+        "lichii o satronho"
+      ],
+      "claves": [
+        "lichii",
+        "diferencia",
+        "igual",
+        "relacion",
+        "eden",
+        "eglantine",
+        "yuzu"
+      ],
+      "respuesta": "Satronho NX se basa en Lichii y se mantiene al día con ella. Cuando Lichii arregla algo, lo traemos a la siguiente build. Lo propio de Satronho son los guías, las novedades, las configuraciones sugeridas con el botón automático, los ajustes de niebla y exposición de Ocarina, el registro de pausas y la marca. Los dos emuladores comparten tus partidas, configuración y shaders, así que puedes pasar de uno a otro.",
+      "ver": [
+        "datos",
+        "que-es"
+      ]
+    },
+    {
+      "id": "datos",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Dónde se guardan mis partidas y mi configuración?",
+      "frases": [
+        "donde estan mis partidas",
+        "donde se guarda",
+        "carpeta de datos",
+        "carpeta eden",
+        "pierdo mis partidas",
+        "se borran las partidas",
+        "carpeta de satronho",
+        "carpeta del emulador"
+      ],
+      "claves": [
+        "partidas",
+        "guardar",
+        "save",
+        "carpeta",
+        "datos",
+        "eden",
+        "appdata",
+        "configuracion",
+        "perder",
+        "borrar"
+      ],
+      "respuesta": "Todo vive en la carpeta «eden» de tu usuario: en Windows es %APPDATA%\\eden. Ahí están las partidas, la configuración (carpeta config), la caché de shaders, el log y el archivo nx2_switches.txt. Esa carpeta no está dentro de la del emulador, así que al actualizar o abrir otra build no pierdes nada. La comparte con Lichii y Eden. Se abre rápido desde «File → Open Satronho NX Folders».",
+      "ver": [
+        "actualizar",
+        "log"
+      ]
+    },
+    {
+      "id": "actualizar",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Cómo actualizo Satronho NX?",
+      "frases": [
+        "como actualizo",
+        "como se actualiza",
+        "salio una build",
+        "actualizar el emulador",
+        "instalar la version nueva",
+        "actualizo el emulador",
+        "aviso de actualizacion",
+        "me salio un aviso de actualizacion",
+        "bajo la ultima build",
+        "bajar la ultima version",
+        "descargar la ultima build"
+      ],
+      "claves": [
+        "actualizar",
+        "actualizacion",
+        "update",
+        "nueva",
+        "version",
+        "build",
+        "descargar",
+        "instalar",
+        "actualizo",
+        "ultima",
+        "bajar",
+        "bajo"
+      ],
+      "respuesta": "Al abrir el emulador, Satronho revisa si hay una build nueva y, si la hay, te aviso yo, Juana, con la lista de novedades. Si aceptas, la descarga, cierra el emulador, instala los archivos nuevos con satronho-updater.exe y vuelve a abrirlo. Tus partidas y ajustes no se tocan. También puedes bajar el zip de la página de releases en GitHub y descomprimirlo en una carpeta nueva.",
+      "ver": [
+        "recordar-saltar",
+        "pgo",
+        "novedades",
+        "datos"
+      ]
+    },
+    {
+      "id": "recordar-saltar",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Qué hacen «Remind Me Later» y «Skip This Version»?",
+      "frases": [
+        "recordar mas tarde",
+        "remind me later",
+        "skip this version",
+        "saltar version",
+        "omitir version",
+        "no quiero actualizar"
+      ],
+      "claves": [
+        "recordar",
+        "remind",
+        "saltar",
+        "skip",
+        "omitir",
+        "despues",
+        "luego",
+        "aviso"
+      ],
+      "respuesta": "«Remind Me Later» (recordar más tarde) vuelve a avisarte en 24 horas. «Skip This Version» (saltar esta versión) no te vuelve a avisar de esa build en particular, pero sí de la siguiente. Puedes desactivar la búsqueda de actualizaciones en las opciones generales («Check for updates»).",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "pgo",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Qué diferencia hay entre la versión PGO y la estándar?",
+      "frases": [
+        "que es pgo",
+        "pgo o estandar",
+        "cual descargo",
+        "version recomendada",
+        "zip pgo",
+        "cual version descargo",
+        "que version descargo",
+        "version me recomiendan",
+        "version estandar"
+      ],
+      "claves": [
+        "pgo",
+        "estandar",
+        "standard",
+        "zip",
+        "recomendada",
+        "cual",
+        "descargo",
+        "recomiendan"
+      ],
+      "respuesta": "Las dos son el mismo programa. La PGO está compilada con un perfil de uso entrenado jugando Ocarina of Time, así que en ese juego suele ir algo más rápida. Es la recomendada. La estándar es la alternativa si la PGO te diera algún problema. El actualizador elige la misma que ya tienes.",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "novedades",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Dónde veo lo nuevo de cada versión?",
+      "frases": [
+        "que hay de nuevo",
+        "donde veo las novedades",
+        "que cambio",
+        "lista de cambios",
+        "changelog",
+        "que trae esta version",
+        "que trae la nueva version",
+        "que trae la nueva build",
+        "que tiene la version nueva",
+        "que hay en la nueva version",
+        "que cambio en la version",
+        "que cambios trae",
+        "donde veo los cambios",
+        "ver los cambios"
+      ],
+      "claves": [
+        "novedades",
+        "nuevo",
+        "changelog",
+        "trae",
+        "mejora",
+        "arreglo"
+      ],
+      "respuesta": "En «Satronho → Novedades». Cada build trae su lista con etiquetas: Nuevo (algo que no existía), Mejora (algo que ya existía y funciona mejor) y Arreglo (algo que fallaba y ya no falla). La primera vez que abres una build nueva, la lista se abre sola.",
+      "ver": [
+        "actualizar",
+        "build-numero"
+      ]
+    },
+    {
+      "id": "build-numero",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Qué build tengo?",
+      "frases": [
+        "que version tengo",
+        "que build tengo",
+        "numero de build",
+        "como se cual tengo",
+        "cual build tengo",
+        "que numero de build"
+      ],
+      "claves": [
+        "build",
+        "version",
+        "numero",
+        "titulo"
+      ],
+      "respuesta": "El número sale en la barra de título de la ventana, por ejemplo «Satronho NX | build-30». También en «Help → About». Cada build tiene un número que solo sube; mientras más alto, más reciente.",
+      "ver": [
+        "novedades",
+        "actualizar"
+      ]
+    },
+    {
+      "id": "sugeridas",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué son las configuraciones sugeridas?",
+      "frases": [
+        "configuracion sugerida",
+        "que configuracion uso",
+        "mejor configuracion",
+        "configurar automaticamente",
+        "aplicalo por mi",
+        "que me recomiendas",
+        "que se configure solo",
+        "configurar solo",
+        "configurarlo solo",
+        "se configure automaticamente"
+      ],
+      "claves": [
+        "sugerida",
+        "recomendada",
+        "recomiendas",
+        "configuracion",
+        "automatica",
+        "aplicar",
+        "boton",
+        "ajustes"
+      ],
+      "respuesta": "En «Satronho → Configuraciones sugeridas» reviso tu tarjeta gráfica, tu procesador y tu RAM, y te muestro qué conviene cambiar y por qué, comparado con lo que tienes ahora. El botón «Aplícalo por mí» lo deja todo listo. Si un juego tiene configuración propia en esas mismas opciones, puedes pedir que pase a usar la general. No se puede aplicar con un juego abierto. Todo se puede cambiar después a mano.",
+      "ver": [
+        "por-juego",
+        "generaciones",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "generaciones",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué conviene según mi tarjeta gráfica?",
+      "frases": [
+        "mi tarjeta grafica",
+        "que grafica sirve",
+        "rx 6000",
+        "rx 7000",
+        "rx 9000",
+        "rtx",
+        "nvidia",
+        "amd",
+        "intel arc",
+        "mi gpu"
+      ],
+      "claves": [
+        "tarjeta",
+        "grafica",
+        "gpu",
+        "amd",
+        "nvidia",
+        "intel",
+        "rx",
+        "rtx",
+        "gtx",
+        "arc",
+        "radeon",
+        "generacion",
+        "conviene",
+        "geforce",
+        "6500",
+        "6600",
+        "6650",
+        "6700",
+        "6750",
+        "6800",
+        "6900",
+        "6950",
+        "7600",
+        "7700",
+        "7800",
+        "7900",
+        "9060",
+        "9070",
+        "2060",
+        "2070",
+        "2080",
+        "3050",
+        "3060",
+        "3070",
+        "3080",
+        "3090",
+        "4060",
+        "4070",
+        "4080",
+        "4090",
+        "5060",
+        "5070",
+        "5080",
+        "5090",
+        "xt",
+        "ti"
+      ],
+      "respuesta": "En «Configuraciones sugeridas» hay una guía por generación. En resumen: las Radeon RX 9000 y RX 7000 con 16 GB, y las RTX 40 y 50, van bien a 1x con FSR o ScaleForce y SMAA, y pueden subir a 1.5x. Las RX 6000 y las RTX 30 van mejor a 1x con texturas recomprimidas a BC3. En las tarjetas de 8 GB conviene usar la memoria de video en modo Conservative. Las generaciones más viejas (RX 5000, Vega, GTX 10) pueden no ir bien. Ocarina depende más del procesador que de la tarjeta.",
+      "ver": [
+        "sugeridas",
+        "resolucion",
+        "procesador",
+        "vram"
+      ]
+    },
+    {
+      "id": "procesador",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué procesador necesito?",
+      "frases": [
+        "que procesador",
+        "cpu necesito",
+        "cuantos nucleos",
+        "mi procesador sirve",
+        "importa el procesador",
+        "depende del procesador",
+        "el procesador importa"
+      ],
+      "claves": [
+        "procesador",
+        "cpu",
+        "nucleos",
+        "hilos",
+        "ryzen",
+        "intel",
+        "core",
+        "threads"
+      ],
+      "respuesta": "Para la Switch 2, el procesador pesa más que la tarjeta gráfica: el emulador usa varios hilos para imitar la GPU de la consola, y en Ocarina es lo que más limita los FPS. Lo ideal son 6 núcleos u 8, con 12 hilos o más. Con menos, cierra programas en segundo plano. Los hilos de la GPU se fijan a sus propios núcleos solo si hay 6 núcleos de rendimiento o más; si no, se deja como está.",
+      "ver": [
+        "ram",
+        "gpu-modo",
+        "fps"
+      ]
+    },
+    {
+      "id": "ram",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Cuánta RAM necesito?",
+      "frases": [
+        "cuanta ram",
+        "memoria ram",
+        "16 gb",
+        "32 gb",
+        "me falta ram"
+      ],
+      "claves": [
+        "ram",
+        "memoria",
+        "gb",
+        "gigas"
+      ],
+      "respuesta": "Los juegos de Switch 2 usan 12 GB de memoria emulada, más lo que necesita el propio emulador. Con 16 GB funciona, pero conviene cerrar el navegador y otros programas. Con 32 GB o más vas tranquilo. Esta RAM es la del PC, no la de la tarjeta gráfica.",
+      "ver": [
+        "procesador",
+        "vram"
+      ]
+    },
+    {
+      "id": "resolucion",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué hace la resolución (1x, 1.5x, 2x)?",
+      "frases": [
+        "que resolucion uso",
+        "1x o 2x",
+        "subir resolucion",
+        "que es 1x",
+        "escala de resolucion",
+        "resolution",
+        "subir a 2x",
+        "cuesta subir la resolucion"
+      ],
+      "claves": [
+        "resolucion",
+        "resolution",
+        "1x",
+        "2x",
+        "escala",
+        "nitidez",
+        "calidad",
+        "1.5x"
+      ],
+      "respuesta": "Es cuántas veces la resolución original dibuja el juego. A 1x lo ves como en la consola; a 2x, con el doble de detalle, pero usa más memoria de video. En Ocarina, subir de 1x a 2x costó cerca de un 20 % de FPS en una RX 9070 XT, porque el límite es el procesador. A 1x, el escalado de la ventana (FSR o ScaleForce) agranda la imagen a tu pantalla con buena nitidez. Se cambia en «Emulation → Configure → Graphics → Resolution». Al cambiarla, los shaders se vuelven a preparar, y la primera carga tarda más.",
+      "ver": [
+        "escalado",
+        "antialias",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "escalado",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué filtro de escalado uso?",
+      "frases": [
+        "fsr o scaleforce",
+        "filtro de ventana",
+        "window adapting filter",
+        "que es fsr",
+        "que es scaleforce",
+        "imagen borrosa",
+        "se vea mas nitido",
+        "mas nitidez"
+      ],
+      "claves": [
+        "fsr",
+        "scaleforce",
+        "filtro",
+        "escalado",
+        "adapting",
+        "window",
+        "borrosa",
+        "nitida",
+        "nitido",
+        "nitidez",
+        "definicion"
+      ],
+      "respuesta": "El filtro de escalado («Window Adapting Filter») agranda la imagen del juego hasta el tamaño de tu ventana o pantalla. FSR (de AMD) y ScaleForce son los que mejor quedan, por ejemplo para pasar de 1080p a 1440p. FSR deja la imagen un poco más nítida y su nitidez se gradúa con «RCAS Sharpness». Los dos funcionan en cualquier marca de tarjeta.",
+      "ver": [
+        "resolucion",
+        "antialias"
+      ]
+    },
+    {
+      "id": "antialias",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué antialiasing uso?",
+      "frases": [
+        "que antialiasing",
+        "smaa o fxaa",
+        "bordes dentados",
+        "dientes de sierra",
+        "anti aliasing"
+      ],
+      "claves": [
+        "antialiasing",
+        "aliasing",
+        "smaa",
+        "fxaa",
+        "bordes",
+        "dentados",
+        "sierra"
+      ],
+      "respuesta": "El antialiasing suaviza los bordes dentados. SMAA da la mejor calidad y es el recomendado. FXAA es más suave y a veces más estable a resoluciones bajas. En Ocarina también existe «Ocarina of Time anti-aliasing»: «Game» usa el suavizado del propio juego, que afila bastante, y «No sharpening» deja la imagen tal como se dibuja, más rápida y buena compañera de una resolución mayor.",
+      "ver": [
+        "escalado",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "niebla-exposicion",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué hacen la niebla y la exposición de Ocarina?",
+      "frases": [
+        "niebla ocarina",
+        "exposicion ocarina",
+        "mucha niebla",
+        "imagen muy brillante",
+        "fog",
+        "exposure",
+        "quitar niebla",
+        "quito la niebla",
+        "quitar la niebla",
+        "menos niebla",
+        "bajar la niebla"
+      ],
+      "claves": [
+        "niebla",
+        "fog",
+        "exposicion",
+        "exposure",
+        "brillo",
+        "bruma",
+        "neblina",
+        "ocarina",
+        "quito",
+        "quitar",
+        "bajar"
+      ],
+      "respuesta": "Son ajustes propios de Satronho para Ocarina of Time, en «Graphics». «Ocarina of Time fog» gradúa la neblina de exteriores e interiores, y «Ocarina of Time exposure» el brillo antes de la curva de tono del juego. El 100 % es el juego tal cual, como en la consola; menos aclara la niebla u oscurece las luces, más las aumenta. Se aplican al empezar el juego.",
+      "ver": [
+        "resolucion",
+        "fidelidad"
+      ]
+    },
+    {
+      "id": "fidelidad",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Por qué los ajustes visuales vienen al 100 %?",
+      "frases": [
+        "por que 100",
+        "como en la consola",
+        "fidelidad",
+        "imagen original"
+      ],
+      "claves": [
+        "fidelidad",
+        "original",
+        "consola",
+        "100",
+        "porcentaje",
+        "fiel"
+      ],
+      "respuesta": "Satronho prioriza verse como en la consola. Por eso cada ajuste visual propio es graduable y el 100 % siempre es el juego original. Si lo quieres distinto, lo ajustas a tu gusto, y siempre puedes volver al 100 %.",
+      "ver": [
+        "niebla-exposicion"
+      ]
+    },
+    {
+      "id": "gpu-modo",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿GPU en Fast o Accurate?",
+      "frases": [
+        "fast o accurate",
+        "modo gpu",
+        "gpu mode",
+        "boton fast",
+        "precision de la gpu"
+      ],
+      "claves": [
+        "fast",
+        "accurate",
+        "modo",
+        "precision",
+        "accuracy"
+      ],
+      "respuesta": "«GPU Mode» decide qué tan al detalle se emula la GPU. Fast es el recomendado: la mayoría de los juegos se ven bien y en Ocarina va alrededor de un tercio más rápido que Accurate. Además, los hilos divididos de la GPU que más rendimiento dan solo funcionan en Fast. Accurate solo hace falta en juegos concretos. Se cambia rápido con el botón FAST/ACCURATE de la barra de abajo.",
+      "ver": [
+        "procesador",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "dibujos-sin-pipeline",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué es «Switch 2 draws with unbuilt pipelines» (Wait, Bounded, Skip)?",
+      "frases": [
+        "wait bounded skip",
+        "que es bounded",
+        "que es skip",
+        "draws with unbuilt pipelines",
+        "dibujos sin pipeline",
+        "se queda congelado un momento",
+        "se congela cuando aparece algo",
+        "opcion wait",
+        "que hace wait"
+      ],
+      "claves": [
+        "wait",
+        "bounded",
+        "skip",
+        "unbuilt",
+        "pipelines",
+        "draws",
+        "dibujos",
+        "congela",
+        "congelado",
+        "congelada"
+      ],
+      "respuesta": "Decide qué hace el emulador cuando el juego quiere dibujar algo cuyo shader todavía se está preparando. Wait espera a que esté listo: lo dibuja todo bien, pero la primera vez puede congelarse un momento. Bounded espera hasta unos milisegundos por cuadro y después se lo salta. Skip se lo salta siempre, y eso puede dejar efectos faltantes o colores raros mientras se preparan los shaders. Para verse como en la consola, lo recomendado es Wait junto con el precache de shaders. Está en «Graphics → Advanced».",
+      "ver": [
+        "shaders-cache",
+        "precache",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "shaders-cache",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué es la caché de shaders y por qué tarda tanto la primera vez?",
+      "frases": [
+        "loading shaders",
+        "por que tarda en cargar",
+        "cache de shaders",
+        "pipeline cache",
+        "carga de shaders lenta",
+        "tirones la primera vez"
+      ],
+      "claves": [
+        "shaders",
+        "shader",
+        "cache",
+        "pipeline",
+        "carga",
+        "cargar",
+        "loading",
+        "tirones",
+        "compilar"
+      ],
+      "respuesta": "Los shaders son los programitas que la tarjeta gráfica usa para dibujar. La primera vez que aparecen hay que prepararlos para tu tarjeta, y eso causa tirones. Satronho los guarda («Use persistent pipeline cache») y al abrir el juego los vuelve a cargar: esa es la pantalla «Loading Shaders». Si cambias de resolución, de driver de la tarjeta o actualizas a una build que cambió los shaders, se preparan de nuevo y esa carga tarda más. Después vuelve a ser rápida.",
+      "ver": [
+        "precache",
+        "dibujos-sin-pipeline",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "precache",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué es el precache de shaders?",
+      "frases": [
+        "precache de shaders",
+        "build shader precache",
+        "precache shaders before game start",
+        "precompilar shaders",
+        "warm up"
+      ],
+      "claves": [
+        "precache",
+        "precompilar",
+        "warm",
+        "precarga",
+        "build",
+        "shader",
+        "precompilo"
+      ],
+      "respuesta": "Sirve para que los shaders estén listos antes de que el juego los pida, y así evitar tirones la primera vez que algo aparece. Hay dos partes: clic derecho en el juego → «Build Shader Precache» lee los archivos del juego y prepara la lista (se hace una vez), y la opción «Precache shaders before game start» (en «Graphics → Advanced») los compila en la pantalla de carga. En «Ask» te pregunta al abrir el juego y en «Always» lo hace siempre. La primera vez tarda unos minutos y tiene botón para saltarlo.",
+      "ver": [
+        "shaders-cache",
+        "dibujos-sin-pipeline"
+      ]
+    },
+    {
+      "id": "astc",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué son ASTC y la recompresión de texturas?",
+      "frases": [
+        "que es astc",
+        "recompresion astc",
+        "bc3 o uncompressed",
+        "astc decoding",
+        "texturas comprimidas"
+      ],
+      "claves": [
+        "astc",
+        "bc3",
+        "bc1",
+        "uncompressed",
+        "recompresion",
+        "recompression",
+        "decoding",
+        "texturas",
+        "comprimidas"
+      ],
+      "respuesta": "Los juegos de Switch guardan sus texturas en un formato llamado ASTC que las tarjetas de PC casi nunca entienden. «ASTC Decoding Method» en GPU las traduce con la tarjeta, que es lo más rápido. «ASTC Recompression Method» decide en qué formato quedan: Uncompressed ocupa mucha memoria de video, y BC3 o BC1 ocupan bastante menos. Con menos de unos 20 GB de memoria de video, Satronho usa BC3 aunque elijas Uncompressed, para que no se llene.",
+      "ver": [
+        "vram",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "vram",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué hace «VRAM Usage Mode»?",
+      "frases": [
+        "vram usage mode",
+        "memoria de video",
+        "conservative o aggressive",
+        "se llena la vram",
+        "tarjeta tiene 8 gb",
+        "gb de vram",
+        "memoria de la tarjeta"
+      ],
+      "claves": [
+        "vram",
+        "video",
+        "conservative",
+        "aggressive",
+        "memoria",
+        "usage",
+        "agresivo",
+        "conservador"
+      ],
+      "respuesta": "Decide cuánta memoria de la tarjeta gráfica deja usar el emulador antes de liberar texturas viejas. Conservative deja margen y es lo mejor en tarjetas de 8 o 12 GB. Aggressive aprovecha más memoria y conviene en tarjetas de 16 GB o más. Está en «Graphics → Advanced».",
+      "ver": [
+        "astc",
+        "generaciones"
+      ]
+    },
+    {
+      "id": "por-juego",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué diferencia hay entre la configuración general y la de cada juego?",
+      "frases": [
+        "configuracion por juego",
+        "configure game",
+        "configuracion de un juego",
+        "no cambia el ajuste",
+        "ajuste no se aplica",
+        "en ocarina no se aplica",
+        "no se aplica en el juego",
+        "no se aplica el cambio"
+      ],
+      "claves": [
+        "juego",
+        "propia",
+        "global",
+        "general",
+        "configure",
+        "per",
+        "game",
+        "personalizada",
+        "aplica"
+      ],
+      "respuesta": "Cada juego puede tener su propia configuración (clic derecho en el juego → «Configure Game»). Si un juego tiene una opción propia, esa manda sobre la general, y por eso a veces cambias algo en la general y en ese juego no cambia nada. En la configuración del juego, cada opción tiene un botón para volver a «usar la global». El botón «Aplícalo por mí» puede hacerlo por ti para las opciones que sugiere.",
+      "ver": [
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "fps",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Cómo veo los FPS y de qué dependen?",
+      "frases": [
+        "cuantos fps",
+        "ver fps",
+        "subir fps",
+        "fps bajos",
+        "rendimiento",
+        "va lento",
+        "subo los fps",
+        "subir los fps",
+        "mas fps",
+        "mejorar los fps"
+      ],
+      "claves": [
+        "fps",
+        "rendimiento",
+        "lento",
+        "velocidad",
+        "cuadros",
+        "frames",
+        "subo",
+        "subir",
+        "aumentar",
+        "mejorar"
+      ],
+      "respuesta": "Abajo a la derecha, en la barra de estado, salen «Game» (los FPS del juego) y «Frame» (cuánto tarda cada cuadro). En Ocarina, los FPS dependen sobre todo del procesador. Lo que más ayuda es GPU Mode en Fast, cerrar programas en segundo plano y el precache de shaders. Subir o bajar la resolución cambia poco.",
+      "ver": [
+        "procesador",
+        "gpu-modo",
+        "fps-unlock"
+      ]
+    },
+    {
+      "id": "fps-unlock",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué son «FPS Unlock», «Dynamic FPS» y el límite de cuadros?",
+      "frases": [
+        "fps unlock",
+        "dynamic fps",
+        "frame rate limit",
+        "mas de 60 fps",
+        "120 hz",
+        "limite de fps"
+      ],
+      "claves": [
+        "unlock",
+        "dynamic",
+        "limite",
+        "limit",
+        "60",
+        "120",
+        "hz",
+        "rate"
+      ],
+      "respuesta": "Son complementos integrados para Ocarina of Time. «Dynamic FPS by Dark» viene activado y hace que la lógica del juego siga el tiempo real. «FPS Unlock» lo reemplaza y permite pasar de 60 FPS sin que el juego vaya más rápido. «Frame rate limit (Switch 2)», en «Graphics», sube el límite (por defecto 60 Hz); úsalo junto con FPS Unlock. Los complementos se activan en clic derecho → «Configure Game» → «Add-Ons».",
+      "ver": [
+        "complementos",
+        "fps"
+      ]
+    },
+    {
+      "id": "complementos",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué son los complementos (Add-Ons)?",
+      "frases": [
+        "que son los add ons",
+        "complementos",
+        "max resolution",
+        "mods",
+        "parches del juego"
+      ],
+      "claves": [
+        "addons",
+        "add",
+        "ons",
+        "complementos",
+        "mods",
+        "parches",
+        "max",
+        "resolution",
+        "integrado"
+      ],
+      "respuesta": "Los complementos son cambios que se aplican al juego al abrirlo: actualizaciones, DLC, mods y parches. Para Ocarina, Satronho trae integrados «Max Resolution», que hace que el juego dibuje a su resolución máxima, «Dynamic FPS by Dark» y «FPS Unlock». Se ven y se activan en clic derecho en el juego → «Configure Game» → «Add-Ons». Los mods propios van en la carpeta que abre «Open Mod Data Location».",
+      "ver": [
+        "fps-unlock",
+        "juegos"
+      ]
+    },
+    {
+      "id": "juegos",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo agrego mis juegos?",
+      "frases": [
+        "agregar juegos",
+        "no aparecen mis juegos",
+        "carpeta de juegos",
+        "anadir juego",
+        "lista de juegos vacia"
+      ],
+      "claves": [
+        "agregar",
+        "anadir",
+        "juegos",
+        "carpeta",
+        "lista",
+        "aparecen",
+        "nup",
+        "nsp",
+        "anado",
+        "agrego"
+      ],
+      "respuesta": "En la lista de juegos, haz doble clic en «Add New Game Directory» (o clic derecho en un espacio vacío → «Add New Game Directory») y elige la carpeta donde guardas tus juegos. Satronho la revisa cada vez que abre. Los juegos de Switch 2 suelen venir en paquetes .nup. Para jugar necesitas tus propias claves y firmware, sacados de tu consola.",
+      "ver": [
+        "menu-juego",
+        "datos"
+      ]
+    },
+    {
+      "id": "menu-juego",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué hay en el clic derecho de un juego?",
+      "frases": [
+        "clic derecho juego",
+        "menu del juego",
+        "opciones del juego",
+        "click derecho"
+      ],
+      "claves": [
+        "clic",
+        "click",
+        "derecho",
+        "menu",
+        "opciones",
+        "favorito",
+        "acceso",
+        "directo"
+      ],
+      "respuesta": "En el clic derecho de un juego tienes, entre otras cosas: «Configure Game», su propia configuración y sus complementos; «Build Shader Precache»; abrir las carpetas de partidas y mods; crear un acceso directo en el escritorio; marcarlo como favorito; y «Submit compatibility report…» para contarle a Lichii cómo funciona.",
+      "ver": [
+        "por-juego",
+        "precache",
+        "informe"
+      ]
+    },
+    {
+      "id": "informe",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué envía el informe de compatibilidad?",
+      "frases": [
+        "informe de compatibilidad",
+        "compatibility report",
+        "que se envia",
+        "reportar juego"
+      ],
+      "claves": [
+        "informe",
+        "compatibilidad",
+        "compatibility",
+        "report",
+        "envia",
+        "reportar",
+        "reporte",
+        "manda"
+      ],
+      "respuesta": "Es opcional y solo se envía si tú lo mandas desde el clic derecho del juego. Va al sitio de Lichii e incluye el juego y su versión, la build de Satronho (dice «Satronho NX, fork of Lichii build-N»), el procesador, la tarjeta gráfica, el driver, el sistema, la RAM y los ajustes. Antes de enviarlo lo ves en una ventana. Satronho no envía nada por su cuenta.",
+      "ver": [
+        "privacidad",
+        "menu-juego"
+      ]
+    },
+    {
+      "id": "privacidad",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Satronho envía mis datos a algún lado?",
+      "frases": [
+        "envia mis datos",
+        "telemetria",
+        "privacidad",
+        "me espian",
+        "recoge datos"
+      ],
+      "claves": [
+        "datos",
+        "telemetria",
+        "privacidad",
+        "envia",
+        "internet",
+        "espiar",
+        "espian",
+        "espia"
+      ],
+      "respuesta": "No hay telemetría. Por internet solo sale lo que tú usas: la búsqueda de actualizaciones en GitHub, la descarga de carátulas, el informe de compatibilidad si lo envías, el multijugador si entras a una sala y el estado de Discord si lo activas. Los guías responden sin internet, desde lo que trae el emulador.",
+      "ver": [
+        "informe",
+        "multijugador"
+      ]
+    },
+    {
+      "id": "controles",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo configuro mi mando o el teclado?",
+      "frases": [
+        "configurar mando",
+        "configurar control",
+        "teclado",
+        "joystick",
+        "mando no funciona",
+        "controles",
+        "cambio los botones",
+        "cambiar los botones",
+        "asignar botones"
+      ],
+      "claves": [
+        "mando",
+        "control",
+        "controles",
+        "teclado",
+        "joystick",
+        "gamepad",
+        "xbox",
+        "botones",
+        "asignar"
+      ],
+      "respuesta": "En «Emulation → Configure → Controls». Elige el dispositivo de entrada de cada jugador (mando o teclado) y asigna cada botón haciendo clic en él y pulsando el tuyo. Los mandos de Xbox y PlayStation se reconocen solos. Puedes guardar perfiles para cambiar rápido.",
+      "ver": [
+        "atajos"
+      ]
+    },
+    {
+      "id": "atajos",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué atajos de teclado hay?",
+      "frases": [
+        "atajos de teclado",
+        "hotkeys",
+        "pantalla completa tecla",
+        "tecla para salir",
+        "captura de pantalla"
+      ],
+      "claves": [
+        "atajos",
+        "hotkeys",
+        "tecla",
+        "teclas",
+        "f11",
+        "captura",
+        "screenshot",
+        "salir"
+      ],
+      "respuesta": "Los atajos se ven y se cambian en «Emulation → Configure → Hotkeys». Ahí están, por ejemplo, pantalla completa, pausa, captura de pantalla y «Exit Satronho NX». Las capturas se guardan en la carpeta screenshots de los datos de Satronho.",
+      "ver": [
+        "controles",
+        "datos"
+      ]
+    },
+    {
+      "id": "multijugador",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo funciona el multijugador?",
+      "frases": [
+        "multijugador",
+        "jugar en linea",
+        "salas",
+        "online",
+        "multiplayer",
+        "juego en linea",
+        "juego online",
+        "jugar online",
+        "jugar con amigos"
+      ],
+      "claves": [
+        "multijugador",
+        "multiplayer",
+        "online",
+        "linea",
+        "salas",
+        "sala",
+        "lobby",
+        "amigos"
+      ],
+      "respuesta": "El menú «Multiplayer» permite entrar a salas públicas o crear la tuya para jugar en red local por internet. Usa los servidores de Eden, así que también se juega con gente que usa Eden. Para publicar una sala hace falta una cuenta de Eden.",
+      "ver": [
+        "privacidad"
+      ]
+    },
+    {
+      "id": "log",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué es el log y cómo lo comparto?",
+      "frases": [
+        "que es el log",
+        "donde esta el log",
+        "eden log",
+        "compartir log",
+        "archivo de registro"
+      ],
+      "claves": [
+        "log",
+        "registro",
+        "eden_log",
+        "compartir",
+        "archivo"
+      ],
+      "respuesta": "El log es un registro de lo que hace el emulador en cada sesión. Está en %APPDATA%\\eden\\log: «eden_log.txt» es el de la sesión actual o la última, y «eden_log.txt.old.txt» el de la anterior. Al abrir el emulador, el log se reemplaza, así que si te lo piden, mándalo antes de volver a abrirlo. Solo lo usamos para revisar qué pasó junto con quien desarrolla Satronho.",
+      "ver": [
+        "datos"
+      ]
+    },
+    {
+      "id": "nx2-switches",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué es nx2_switches.txt?",
+      "frases": [
+        "nx2 switches",
+        "nx2_switches",
+        "interruptores",
+        "archivo switches"
+      ],
+      "claves": [
+        "nx2",
+        "interruptores",
+        "variables",
+        "diagnostico"
+      ],
+      "respuesta": "Es un archivo de interruptores avanzados que se usan para diagnosticar con quien desarrolla Satronho, por ejemplo para medir el rendimiento. Viene uno junto al emulador con los valores recomendados, y el tuyo, en %APPDATA%\\eden, manda sobre él. No hace falta tocarlo para jugar; si alguien te pide activar algo ahí, te dirá exactamente qué línea poner.",
+      "ver": [
+        "log"
+      ]
+    },
+    {
+      "id": "dlss",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Puedo usar DLSS o FSR 3 en vez del escalado del juego?",
+      "frases": [
+        "dlss",
+        "nvidia dlss",
+        "fsr 3",
+        "escalado del juego",
+        "use the game's own dlss"
+      ],
+      "claves": [
+        "dlss",
+        "fsr",
+        "nvidia",
+        "escalador",
+        "upscaler",
+        "streamline"
+      ],
+      "respuesta": "Algunos juegos de Switch 2 traen su propio DLSS. Satronho lo reemplaza por AMD FSR 3.1, que funciona en cualquier tarjeta. En tarjetas NVIDIA RTX existe además «Use NVIDIA DLSS in place of a game's DLSS» (experimental), que necesita descargar los archivos de NVIDIA con el botón de esa misma sección. En Ocarina reemplaza el escalado del juego a resolución 1x. Están en «Graphics».",
+      "ver": [
+        "escalado",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "pantalla-completa",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Cómo pongo pantalla completa?",
+      "frases": [
+        "pantalla completa",
+        "fullscreen",
+        "ventana completa",
+        "borderless"
+      ],
+      "claves": [
+        "pantalla",
+        "completa",
+        "fullscreen",
+        "borderless",
+        "ventana"
+      ],
+      "respuesta": "Con F11 o «View → Fullscreen». En «Graphics → Fullscreen Mode» eliges el modo: Borderless (ventana sin bordes) es el más compatible y el recomendado. Exclusive puede ir algo más fluido, pero cambia de ventana más lento.",
+      "ver": [
+        "atajos"
+      ]
+    }
+  ]
+}

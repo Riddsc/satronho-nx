@@ -636,7 +636,28 @@ jobs:
             pgo_note="The PGO builds are the same programs compiled with profile-guided optimization. Linux uses clang with Eglantine's profile; Windows uses clang-cl and ThinLTO with a profile trained in Lichii on Ocarina of Time, so other games gain less. Prefer them when your CPU supports it."
           fi
 
+          # Lo nuevo de esta build, de dist/satronho/novedades.json (la primera entrada).
+          gh api -H "Accept: application/vnd.github.raw" \
+            "repos/${GITHUB_REPOSITORY}/contents/dist/satronho/novedades.json?ref=${GITHUB_SHA}" \
+            > novedades.json || echo '{}' > novedades.json
+          python3 - > novedades.md <<'PY'
+          import json
+          try:
+              builds = json.load(open('novedades.json', encoding='utf-8')).get('builds', [])
+          except Exception:
+              builds = []
+          if builds:
+              b = builds[0]
+              etiquetas = {'nuevo': 'Nuevo', 'mejora': 'Mejora', 'arreglo': 'Arreglo'}
+              print(f"## {b.get('titulo', '')}\n")
+              for c in b.get('cambios', []):
+                  print(f"- **{etiquetas.get(c.get('tipo'), 'Arreglo')}:** {c.get('texto', '')}")
+              print()
+          PY
+
           cat > notes.md <<EOF
+          $(cat novedades.md)
+
           Satronho NX, compilacion automatica de ${GITHUB_SHA}.
 
           Windows: descomprime el zip completo y ejecuta satronho-nx.exe. Comparte partidas, configuracion y shaders con Lichii y Eden (carpeta eden en AppData).
