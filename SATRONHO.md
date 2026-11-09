@@ -76,6 +76,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   tiempo que la GPU estuvo parada antes de empezarlo (`idle`: un semáforo o un envío tardío), y la
   duración en la GPU de sus subidas (`uploads`, el buffer que va primero: copias, decodificación de
   ASTC) y de sus comandos (`commands`).
+  Desde la build 30, una cuarta línea dice qué tuvo ocupado al hilo `VulkanWorker` durante la
+  espera: cada compilación de pipeline de cómputo que tuvo que esperar (hash y ms; además se
+  avisa en el log al pasar de 100 ms) y cada bloque de comandos de más de 100 ms.
 - Arreglo del log repetido de umbrales de la caché de texturas (`texture_cache.h`).
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,
   perfil de Ocarina de Lichii), se dispara con push a `main`, artefactos `satronho-nx-*`.
@@ -200,8 +203,12 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Windows con `abort()` en `ucrtbase.dll+0xa527e` (fast-fail 7) al entrar al juego; uno guardó en
   memoria `surface.h:193:BitsPerBlock: unreachable`. Era una regresión de Lichii #858 (memo de
   texturas preparaba la imagen nula, de formato inválido): Lichii #904, arreglado en #910, #921 y
-  #918 (Log2Ceil(0)). Integrado en la build 29. Lección: leer volcados con el paquete Python
+  #918 (Log2Ceil(0)). La build 29 se canceló; sale en la build 30. También se cerraba así en la PC
+  de Riddsc al entrar a Kakariko (dos veces con la build 28). Lección: leer volcados con el paquete Python
   `minidump` y buscar en la memoria cruda las últimas líneas del log (`[ t] Clase <Critical> …`).
+- **Trabajo en curso (no publicado):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
+  Configuraciones sugeridas con botón automático y base de conocimiento local. Guardado en un
+  `git stash` local ("satronho-ui-wip") durante la build 30; los datos están en `dist/satronho/`.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y
