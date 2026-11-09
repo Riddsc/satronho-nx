@@ -12,6 +12,7 @@
 #include <fmt/format.h>
 
 #include "common/logging.h"
+#include "video_core/nx2_stutter_trace.h"
 #include "video_core/renderer_vulkan/vk_slow_wait.h"
 
 namespace Vulkan::SlowWait {
@@ -65,13 +66,20 @@ std::mutex submit_mutex;
 struct WorkerBlock {
     std::chrono::steady_clock::time_point start{};
     std::chrono::steady_clock::time_point end{};
-    u64 shader_hash{}; ///< Compute shader whose build it waited for; zero for a whole chunk
+    u64 shader_hash{}; ///< Pipeline whose build it waited for; zero for a whole chunk
+    bool graphics{};   ///< A graphics pipeline (the hash is its key) instead of a compute shader
 };
-constexpr size_t WorkerBlockCount = 64;
+constexpr size_t WorkerBlockCount = 512;
 std::array<WorkerBlock, WorkerBlockCount> worker_blocks{};
 size_t worker_block_next{};
 std::mutex worker_mutex;
 constexpr auto WorkerBlockMin = std::chrono::milliseconds{100};
+// Kept for the stutter trace's long frames (over 50 ms), which shorter waits add up to.
+constexpr auto WorkerBlockFrameMin = std::chrono::milliseconds{4};
+
+[[nodiscard]] bool StutterDetail() {
+    return VideoCommon::StutterTrace::Enabled();
+}
 
 std::mutex ring_mutex;
 std::array<Entry, RingSize> ring;
@@ -261,7 +269,8 @@ std::string WorkerTimes(std::chrono::steady_clock::time_point wait_start,
         std::scoped_lock lock{worker_mutex};
         for (const WorkerBlock& block : worker_blocks) {
             if (block.end > wait_start && block.start < wait_end &&
-                block.end != std::chrono::steady_clock::time_point{}) {
+                block.end != std::chrono::steady_clock::time_point{} &&
+                block.end - block.start >= WorkerBlockMin) {
                 blocks.push_back(block);
             }
         }
@@ -278,9 +287,9 @@ std::string WorkerTimes(std::chrono::steady_clock::time_point wait_start,
     std::string text = "Vulkan worker during the wait (start: ms after the wait began):";
     for (const WorkerBlock& block : blocks) {
         if (block.shader_hash != 0) {
-            text += fmt::format("\n    compute pipeline {:016x} build {:.1f} ms, start {:+.1f} ms",
-                                block.shader_hash, ms(block.end - block.start),
-                                ms(block.start - wait_start));
+            text += fmt::format("\n    {} pipeline {:016x} build {:.1f} ms, start {:+.1f} ms",
+                                block.graphics ? "graphics" : "compute", block.shader_hash,
+                                ms(block.end - block.start), ms(block.start - wait_start));
         } else {
             text += fmt::format("\n    command chunk {:.1f} ms, start {:+.1f} ms",
                                 ms(block.end - block.start), ms(block.start - wait_start));
@@ -298,22 +307,70 @@ void PushWorkerBlock(const WorkerBlock& block) {
 } // Anonymous namespace
 
 void NoteWorkerBuild(u64 shader_hash, std::chrono::steady_clock::time_point start,
-                     std::chrono::steady_clock::time_point end) {
-    if (!Enabled() || end - start < WorkerBlockMin) {
+                     std::chrono::steady_clock::time_point end, bool graphics) {
+    const auto took = end - start;
+    const bool slow = Enabled() && took >= WorkerBlockMin;
+    if (!slow && !(StutterDetail() && took >= WorkerBlockFrameMin)) {
         return;
     }
-    LOG_WARNING(Render_Vulkan,
-                "Compute pipeline {:016x} kept the Vulkan worker waiting {:.0f} ms for its build",
-                shader_hash, std::chrono::duration<double, std::milli>(end - start).count());
-    PushWorkerBlock({.start = start, .end = end, .shader_hash = shader_hash});
+    if (slow) {
+        LOG_WARNING(Render_Vulkan,
+                    "{} pipeline {:016x} kept the Vulkan worker waiting {:.0f} ms for its build",
+                    graphics ? "Graphics" : "Compute", shader_hash,
+                    std::chrono::duration<double, std::milli>(took).count());
+    }
+    PushWorkerBlock(
+        {.start = start, .end = end, .shader_hash = shader_hash, .graphics = graphics});
 }
 
 void NoteWorkerChunk(std::chrono::steady_clock::time_point start,
                      std::chrono::steady_clock::time_point end) {
-    if (!Enabled() || end - start < WorkerBlockMin) {
+    const auto took = end - start;
+    if (!(Enabled() && took >= WorkerBlockMin) &&
+        !(StutterDetail() && took >= WorkerBlockFrameMin * 5)) {
         return;
     }
     PushWorkerBlock({.start = start, .end = end});
+}
+
+std::string FrameWorkerText(std::chrono::steady_clock::time_point frame_start,
+                            std::chrono::steady_clock::time_point frame_end) {
+    std::vector<WorkerBlock> blocks;
+    {
+        std::scoped_lock lock{worker_mutex};
+        for (const WorkerBlock& block : worker_blocks) {
+            if (block.end > frame_start && block.start < frame_end &&
+                block.end != std::chrono::steady_clock::time_point{}) {
+                blocks.push_back(block);
+            }
+        }
+    }
+    // Longest first; a chunk contains the builds waited for inside it, so chunks go last.
+    std::ranges::sort(blocks, [](const WorkerBlock& a, const WorkerBlock& b) {
+        if ((a.shader_hash == 0) != (b.shader_hash == 0)) {
+            return a.shader_hash != 0;
+        }
+        return a.end - a.start > b.end - b.start;
+    });
+    constexpr size_t MaxListed = 6;
+    std::string text;
+    for (size_t index = 0; index < blocks.size() && index < MaxListed; ++index) {
+        const WorkerBlock& block = blocks[index];
+        const double ms = std::chrono::duration<double, std::milli>(block.end - block.start).count();
+        if (!text.empty()) {
+            text += ',';
+        }
+        if (block.shader_hash == 0) {
+            text += fmt::format("chunk:{:.1f}", ms);
+        } else {
+            text += fmt::format("{}:{:016x}:{:.1f}", block.graphics ? "gfx" : "compute",
+                                block.shader_hash, ms);
+        }
+    }
+    if (blocks.size() > MaxListed) {
+        text += fmt::format(",+{}", blocks.size() - MaxListed);
+    }
+    return text;
 }
 
 void SetSubmitPool(VkQueryPool pool, u32 entries) {

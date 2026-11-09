@@ -743,7 +743,10 @@
         "cache de shaders",
         "pipeline cache",
         "carga de shaders lenta",
-        "tirones la primera vez"
+        "tirones la primera vez",
+        "que es la cache v2",
+        "formato nuevo de shaders",
+        "por que tarda la primera vez que abro el juego"
       ],
       "claves": [
         "shaders",
@@ -756,7 +759,7 @@
         "tirones",
         "compilar"
       ],
-      "respuesta": "Los shaders son los programitas que la tarjeta gráfica usa para dibujar. La primera vez que aparecen hay que prepararlos para tu tarjeta, y eso causa tirones. Satronho los guarda («Use persistent pipeline cache») y al abrir el juego los vuelve a cargar: esa es la pantalla «Loading Shaders». Si cambias de resolución, de driver de la tarjeta o actualizas a una build que cambió los shaders, se preparan de nuevo y esa carga tarda más. Después vuelve a ser rápida.",
+      "respuesta": "Los shaders son los programitas que la tarjeta gráfica usa para dibujar. La primera vez que aparecen hay que prepararlos para tu tarjeta, y eso causa tirones. Satronho los guarda («Use persistent pipeline cache») y al abrir el juego los vuelve a cargar: esa es la pantalla «Loading Shaders». Desde la build 35 se guardan en un formato nuevo que aguanta cortes y archivos dañados: la primera vez que abras cada juego, Satronho pasa tus shaders viejos a ese formato y esa carga tarda más; tus archivos anteriores no se tocan. Si actualizas el driver de la tarjeta, la lista de shaders se conserva y solo se vuelven a preparar. Después la carga vuelve a ser rápida.",
       "ver": [
         "precache",
         "dibujos-sin-pipeline",

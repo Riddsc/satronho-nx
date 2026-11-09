@@ -161,6 +161,13 @@ GuideDock::GuideDock(QWidget* host_, OpenHub open_hub_, std::function<void()> sa
         }
     }
     std::shuffle(tips.begin(), tips.end(), std::mt19937{QRandomGenerator::global()->generate()});
+    // Samy opens: her first tip goes to the front.
+    const auto samy = std::ranges::find_if(tips, [](const Topic* topic) {
+        return GuideFromKey(topic->guide) == GuideId::Samy;
+    });
+    if (samy != tips.end()) {
+        std::rotate(tips.begin(), samy, samy + 1);
+    }
     if (!tips.empty()) {
         SetPet(GuideFromKey(tips.front()->guide));
     } else {
@@ -264,7 +271,7 @@ void GuideDock::AnnounceNovedades(const QString& build_tag) {
     if (!title.isEmpty()) {
         text += QStringLiteral("<br>%1").arg(title.toHtmlEscaped());
     }
-    Speak(GuideId::Juana, text, Tr("Ver lo nuevo"),
+    Speak(GuideId::Samy, text, Tr("Ver lo nuevo"),
           [this] { open_hub(Hub::Page::Novedades, QString()); }, false);
 }
 

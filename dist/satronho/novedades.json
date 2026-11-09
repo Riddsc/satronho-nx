@@ -1,6 +1,33 @@
 {
   "builds": [
     {
+      "tag": "build-35",
+      "fecha": "9 de noviembre de 2026",
+      "titulo": "Caché de shaders nueva y diagnóstico en conjunto con Lichii",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Caché de shaders nueva, integrada desde Lichii y adaptada a Satronho: aguanta cortes y archivos dañados, y conserva tus shaders aunque actualices el driver de la tarjeta. La primera vez que abras cada juego, Satronho pasa tus shaders al formato nuevo y esa carga tarda más; tus archivos anteriores no se tocan."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Diagnóstico en conjunto: el rastreador de tirones de Lichii dice la causa de cada cuadro lento, y nuestro detector de pausas le agrega qué shader exacto hizo esperar al emulador y cuánto. Además, ahora también nombra los shaders de dibujo, no solo los de cómputo."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Integramos 16 cambios del motor de Lichii. Entre ellos: el juego ya no se frena esperando a la tarjeta cuando lee datos de ella (en Ocarina pasaba unas 1.500 veces cada 10 segundos), un hilo que ocupaba un núcleo entero del procesador ahora descansa y menos RAM ocupada por páginas vacías."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Del mismo paquete: arreglos de memoria que podían causar cierres raros, archivos de juego dañados que ya no rompen el emulador, y cierres y terreno faltante en Donkey Kong Bananza y Mario Kart World."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Soporte para juegos en formato .nx."
+        }
+      ]
+    },
+    {
       "tag": "build-34",
       "fecha": "9 de noviembre de 2026",
       "titulo": "Menos tirones: vuelve Bounded",

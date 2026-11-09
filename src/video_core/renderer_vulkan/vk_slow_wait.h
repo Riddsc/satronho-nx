@@ -80,10 +80,16 @@ void EndSubmit(u32 entry, vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmd
 /// Worker thread, after vkQueueSubmit: the entry's tick and when it reached the queue.
 void Submitted(u32 entry, u64 tick);
 
-/// Vulkan worker thread: a compute pipeline build it had to finish before recording a dispatch
-/// took from `start` to `end`. Builds over 100 ms are logged and listed in the next slow wait.
+/// Vulkan worker thread: a pipeline build it had to finish before recording a dispatch (or, with
+/// `graphics`, a draw) took from `start` to `end`. Builds over 100 ms are logged and listed in the
+/// next slow wait; with EDEN_NX2_STUTTER_TRACE, shorter ones are kept for the long frames' detail.
 void NoteWorkerBuild(u64 shader_hash, std::chrono::steady_clock::time_point start,
-                     std::chrono::steady_clock::time_point end);
+                     std::chrono::steady_clock::time_point end, bool graphics = false);
+
+/// Nx2StutterDetail's `waited=` field: the pipeline builds and long command chunks the Vulkan
+/// worker waited on during [frame_start, frame_end], longest first.
+std::string FrameWorkerText(std::chrono::steady_clock::time_point frame_start,
+                            std::chrono::steady_clock::time_point frame_end);
 
 /// Vulkan worker thread: executing one command chunk took from `start` to `end`. Chunks over
 /// 100 ms are listed in the slow waits they overlap.

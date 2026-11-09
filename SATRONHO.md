@@ -9,7 +9,9 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`cbb512ee`** (2026-11-08, #932; incluye #910/#921/#918, cierre al cargar partida).
+- Último commit de Lichii integrado: **`1a5e995a`** (2026-11-09, #1056; build 35: caché de shaders v2
+  #1036, lectura asíncrona #1028, HostTiming #1016, formato .nx #923, rastreador de tirones
+  #975/#1039, semáforos #979/#1014/#949). Antes: `cbb512ee` (#932).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
@@ -79,7 +81,19 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Desde la build 30, una cuarta línea dice qué tuvo ocupado al hilo `VulkanWorker` durante la
   espera: cada compilación de pipeline de cómputo que tuvo que esperar (hash y ms; además se
   avisa en el log al pasar de 100 ms) y cada bloque de comandos de más de 100 ms.
-- Arreglo del log repetido de umbrales de la caché de texturas (`texture_cache.h`).
+- (El arreglo propio del log repetido de umbrales de la caché de texturas se reemplazó por el de
+  Lichii en la build 35.)
+- Diagnóstico en conjunto (build 35): `StutterTrace::SetFrameDetailHook` (añadido a
+  `nx2_stutter_trace.{h,cpp}`) agrega `waited=` a cada línea `Nx2StutterDetail` con lo que el
+  VulkanWorker esperó en ese cuadro (`SlowWait::FrameWorkerText`: `compute:<hash>:<ms>`,
+  `gfx:<clave>:<ms>`, `chunk:<ms>`). Con `EDEN_NX2_STUTTER_TRACE=1` se guardan esperas desde 4 ms
+  (trozos desde 20 ms) en un anillo de 512; las esperas lentas siguen listando solo las de 100 ms o
+  más. Las esperas por pipelines gráficos (`vk_graphics_pipeline.cpp`) también se anotan.
+  Conflicto típico al integrar: el lambda de espera de `vk_compute_pipeline.cpp` (conservar la
+  zona `PipelineWait` y `jobs->RunOrWait` de Lichii más nuestro `wait_start`/`NoteWorkerBuild`) y
+  `vk_master_semaphore.cpp` (zona `GpuWait` + nuestro cronómetro).
+- Caché v2: los registros guardan el código nativo, no SPIR-V, así que el ajuste de niebla y
+  exposición de Ocarina (`CreateGraphicsPipeline`/`CreateComputePipeline`) se sigue aplicando.
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,
   perfil de Ocarina de Lichii), se dispara con push a `main`, artefactos `satronho-nx-*`.
 
