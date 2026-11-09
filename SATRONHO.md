@@ -207,8 +207,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   de Riddsc al entrar a Kakariko (dos veces con la build 28). Lección: leer volcados con el paquete Python
   `minidump` y buscar en la memoria cruda las últimas líneas del log (`[ t] Clase <Critical> …`).
 - **Trabajo en curso (no publicado):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
-  Configuraciones sugeridas con botón automático y base de conocimiento local. Guardado en un
-  `git stash` local ("satronho-ui-wip") durante la build 30; los datos están en `dist/satronho/`.
+  Configuraciones sugeridas con botón automático y base de conocimiento local. Está en la rama
+  `satronho-guias` (código en `src/yuzu/satronho/`, datos en `dist/satronho/`); se une a `main`
+  para la build 31. La base de conocimiento se probó con una réplica en Python del buscador.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y
