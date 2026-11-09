@@ -239,6 +239,10 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   nuevos (Wait). Se vuelve a Bounded (también por migración de ajustes v4) y Conservative hasta
   16 GB. ASTC no cambia nada aquí: bajo 20 GB Satronho usa BC3 igual (`UseBc3ForSwitch2OnSmallCards`).
   Regla: no recomendar un ajuste que contradiga lo que ya se eligió y probó antes (v3 = Bounded).
+  **Confirmado con la build 34 (2026-11-09, 67 min):** Bounded restablecido por la migración v4,
+  0 esperas lentas, mediana de 16.9 ms por cuadro (59 FPS; p90 21.4 ms) y 71 cuadros de más de
+  100 ms, contra 351 con la 30 y 848 con la 33. VRAM seguía en Aggressive (la migración no la
+  toca) sin problemas visibles.
   Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
   integradas), NVIDIA (RTX 50/40/30/20, GTX 16/10, profesionales) e Intel (Arc A/B, Arc
   integrada, UHD/Iris Xe); el clasificador se probó con 31 nombres reales de Vulkan.
