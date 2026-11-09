@@ -60,6 +60,19 @@ std::vector<Submit> submits;
 u32 submit_next{};
 std::mutex submit_mutex;
 
+// What kept the Vulkan worker thread busy: long command chunks and the compute pipeline builds it
+// waited for inside them. A wait for a tick the worker submitted late overlaps one of these.
+struct WorkerBlock {
+    std::chrono::steady_clock::time_point start{};
+    std::chrono::steady_clock::time_point end{};
+    u64 shader_hash{}; ///< Compute shader whose build it waited for; zero for a whole chunk
+};
+constexpr size_t WorkerBlockCount = 64;
+std::array<WorkerBlock, WorkerBlockCount> worker_blocks{};
+size_t worker_block_next{};
+std::mutex worker_mutex;
+constexpr auto WorkerBlockMin = std::chrono::milliseconds{100};
+
 std::mutex ring_mutex;
 std::array<Entry, RingSize> ring;
 size_t ring_next{};
@@ -240,7 +253,68 @@ std::string SubmitTimes(u64 tick, u64 known_done, std::chrono::steady_clock::tim
     return text;
 }
 
+// The worker blocks that overlap [wait_start, wait_end], oldest first.
+std::string WorkerTimes(std::chrono::steady_clock::time_point wait_start,
+                        std::chrono::steady_clock::time_point wait_end) {
+    std::vector<WorkerBlock> blocks;
+    {
+        std::scoped_lock lock{worker_mutex};
+        for (const WorkerBlock& block : worker_blocks) {
+            if (block.end > wait_start && block.start < wait_end &&
+                block.end != std::chrono::steady_clock::time_point{}) {
+                blocks.push_back(block);
+            }
+        }
+    }
+    if (blocks.empty()) {
+        return {};
+    }
+    std::ranges::sort(blocks, [](const WorkerBlock& a, const WorkerBlock& b) {
+        return a.start < b.start;
+    });
+    const auto ms = [](auto duration) {
+        return std::chrono::duration<double, std::milli>(duration).count();
+    };
+    std::string text = "Vulkan worker during the wait (start: ms after the wait began):";
+    for (const WorkerBlock& block : blocks) {
+        if (block.shader_hash != 0) {
+            text += fmt::format("\n    compute pipeline {:016x} build {:.1f} ms, start {:+.1f} ms",
+                                block.shader_hash, ms(block.end - block.start),
+                                ms(block.start - wait_start));
+        } else {
+            text += fmt::format("\n    command chunk {:.1f} ms, start {:+.1f} ms",
+                                ms(block.end - block.start), ms(block.start - wait_start));
+        }
+    }
+    return text;
+}
+
+void PushWorkerBlock(const WorkerBlock& block) {
+    std::scoped_lock lock{worker_mutex};
+    worker_blocks[worker_block_next] = block;
+    worker_block_next = (worker_block_next + 1) % WorkerBlockCount;
+}
+
 } // Anonymous namespace
+
+void NoteWorkerBuild(u64 shader_hash, std::chrono::steady_clock::time_point start,
+                     std::chrono::steady_clock::time_point end) {
+    if (!Enabled() || end - start < WorkerBlockMin) {
+        return;
+    }
+    LOG_WARNING(Render_Vulkan,
+                "Compute pipeline {:016x} kept the Vulkan worker waiting {:.0f} ms for its build",
+                shader_hash, std::chrono::duration<double, std::milli>(end - start).count());
+    PushWorkerBlock({.start = start, .end = end, .shader_hash = shader_hash});
+}
+
+void NoteWorkerChunk(std::chrono::steady_clock::time_point start,
+                     std::chrono::steady_clock::time_point end) {
+    if (!Enabled() || end - start < WorkerBlockMin) {
+        return;
+    }
+    PushWorkerBlock({.start = start, .end = end});
+}
 
 void SetSubmitPool(VkQueryPool pool, u32 entries) {
     std::scoped_lock lock{submit_mutex};
@@ -451,6 +525,10 @@ void ReportWait(std::chrono::steady_clock::duration waited, u64 tick, u64 known_
         if (const std::string submitted = SubmitTimes(tick, known_done, wait_start);
             !submitted.empty()) {
             LOG_WARNING(Render_Vulkan, "Slow GPU wait for tick {}: {}", tick, submitted);
+        }
+        if (const std::string worker = WorkerTimes(wait_start, std::chrono::steady_clock::now());
+            !worker.empty()) {
+            LOG_WARNING(Render_Vulkan, "Slow GPU wait for tick {}: {}", tick, worker);
         }
     }
 }

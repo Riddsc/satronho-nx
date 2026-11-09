@@ -657,7 +657,9 @@ void Scheduler::WorkerThread(std::stop_token stop_token) {
             // Perform the work, tracking whether the chunk was a submission
             // before executing.
             const bool has_submit = work->HasSubmit();
+            const auto chunk_start = std::chrono::steady_clock::now();
             work->ExecuteAll(current_cmdbuf, current_upload_cmdbuf);
+            SlowWait::NoteWorkerChunk(chunk_start, std::chrono::steady_clock::now());
 
             // If the chunk was a submission, reallocate the command buffer.
             if (has_submit) {

@@ -80,6 +80,16 @@ void EndSubmit(u32 entry, vk::CommandBuffer cmdbuf, vk::CommandBuffer upload_cmd
 /// Worker thread, after vkQueueSubmit: the entry's tick and when it reached the queue.
 void Submitted(u32 entry, u64 tick);
 
+/// Vulkan worker thread: a compute pipeline build it had to finish before recording a dispatch
+/// took from `start` to `end`. Builds over 100 ms are logged and listed in the next slow wait.
+void NoteWorkerBuild(u64 shader_hash, std::chrono::steady_clock::time_point start,
+                     std::chrono::steady_clock::time_point end);
+
+/// Vulkan worker thread: executing one command chunk took from `start` to `end`. Chunks over
+/// 100 ms are listed in the slow waits they overlap.
+void NoteWorkerChunk(std::chrono::steady_clock::time_point start,
+                     std::chrono::steady_clock::time_point end);
+
 /// The thread about to wait sets where the wait comes from; cleared after.
 void SetWaitSite(const std::source_location* site);
 
