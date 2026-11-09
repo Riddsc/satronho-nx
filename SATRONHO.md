@@ -117,7 +117,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   `nx2_switches.txt` del usuario (gana sobre el que viene con la build), caché de shaders en
   `cache\shader\<titleid>\vulkan.fork-v<N>.bin`.
 - Juego de prueba: Ocarina of Time `0400486024DEC000`. Configuración recomendada: 1x, FSR o
-  ScaleForce (para agrandar 1080p→1440p), SMAA, GPU "Fast", Bounded.
+  ScaleForce, SMAA, GPU "Fast", Bounded.
+- Riddsc juega en **modo Docked** al menos desde la build 30 (`System.use_docked_mode: Docked`, con
+  `M-` por ser distinto del valor por defecto, Handheld). En Docked Ocarina compone a 2560×1440
+  (`nx2:vi2 composite image … layout 2560x1440`), justo su monitor; en Handheld sería 1920×1080.
+  Antes de comparar sesiones, revisar que ambas tengan el mismo modo.
 
 ## Cómo leer un log (método que funcionó)
 
