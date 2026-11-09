@@ -212,9 +212,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   #918 (Log2Ceil(0)). La build 29 se canceló; sale en la build 30. También se cerraba así en la PC
   de Riddsc al entrar a Kakariko (dos veces con la build 28). Lección: leer volcados con el paquete Python
   `minidump` y buscar en la memoria cruda las últimas líneas del log (`[ t] Clase <Critical> …`).
-- **Guías (build 31):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
+- **Guías (build 32):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
   Configuraciones sugeridas con botón automático y base de conocimiento local (código en
-  `src/yuzu/satronho/`, datos en `dist/satronho/`). Sale en la build 31. La base de conocimiento
+  `src/yuzu/satronho/`, datos en `dist/satronho/`). Sale en la build 32 (la 31 falló al compilar por una función sin usar: el CI usa -Werror=unused; revisar en local con esas mismas opciones). La base de conocimiento
   se probó con una réplica en Python del buscador (192 preguntas).
   Pendiente que pidió Riddsc: los guías deben ir donde no interfieran con nada, quizá en la
   esquina inferior derecha (por ahora salen dentro de la ventana Satronho y del aviso de

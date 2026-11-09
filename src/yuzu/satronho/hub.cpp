@@ -56,15 +56,6 @@ QString Tr(const char* text) {
     return QCoreApplication::translate("Satronho", text);
 }
 
-QLabel* Heading(const QString& text, QWidget* parent) {
-    auto* label = new QLabel(text, parent);
-    QFont font = label->font();
-    font.setPointSizeF(font.pointSizeF() * 1.25);
-    font.setBold(true);
-    label->setFont(font);
-    return label;
-}
-
 } // Anonymous namespace
 
 Hub::Hub(const std::vector<VkDeviceInfo::Record>& records, bool emulation_running_,
