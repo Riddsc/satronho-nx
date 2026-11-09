@@ -209,6 +209,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - **Trabajo en curso (no publicado):** guías (MechaRidds, Samy, Troya, Ñoño, Juana), Novedades,
   Configuraciones sugeridas con botón automático y base de conocimiento local. Guardado en un
   `git stash` local ("satronho-ui-wip") durante la build 30; los datos están en `dist/satronho/`.
+  Pendiente que pidió Riddsc: los guías deben ir donde no interfieran con nada, quizá en la
+  esquina inferior derecha (por ahora salen dentro de la ventana Satronho y del aviso de
+  actualización). Configuraciones sugeridas cubre AMD (RX 9000/7000/6000, anteriores e
+  integradas), NVIDIA (RTX 50/40/30/20, GTX 16/10, profesionales) e Intel (Arc A/B, Arc
+  integrada, UHD/Iris Xe); el clasificador se probó con 31 nombres reales de Vulkan.
 - **GitHub a veces responde 502/504 al bajar herramientas** (LLVM, sccache, dependencias CPM):
   desde la build 22 la compilación reintenta cada descarga y la configuración de CMake.
 - No se hacen pull requests a Lichii; los cambios se quedan en Satronho NX. Dar crédito a Lichii y

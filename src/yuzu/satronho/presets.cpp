@@ -124,8 +124,11 @@ QString FamilyName(GpuFamily family) {
     case GpuFamily::NvAmpere: return QStringLiteral("NVIDIA GeForce RTX 30");
     case GpuFamily::NvTuring: return QStringLiteral("NVIDIA GeForce RTX 20 / GTX 16");
     case GpuFamily::NvOlder: return Tr("NVIDIA GeForce GTX 10 o anterior");
-    case GpuFamily::IntelArc: return QStringLiteral("Intel Arc");
-    case GpuFamily::IntelIntegrated: return Tr("Gráficos integrados de Intel");
+    case GpuFamily::AmdIntegrated: return Tr("Gráficos integrados de AMD (Ryzen)");
+    case GpuFamily::NvWorkstation: return Tr("NVIDIA RTX profesional / Quadro");
+    case GpuFamily::IntelArc: return QStringLiteral("Intel Arc (A / B)");
+    case GpuFamily::IntelArcIntegrated: return Tr("Intel Arc integrada (Core Ultra)");
+    case GpuFamily::IntelIntegrated: return Tr("Gráficos integrados de Intel (UHD / Iris Xe)");
     case GpuFamily::Unknown: break;
     }
     return Tr("Tarjeta no reconocida");
@@ -133,6 +136,11 @@ QString FamilyName(GpuFamily family) {
 
 bool IsOlderFamily(GpuFamily family) {
     return family == GpuFamily::AmdOlder || family == GpuFamily::NvOlder ||
+           family == GpuFamily::IntelIntegrated;
+}
+
+bool IsIntegrated(GpuFamily family) {
+    return family == GpuFamily::AmdIntegrated || family == GpuFamily::IntelArcIntegrated ||
            family == GpuFamily::IntelIntegrated;
 }
 
@@ -192,24 +200,35 @@ GpuFamily ClassifyGpu(const QString& name, u32 vendor_id) {
     if (vendor_id == 0x1002 || n.contains(QStringLiteral("RADEON")) ||
         n.contains(QStringLiteral("AMD"))) {
         if (has("RX\\s*9\\d{3}")) return GpuFamily::AmdRdna4;
-        if (has("RX\\s*7\\d{3}") || has("\\b(7|8|9)\\d0M\\b")) return GpuFamily::AmdRdna3;
-        if (has("RX\\s*6\\d{3}") || has("\\b6\\d0M\\b")) return GpuFamily::AmdRdna2;
-        if (has("RX\\s*5\\d{3}") || has("VEGA") || has("RX\\s*[45]\\d{2}\\b"))
+        if (has("RX\\s*7\\d{3}")) return GpuFamily::AmdRdna3;
+        if (has("RX\\s*6\\d{3}")) return GpuFamily::AmdRdna2;
+        if (has("RX\\s*5\\d{3}") || has("RX\\s*VEGA") || has("RX\\s*[45]\\d{2}\\b") ||
+            has("VEGA\\s*(56|64)") || has("RADEON\\s*VII") || has("R9\\s") || has("R7\\s"))
             return GpuFamily::AmdOlder;
+        // Ryzen integrated: "Radeon 780M Graphics", "Radeon(TM) Graphics", "Radeon 8060S".
+        if (has("\\b\\d{3,4}[MS]\\b") || n.contains(QStringLiteral("GRAPHICS")) ||
+            has("VEGA\\s*\\d+\\b"))
+            return GpuFamily::AmdIntegrated;
         return GpuFamily::Unknown;
     }
     if (vendor_id == 0x10DE || n.contains(QStringLiteral("NVIDIA")) ||
         n.contains(QStringLiteral("GEFORCE"))) {
+        if (has("RTX\\s*PRO") || has("RTX\\s*A\\d{3,4}") || has("RTX\\s*\\d{4}\\s*ADA") ||
+            n.contains(QStringLiteral("QUADRO")) || has("\\bT\\d{3,4}\\b"))
+            return GpuFamily::NvWorkstation;
         if (has("RTX\\s*50\\d{2}")) return GpuFamily::NvBlackwell;
         if (has("RTX\\s*40\\d{2}")) return GpuFamily::NvAda;
         if (has("RTX\\s*30\\d{2}")) return GpuFamily::NvAmpere;
         if (has("RTX\\s*20\\d{2}") || has("GTX\\s*16\\d{2}")) return GpuFamily::NvTuring;
-        if (has("GTX\\s*10\\d{2}") || has("GTX\\s*9\\d{2}")) return GpuFamily::NvOlder;
+        if (has("GTX\\s*10\\d{2}") || has("GTX\\s*9\\d{2}") || has("GT\\s*\\d{3,4}") ||
+            has("MX\\s*\\d{3}"))
+            return GpuFamily::NvOlder;
         return GpuFamily::Unknown;
     }
     if (vendor_id == 0x8086 || n.contains(QStringLiteral("INTEL"))) {
-        return n.contains(QStringLiteral("ARC")) ? GpuFamily::IntelArc
-                                                 : GpuFamily::IntelIntegrated;
+        if (has("ARC.*\\b[AB]\\d{3}")) return GpuFamily::IntelArc;  // "Arc A770", "Arc B580"
+        if (n.contains(QStringLiteral("ARC"))) return GpuFamily::IntelArcIntegrated;
+        return GpuFamily::IntelIntegrated;
     }
     return GpuFamily::Unknown;
 }
@@ -243,7 +262,8 @@ Suggestion Suggest(const Hardware& hardware) {
     const u64 vram = hardware.vram_bytes;
     const bool big_vram = vram >= 15 * GiB;     // 16 GB cards report a little under 16 GiB
     const bool huge_vram = vram >= 20 * GiB;
-    const bool small_vram = vram > 0 && vram < 11 * GiB;
+    const bool integrated = IsIntegrated(suggestion.family);
+    const bool small_vram = !integrated && vram > 0 && vram < 11 * GiB;
     auto& v = Settings::values;
 
     // The settings: same idea on every card (fidelity first), sized by video memory.
@@ -319,6 +339,11 @@ Suggestion Suggest(const Hardware& hardware) {
                "Te dejo la configuración más liviana; si va lento o no arranca, la tarjeta es el "
                "límite.")
                 .arg(hardware.gpu_name, vram_text);
+    } else if (integrated) {
+        suggestion.summary =
+            Tr("Tu %1 son gráficos integrados: comparten la RAM del PC y Switch 2 les exige "
+               "mucho. Te dejo la configuración más liviana; espera pocos FPS en zonas grandes.")
+                .arg(hardware.gpu_name);
     } else if (suggestion.family == GpuFamily::Unknown) {
         suggestion.summary = Tr("No reconozco la generación de tu %1 (%2), así que te dejo la "
                                 "configuración general, que funciona en la mayoría de tarjetas.")
@@ -328,6 +353,11 @@ Suggestion Suggest(const Hardware& hardware) {
             Tr("Tu %1 (%2) es de la familia %3. Esta configuración prioriza que se vea como en "
                "la consola y rinde bien en ella.")
                 .arg(hardware.gpu_name, vram_text, suggestion.family_name);
+    }
+    if (integrated) {
+        suggestion.notes.push_back(
+            Tr("Con gráficos integrados conviene tener 32 GB de RAM en doble canal, porque la "
+               "tarjeta usa esa misma memoria, y cerrar todo lo demás."));
     }
     if (small_vram) {
         suggestion.notes.push_back(
@@ -396,8 +426,17 @@ QString GenerationGuideHtml() {
          "1x, BC3 y memoria en Conservative en las de 8 a 12 GB. Wait y precache de shaders."},
         {"NVIDIA GTX 16, GTX 10 o anteriores",
          "La GTX 16 es lo mínimo razonable; la GTX 10 puede no funcionar. 1x, BC3, Conservative."},
-        {"Intel Arc",
-         "Sin pruebas propias todavía. Empieza con la configuración general: 1x, BC3, Wait."},
+        {"NVIDIA RTX profesional / Quadro",
+         "Se configuran como la GeForce de su misma generación, según su memoria de video."},
+        {"Intel Arc A y B (dedicadas)",
+         "Sin pruebas propias todavía. Empieza con la configuración general: 1x, FSR, SMAA, BC3, "
+         "Wait y memoria en Conservative; con 16 GB, Aggressive."},
+        {"Gráficos integrados de AMD (Radeon 680M, 780M, 890M)",
+         "Comparten la RAM del PC. Lo más liviano: 1x, BC3, Conservative, y 32 GB de RAM en doble "
+         "canal. Espera pocos FPS en zonas grandes."},
+        {"Intel Arc integrada (Core Ultra) y UHD / Iris Xe",
+         "La Arc integrada puede arrancar los juegos con lo más liviano; UHD e Iris Xe "
+         "probablemente no alcanzan para Switch 2."},
     };
     QString html = QStringLiteral("<table width=\"100%\" cellspacing=\"0\" cellpadding=\"8\">");
     for (const Row& row : rows) {

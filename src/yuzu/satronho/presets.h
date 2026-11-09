@@ -39,8 +39,11 @@ enum class GpuFamily {
     NvAmpere,    // GeForce RTX 30
     NvTuring,    // GeForce RTX 20, GTX 16
     NvOlder,     // GTX 10 and older
-    IntelArc,    // Arc A and B
-    IntelIntegrated,
+    AmdIntegrated,      // Radeon 680M, 780M, 890M and other Ryzen integrated graphics
+    NvWorkstation,      // RTX A/Ada workstation cards, Quadro
+    IntelArc,           // Arc A and B (dedicated)
+    IntelArcIntegrated, // Arc Graphics integrated in Core Ultra
+    IntelIntegrated,    // UHD / Iris Xe
 };
 
 /// One setting the suggestion changes.
