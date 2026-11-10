@@ -58,13 +58,15 @@ namespace VkDeviceInfo {
 class Record {
 public:
     explicit Record(std::string_view name, const std::vector<VkPresentModeKHR>& vsync_modes,
-                    bool has_broken_compute, std::string_view device_name = {},
-                    u32 vendor_id = 0, u64 device_local_bytes = 0);
+                    bool has_broken_compute, bool fsr4_capable,
+                    std::string_view device_name = {}, u32 vendor_id = 0,
+                    u64 device_local_bytes = 0);
     ~Record();
 
     const std::string name;
     const std::vector<VkPresentModeKHR> vsync_support;
     const bool has_broken_compute;
+    const bool fsr4_capable; ///< VideoCommon::IsFsr4CapableGpu
     // Satronho NX: for the suggested settings (GPU generation and video memory).
     const std::string device_name;  ///< Device name without the driver
     const u32 vendor_id;            ///< PCI vendor (0x1002 AMD, 0x10DE NVIDIA, 0x8086 Intel)
