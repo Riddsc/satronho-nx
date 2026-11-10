@@ -10,8 +10,8 @@ session after the shader cache changed format).
     python3 tools/satronho/compare_logs.py old_session.txt new_session.txt [...]
 
 Frame times come from the presenter's "last 600 presents" lines. Frames over 100 ms are counted
-per minute of play. "Play" starts at the first window slower than 17.5 ms after the game boots, so
-the title screen (a steady 60 FPS) does not count. Shader numbers come from the pipeline cache and
+per minute of play. "Play" starts at the first window slower than 17.5 ms after the game boots and
+leaves out stretches pinned at exactly 60 FPS (title screen, menus, pause). Shader numbers come from the pipeline cache and
 the slow wait detector; the stutter trace's summaries, when on, add where the time went.
 """
 
@@ -59,12 +59,33 @@ class Session:
     summary_windows: int = 0
     forced_stop: bool = False
 
-    # Play windows: from the first one slower than the title screen on.
+    # Play windows: from the first one slower than the title screen on, without the stretches
+    # pinned at exactly 60 FPS (title screen, menus, pause or the game left idle): three or more
+    # windows in a row at 16.6-16.8 ms with no slow frame.
     def play(self) -> list[tuple[float, int, int]]:
-        for index, (_, frame_us, _) in enumerate(self.windows):
-            if frame_us > 17500:
-                return [w for w in self.windows[index:] if w[1] < 1_000_000]
-        return []
+        start = next((i for i, (_, frame_us, _) in enumerate(self.windows) if frame_us > 17500),
+                     None)
+        if start is None:
+            return []
+        windows = [w for w in self.windows[start:] if w[1] < 1_000_000]
+        idle = [16600 <= frame_us <= 16800 and over == 0 for _, frame_us, over in windows]
+        keep = [True] * len(windows)
+        index = 0
+        while index < len(windows):
+            end = index
+            while end < len(windows) and idle[end]:
+                end += 1
+            if end - index >= 3:
+                for k in range(index, end):
+                    keep[k] = False
+            index = max(end, index + 1)
+        return [w for w, k in zip(windows, keep) if k]
+
+    def idle_minutes(self) -> float:
+        start = next((i for i, (_, frame_us, _) in enumerate(self.windows) if frame_us > 17500),
+                     len(self.windows))
+        played = len([w for w in self.windows[start:] if w[1] < 1_000_000])
+        return (played - len(self.play())) * 10 / 60
 
 
 def parse(path: str) -> Session:
@@ -158,6 +179,7 @@ def table(sessions: list[Session]) -> str:
     for key, label in KEY_SETTINGS.items():
         row(label, [s.settings.get(key, "(por defecto)") for s in sessions])
     row("Minutos jugando", [f"{len(s.play()) * 10 / 60:.1f}" for s in sessions])
+    row("Minutos quieto (menú, pausa, título)", [f"{s.idle_minutes():.1f}" for s in sessions])
     stats = [fps_stats(s.play()) for s in sessions]
     row("FPS típicos", [f"{m:.1f}" for m, _, _ in stats])
     row("FPS del 10 % más lento", [f"{p:.1f}" for _, p, _ in stats])

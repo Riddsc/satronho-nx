@@ -298,11 +298,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   20 s de cada pipeline de cómputo nuevo y al cerrar; se borra con «Remove Vulkan Driver Pipeline
   Cache». Para verificarlo: tras una sesión, en la siguiente no debe aparecer «kept the Vulkan
   worker waiting» para hashes ya vistos, y el log dice «Satronho compute driver cache: N bytes».
-- **Primera sesión con la 36 (2026-11-09, 22 min, recorrido oficial):** 48 FPS típicos (igual que
-  la 35), el 10 % más lento 36.3, 4.5 cuadros de más de 100 ms por minuto (35: 10.0; 34: 15.1),
-  0 pausas largas y 0 shaders que frenaran al worker. La caché de cómputo de AMD guardó 22.6 MB al
-  cerrar (empezó vacía: 52 bytes). Cierre limpio. FSR 4: descargó los archivos de AMD, pero
-  `ocarina_fsr`/`amd_fsr4` seguían en false al arrancar el juego.
+- **Sesiones con la 36 (2026-11-09/10), con el comparador corregido** (sin los tramos quietos a 60
+  FPS exactos de menú/pausa/título, que antes inflaban los FPS: la 1.ª sesión tenía 9.8 min así):
+  | | 34 | 35 | 36 (1.ª) | 36 (2.ª) |
+  | FPS típicos al jugar | 36.6 | 42.2 | 38.8 | 38.2 |
+  | 10 % más lento | 30.2 | 31.2 | 33.2 | 26.5 |
+  | Cuadros >100 ms/min | 16.8 | 14.2 | 8.3 | 15.5 |
+  | Congeladas por shaders | 12 (hasta 5.5 s) | 0 | 0 | 0 |
+  La caché de cómputo de AMD guardó 22.6 MB y los recargó en las sesiones siguientes; ningún shader
+  frenó al worker. Los FPS no cambiaron entre builds: los tirones que quedan son de categoría
+  «other» (lado de la emulación/CPU), no shaders. FSR 4 (sesión corta): 4.1.2, sale a 3840×2160
+  (supermuestreo en monitor 1440p), ~6 s de congelada al iniciarse y ~37 FPS contra ~48; no se
+  recomienda en Configuraciones sugeridas por ahora.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
