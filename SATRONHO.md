@@ -310,6 +310,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   «other» (lado de la emulación/CPU), no shaders. FSR 4 (sesión corta): 4.1.2, sale a 3840×2160
   (supermuestreo en monitor 1440p), ~6 s de congelada al iniciarse y ~37 FPS contra ~48; no se
   recomienda en Configuraciones sugeridas por ahora.
+- **Build 37 en stream (2026-11-10, 74 min, 28 jugando):** 31.9 FPS típicos (el stream le quita
+  CPU: sin stream ~38–39), 12.8 cuadros >100 ms/min. 2 congeladas de ~2.3 s: a2ad0e377bf35f6f y
+  ac898ad3f17a4df5, shaders de cómputo vistos una sola vez antes (5.8–6.3 s, en la build 30, antes de
+  existir nuestra caché) en zonas que no se habían vuelto a visitar; ahora quedan en ella. Ninguno de
+  los que ya estaban en nuestra caché volvió a compilarse.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
