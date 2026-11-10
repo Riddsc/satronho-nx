@@ -1,0 +1,69 @@
+como actualizo el emulador|actualizar
+hay una version nueva como la instalo|actualizar
+que hace remind me later|recordar-saltar
+quiero saltar esta version|recordar-saltar
+cual zip descargo pgo o normal|pgo
+que trae la nueva version|novedades
+donde veo los cambios|novedades
+que build tengo|build-numero
+que configuracion me recomiendas|sugeridas
+como funciona el boton aplicalo por mi|sugeridas
+tengo una rx 6700 xt que me conviene|generaciones
+mi grafica es nvidia rtx 3060|generaciones
+que procesador necesito|procesador
+cuantos nucleos necesito|procesador
+cuanta ram necesito|ram
+tengo 16 gb de ram alcanza|ram
+que resolucion uso 1x o 2x|resolucion
+para que sirve subir la resolucion|resolucion
+fsr o scaleforce|escalado
+que filtro de escalado uso|escalado
+que antialiasing pongo|antialias
+smaa o fxaa|antialias
+para que sirve la niebla de ocarina|niebla-exposicion
+como quito la niebla|niebla-exposicion
+la imagen se ve muy brillante|niebla-exposicion
+fast o accurate cual uso|gpu-modo
+que es bounded|dibujos-sin-pipeline
+wait bounded o skip|dibujos-sin-pipeline
+por que tarda tanto loading shaders|shaders-cache
+que es el precache de shaders|precache
+como uso build shader precache|precache
+que es astc|astc
+bc3 o uncompressed|astc
+que hace vram usage mode|vram
+conservative o aggressive|vram
+por que no cambia el ajuste en un juego|por-juego
+configuracion de cada juego|por-juego
+como veo los fps|fps
+como subo los fps|fps
+que es fps unlock|fps-unlock
+puedo jugar a 120 hz|fps-unlock
+que son los add ons|complementos
+que es max resolution|complementos
+como agrego mis juegos|juegos
+no aparecen mis juegos|juegos
+que opciones hay en el clic derecho|menu-juego
+que envia el informe de compatibilidad|informe
+satronho envia mis datos|privacidad
+hay telemetria|privacidad
+como configuro mi mando|controles
+el teclado no funciona|controles
+que atajos de teclado hay|atajos
+como juego en linea|multijugador
+donde esta el log|log
+que es nx2_switches.txt|nx2-switches
+puedo usar dlss|dlss
+como pongo pantalla completa|pantalla-completa
+donde estan mis partidas|datos
+pierdo mis partidas si actualizo|datos
+quienes son los guias|guias
+quien es juana|guias
+como apago a los guias|apagar-guias
+no quiero ver a los guias|apagar-guias
+que les puedo preguntar|preguntar
+que es satronho nx|que-es
+cual es la diferencia con lichii|lichii
+por que los ajustes vienen al 100|fidelidad
+cuanto cuesta una pizza|-
+como derroto a ganon|-

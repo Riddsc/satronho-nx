@@ -14,13 +14,14 @@
 
 #include "common/common_types.h"
 
-// EDEN_NX2_STUTTER_TRACE=1: per presented frame, the wall time each GPU thread (front, back,
-// VulkanWorker) spent by category, from the EDEN_NX2_GPU_PROFILE zones (nx2_profile.h maps each
-// zone to a category). Frames presented more than 33 ms after the previous one are logged with
-// their top category (Nx2Stutter); every 10 s the frame-time histogram, pipeline builds and
-// lookups (Nx2StutterSummary); and the boot phases with the process memory (Nx2Boot).
-// tools/nx2/cache_metrics.py reads them. Frames longer than EDEN_NX2_STUTTER_DETAIL_MS (default
-// 50) also get an Nx2StutterDetail line: each thread's largest zones and the sites below that ran.
+// EDEN_NX2_STUTTER_TRACE (on in Satronho NX unless set to 0): per presented frame, the wall
+// time each GPU thread (front, back, VulkanWorker) spent by category, from the
+// EDEN_NX2_GPU_PROFILE zones (nx2_profile.h maps each zone to a category). Frames presented more
+// than 33 ms after the previous one are logged with their top category (Nx2Stutter); every 10 s
+// the frame-time histogram, pipeline builds and lookups (Nx2StutterSummary); and the boot phases
+// with the process memory (Nx2Boot). tools/nx2/cache_metrics.py reads them. Frames longer than
+// EDEN_NX2_STUTTER_DETAIL_MS (default 50) also get an Nx2StutterDetail line: each thread's
+// largest zones and the sites below that ran.
 namespace VideoCommon::StutterTrace {
 
 enum class Category : u8 {
@@ -107,9 +108,11 @@ inline constexpr std::array<std::string_view, SiteCount> site_names{
     "texture_collect", "texture_download", "scheduler_finish", "memory_free",
 };
 
+// Satronho NX: on unless EDEN_NX2_STUTTER_TRACE=0, so every log names what made its slow frames
+// slow (with the slow wait detector's `waited=`), without setting anything up first.
 [[nodiscard]] inline bool ReadEnv() {
     const char* const value = std::getenv("EDEN_NX2_STUTTER_TRACE");
-    return value != nullptr && value[0] == '1';
+    return value == nullptr || value[0] != '0';
 }
 
 inline bool g_enabled = ReadEnv();

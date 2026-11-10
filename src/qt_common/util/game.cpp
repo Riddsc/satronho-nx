@@ -312,6 +312,15 @@ void RemoveVulkanDriverPipelineCache(u64 program_id) {
         QtCommon::Frontend::Warning(tr("Error Removing Vulkan Driver Pipeline Cache"),
                                     tr("Failed to remove the driver pipeline cache."));
     }
+    // Satronho NX: the compute pipelines' own driver cache on AMD's proprietary driver
+    if (VideoCommon::ClearPipelineCache(shader_cache_folder_path, "satronho_compute_pipelines",
+                                        VideoCommon::VulkanDriverPipelineCacheMagic,
+                                        VideoCommon::CompatibleVulkanPipelineCacheVersions,
+                                        VideoCommon::VulkanPipelineCacheVersion) ==
+        VideoCommon::PipelineCacheClear::Failed) {
+        QtCommon::Frontend::Warning(tr("Error Removing Vulkan Driver Pipeline Cache"),
+                                    tr("Failed to remove the driver pipeline cache."));
+    }
 }
 
 void RemoveAllTransferableShaderCaches(u64 program_id) {

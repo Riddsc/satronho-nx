@@ -1,0 +1,50 @@
+me salio un aviso de actualizacion que hago|actualizar
+se actualiza solo?|actualizar
+que significa saltar esta version|recordar-saltar
+la pgo es mejor?|pgo
+donde esta la lista de cambios|novedades
+que numero de version tengo|build-numero
+cual es la mejor configuracion para mi pc|sugeridas
+quiero que se configure solo|sugeridas
+tengo una rx 7800 xt|generaciones
+rtx 4070 que pongo|generaciones
+mi procesador es un ryzen 5 sirve|procesador
+cuantos hilos necesita|procesador
+alcanza con 16 gigas de memoria|ram
+que diferencia hay entre 1x y 2x|resolucion
+la imagen se ve borrosa|escalado
+que es scaleforce|escalado
+los bordes se ven dentados|antialias
+que es la exposicion|niebla-exposicion
+hay mucha neblina|niebla-exposicion
+para que sirve el boton fast|gpu-modo
+que es skip en los dibujos|dibujos-sin-pipeline
+tarda mucho en cargar los shaders|shaders-cache
+que es la cache de shaders|shaders-cache
+como precompilo los shaders|precache
+que es la recompresion de texturas|astc
+que es la memoria de video|vram
+cambie algo y en ocarina no se aplica|por-juego
+va lento que puedo hacer|fps
+como juego a mas de 60 fps|fps-unlock
+que son los complementos|complementos
+como anado juegos|juegos
+que hay en el menu del juego|menu-juego
+que manda el reporte de compatibilidad|informe
+me espian?|privacidad
+como pongo mi control de xbox|controles
+cual es la tecla para pantalla completa|pantalla-completa
+como hago capturas de pantalla|atajos
+como creo una sala|multijugador
+donde encuentro el archivo de registro|log
+para que sirve nx2 switches|nx2-switches
+puedo usar dlss de nvidia|dlss
+se borran mis partidas al actualizar|datos
+donde esta la carpeta de satronho|datos
+quien es troya|guias
+quiero desactivar a samy|apagar-guias
+en que me pueden ayudar|preguntar
+es igual que lichii|lichii
+por que viene todo al 100 por ciento|fidelidad
+que es satronho|que-es
+la receta del arroz con pollo|-

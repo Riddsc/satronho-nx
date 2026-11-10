@@ -225,6 +225,14 @@ private:
     /// Cancels the v2 prebuild and waits for its running stages
     void StopBackgroundJobs();
 
+    /// The driver pipeline cache compute pipelines build into (Satronho NX, see
+    /// use_compute_driver_cache).
+    [[nodiscard]] vk::PipelineCache& ComputeDriverCache() noexcept;
+    /// Saves it on the serialization thread: `now`, or after enough new compute pipelines.
+    void QueueComputeDriverCacheSave(bool now);
+    /// Saves it on this thread (the cache going away, another title).
+    void SaveComputeDriverCache();
+
     void SerializeVulkanPipelineCache(const std::filesystem::path& filename,
                                       const vk::PipelineCache& pipeline_cache, u32 cache_version);
 
@@ -330,6 +338,18 @@ private:
     std::chrono::steady_clock::time_point last_flush{};
     std::atomic<size_t> last_cache_size{};
     std::atomic_bool flush_in_flight{};
+
+    /// Satronho NX: AMD's proprietary driver keeps pipelines in its own disk cache
+    /// (DriverCachesPipelines), but drops large compute pipelines from it every few sessions:
+    /// Ocarina of Time's 2-6 s compute builds came back session after session, each a freeze. On
+    /// that driver the compute pipelines (a few hundred) also build into a driver pipeline cache
+    /// of ours, saved beside the shader cache, which the driver serves them from.
+    bool use_compute_driver_cache{};
+    std::filesystem::path compute_driver_cache_filename;
+    vk::PipelineCache compute_driver_cache;
+    size_t compute_since_flush{};
+    std::chrono::steady_clock::time_point compute_last_flush{};
+    std::atomic_bool compute_flush_in_flight{};
 
     /// Requested first when the cache is destroyed, to stop a rewrite of the disk cache: Android
     /// and yuzu_cmd load with a stop token that never stops

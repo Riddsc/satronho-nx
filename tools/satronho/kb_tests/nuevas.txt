@@ -1,0 +1,39 @@
+cada cuanto sale una build|actualizar
+como descargo la actualizacion manualmente|actualizar
+que pasa si no actualizo|recordar-saltar
+la version estandar es peor|pgo
+que significa mejora y arreglo|novedades
+mi grafica es una rx 6600|generaciones
+que pongo con una rtx 3070|generaciones
+mi cpu es un i5 12400 alcanza|procesador
+tengo 32 gb de ram|ram
+cuanto cuesta subir a 2x|resolucion
+que filtro es mejor para 1440p|escalado
+para que sirve smaa|antialias
+puedo bajar la niebla|niebla-exposicion
+que es accurate|gpu-modo
+que hace la opcion wait|dibujos-sin-pipeline
+como evito tirones la primera vez|precache
+para que sirve la cache de pipelines|shaders-cache
+que es bc1|astc
+modo agresivo de vram|vram
+como hago para que un juego use la configuracion general|por-juego
+donde salen los fps|fps
+como activo fps unlock|fps-unlock
+donde pongo mis mods|complementos
+como agrego una carpeta de juegos|juegos
+como marco un juego como favorito|menu-juego
+que datos lleva el informe|informe
+el emulador usa internet|privacidad
+configurar control de playstation|controles
+donde cambio los atajos|atajos
+necesito cuenta para el multijugador|multijugador
+el log se borra al abrir|log
+tengo que tocar nx2_switches.txt|nx2-switches
+que es fsr 3|dlss
+como salgo de pantalla completa|pantalla-completa
+donde estan las capturas|atajos
+quien es nono|guias
+quiero apagar a todas las mascotas|apagar-guias
+es un emulador de switch 2|que-es
+como gano mas rupias|-

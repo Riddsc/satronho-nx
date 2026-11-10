@@ -1,0 +1,11 @@
+[   0.019084] Frontend <Info> qt_common\qt_common.cpp:245:Init: Satronho NX Version: Satronho NX Development Build | main-build-35-1a5e995a38
+[   3.706742] Config <Info> common\settings.cpp:139:LogSettings: M- System.use_docked_mode: Docked
+[   3.706800] Config <Info> common\settings.cpp:139:LogSettings: M- Renderer.gpu_accuracy: Low
+[   3.706900] Config <Info> common\settings.cpp:139:LogSettings: M- Renderer.native_async_draws: Bounded
+[  10.000000] Render.Vulkan <Info> video_core\renderer_vulkan\vk_pipeline_cache.cpp:1052:LoadDiskResources: Shader cache v2 started from the version 54 cache: 6820 graphics and 637 compute pipelines (0 records collapsed), 6810 used-list entries
+[  20.000000] Service <Info> .\core/hle/service/nx2_gsv.h:2240:PresentClientBuffer: nx2:vi2 last 600 presents: frame 16693 us (max 19631, 0 over 100 ms), blocked on the GPU fence 0 us (max 17)
+[  30.000000] Service <Info> .\core/hle/service/nx2_gsv.h:2240:PresentClientBuffer: nx2:vi2 last 600 presents: frame 25000 us (max 157474, 2 over 100 ms), blocked on the GPU fence 0 us (max 22)
+[  40.000000] Service <Info> .\core/hle/service/nx2_gsv.h:2240:PresentClientBuffer: nx2:vi2 last 600 presents: frame 20000 us (max 99000, 0 over 100 ms), blocked on the GPU fence 0 us (max 22)
+[  41.000000] Render.Vulkan <Warning> video_core\renderer_vulkan\vk_slow_wait.cpp:320:NoteWorkerBuild: Compute pipeline 74ab167d83c54073 kept the Vulkan worker waiting 5260 ms for its build
+[  42.000000] Render.Vulkan <Warning> video_core\renderer_vulkan\vk_slow_wait.cpp:576:ReportWait: Slow GPU wait: 1591 ms for tick 220725 from vk_buffer_cache
+[  50.000000] Service <Info> .\core/hle/service/nx2_gsv.h:2240:PresentClientBuffer: nx2:vi2 last 600 presents: frame 40000 us (max 120000, 1 over 100 ms), blocked on the GPU fence 0 us (max 22)

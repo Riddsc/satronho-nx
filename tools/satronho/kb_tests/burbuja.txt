@@ -1,0 +1,11 @@
+que es la burbuja de la esquina|burbuja
+como quito la burbuja|burbuja
+los perritos de abajo a la derecha que son|burbuja
+como oculto los consejos de la esquina|burbuja
+gpu en fast o accurate|gpu-modo
+que es vram usage mode|vram
+como veo los fps|fps
+que es astc|astc
+wait bounded o skip|dibujos-sin-pipeline
+quienes son los guias|guias
+como apago a los guias|apagar-guias

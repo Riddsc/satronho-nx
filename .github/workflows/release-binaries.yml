@@ -48,6 +48,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Check out source for Satronho's checks
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+
+      # Satronho NX: the guides' answers, what's new, the suggested settings, the visible branding
+      # and the log comparator, before anything is tagged or built.
+      - name: Satronho checks
+        run: python3 tools/satronho/check_satronho.py
+
       - name: Prepare release tag
         if: github.event_name == 'push' || inputs.publish_release
         shell: bash

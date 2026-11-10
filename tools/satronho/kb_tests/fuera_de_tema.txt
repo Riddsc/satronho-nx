@@ -1,0 +1,34 @@
+como bajo la ultima build|actualizar
+el emulador me pide actualizar|actualizar
+cual version me recomiendan descargar|pgo
+que mejoras trae|novedades
+que tarjeta grafica necesito|generaciones
+sirve una gtx 1060|generaciones
+mi pc tiene 8 gb de ram|ram
+el juego depende del procesador o la grafica|procesador
+a que resolucion juego|resolucion
+como hago que se vea mas nitido|escalado
+que es el suavizado de bordes|antialias
+como subo el brillo en ocarina|niebla-exposicion
+que modo de gpu uso|gpu-modo
+el juego se queda congelado un momento cuando aparece algo|dibujos-sin-pipeline
+por que la primera carga es tan larga|shaders-cache
+que es build shader precache|precache
+que formato de texturas uso|astc
+mi tarjeta tiene 8 gb de vram|vram
+como vuelvo a usar la configuracion global|por-juego
+donde veo el rendimiento|fps
+que hace dynamic fps|fps-unlock
+como instalo mods|complementos
+donde pongo mis juegos|juegos
+como creo un acceso directo|menu-juego
+el informe se envia solo?|informe
+se conecta a internet|privacidad
+como cambio los botones|controles
+cual es el atajo para salir|atajos
+puedo jugar con mi amigo|multijugador
+como mando el log|log
+quien te creo|que-es
+que hace cada mascota|guias
+como prendo a los guias otra vez|apagar-guias
+cual es el mejor juego de zelda|-

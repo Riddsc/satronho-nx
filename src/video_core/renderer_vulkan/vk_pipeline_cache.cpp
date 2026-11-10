@@ -527,6 +527,9 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
       use_asynchronous_shaders{Settings::values.use_asynchronous_shaders.GetValue()},
       use_vulkan_pipeline_cache{Settings::values.use_vulkan_driver_pipeline_cache.GetValue() &&
                                 !device_.DriverCachesPipelines()},
+      use_compute_driver_cache{Settings::values.use_vulkan_driver_pipeline_cache.GetValue() &&
+                               device_.DriverCachesPipelines() &&
+                               device_.GetDriverID() == VK_DRIVER_ID_AMD_PROPRIETARY},
       serialization_thread(1, "VkPipelineSerialization", {}, Common::ThreadPlacement::Background) {
     const auto& float_control{device.FloatControlProperties()};
     const VkDriverId driver_id{device.GetDriverID()};
@@ -828,6 +831,7 @@ PipelineCache::~PipelineCache() {
         SerializeVulkanPipelineCache(vulkan_pipeline_cache_filename, vulkan_pipeline_cache,
                                      CACHE_VERSION);
     }
+    SaveComputeDriverCache();
     // After the records the serialization thread queued: its writer drains on destruction
     shader_cache_v2 = nullptr;
     cache_v2.reset();
@@ -1026,6 +1030,8 @@ void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading
             SerializeVulkanPipelineCache(vulkan_pipeline_cache_filename, vulkan_pipeline_cache,
                                          CACHE_VERSION);
         }
+        SaveComputeDriverCache();
+        compute_driver_cache_filename.clear();
         shader_cache_v2 = nullptr;
         cache_v2.reset();
         pipeline_binaries.reset();
@@ -1105,6 +1111,16 @@ void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading
         }
         vulkan_pipeline_cache =
             LoadVulkanPipelineCache(vulkan_pipeline_cache_filename, CACHE_VERSION);
+    }
+    if (use_compute_driver_cache) {
+        compute_driver_cache_filename = VideoCommon::VersionedPipelineCachePath(
+            base_dir, "satronho_compute_pipelines", CACHE_VERSION);
+        compute_driver_cache =
+            LoadVulkanPipelineCache(compute_driver_cache_filename, CACHE_VERSION);
+        size_t size = 0;
+        compute_driver_cache.Read(&size, nullptr);
+        LOG_INFO(Render_Vulkan, "Satronho compute driver cache: {} bytes from {}", size,
+                 Common::FS::PathToUTF8String(compute_driver_cache_filename));
     }
     LoadPipelinesV2(title_id, std::move(log_v2), stop_loading, callback, load_begin, precache,
                     std::move(precached_pipelines));
@@ -1588,6 +1604,7 @@ void PipelineCache::LoadPipelinesV2(u64 title_id,
         last_cache_size.store(size, std::memory_order_relaxed);
         last_flush = std::chrono::steady_clock::now();
     }
+    QueueComputeDriverCacheSave(true);
     if (state.statistics) {
         state.statistics->Report();
     }
@@ -1790,6 +1807,7 @@ void PipelineCache::PrecacheShaders(u64 title_id, std::vector<PrecacheJob> jobs,
         // Without this, the builds reach the file only at the next boot, game change or clean
         // close, and are lost if the app ends otherwise.
         QueueVulkanPipelineCacheSave();
+        QueueComputeDriverCacheSave(true);
     }
     const double seconds =
         std::chrono::duration<double>(std::chrono::steady_clock::now() - begin).count();
@@ -1828,6 +1846,47 @@ void PipelineCache::QueueVulkanPipelineCacheFlush() {
         last_cache_size.store(size, std::memory_order_relaxed);
         flush_in_flight.store(false, std::memory_order_release);
     });
+}
+
+vk::PipelineCache& PipelineCache::ComputeDriverCache() noexcept {
+    return use_compute_driver_cache ? compute_driver_cache : vulkan_pipeline_cache;
+}
+
+void PipelineCache::QueueComputeDriverCacheSave(bool now) {
+    if (!use_compute_driver_cache || compute_driver_cache_filename.empty()) {
+        return;
+    }
+    // A compute pipeline built while playing: saved soon, as the app may not close cleanly. The
+    // pipeline that asks may still be building; the next save, or the last one, has it.
+    constexpr auto MinInterval = std::chrono::seconds{20};
+    const auto current = std::chrono::steady_clock::now();
+    ++compute_since_flush;
+    if (!now && compute_last_flush.time_since_epoch().count() != 0 &&
+        current - compute_last_flush < MinInterval) {
+        return;
+    }
+    if (compute_flush_in_flight.exchange(true, std::memory_order_acq_rel)) {
+        return;
+    }
+    compute_since_flush = 0;
+    compute_last_flush = current;
+    serialization_thread.QueueWork([this] {
+        SerializeVulkanPipelineCache(compute_driver_cache_filename, compute_driver_cache,
+                                     CACHE_VERSION);
+        compute_flush_in_flight.store(false, std::memory_order_release);
+    });
+}
+
+void PipelineCache::SaveComputeDriverCache() {
+    if (!use_compute_driver_cache || compute_driver_cache_filename.empty() ||
+        !compute_driver_cache) {
+        return;
+    }
+    SerializeVulkanPipelineCache(compute_driver_cache_filename, compute_driver_cache,
+                                 CACHE_VERSION);
+    size_t size = 0;
+    compute_driver_cache.Read(&size, nullptr);
+    LOG_INFO(Render_Vulkan, "Satronho compute driver cache saved, {} bytes", size);
 }
 
 void PipelineCache::QueueVulkanPipelineCacheSave() {
@@ -2881,6 +2940,7 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(const ComputePipe
         }
     });
     QueueVulkanPipelineCacheFlush();
+    QueueComputeDriverCacheSave(false);
     return entry;
 }
 
@@ -2950,7 +3010,7 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(
             return module;
         };
         pipeline = std::make_unique<ComputePipeline>(
-            device, scheduler, vulkan_pipeline_cache, pipeline_binaries.get(), hash,
+            device, scheduler, ComputeDriverCache(), pipeline_binaries.get(), hash,
             descriptor_pool, guest_descriptor_queue, descriptor_buffer_ring,
             BuildQueue(build_in_parallel, ir_bytes), statistics,
             &shader_notify, info, vk::ShaderModule{}, key.unique_hash, std::move(emit));
@@ -2965,7 +3025,7 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(
             pools.inst.Free();
         }
         pipeline = std::make_unique<ComputePipeline>(
-            device, scheduler, vulkan_pipeline_cache, pipeline_binaries.get(), hash,
+            device, scheduler, ComputeDriverCache(), pipeline_binaries.get(), hash,
             descriptor_pool, guest_descriptor_queue, descriptor_buffer_ring,
             BuildQueue(build_in_parallel), statistics, &shader_notify, info, std::move(module),
             key.unique_hash);
