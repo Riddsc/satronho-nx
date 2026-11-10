@@ -298,6 +298,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   20 s de cada pipeline de cómputo nuevo y al cerrar; se borra con «Remove Vulkan Driver Pipeline
   Cache». Para verificarlo: tras una sesión, en la siguiente no debe aparecer «kept the Vulkan
   worker waiting» para hashes ya vistos, y el log dice «Satronho compute driver cache: N bytes».
+- **Primera sesión con la 36 (2026-11-09, 22 min, recorrido oficial):** 48 FPS típicos (igual que
+  la 35), el 10 % más lento 36.3, 4.5 cuadros de más de 100 ms por minuto (35: 10.0; 34: 15.1),
+  0 pausas largas y 0 shaders que frenaran al worker. La caché de cómputo de AMD guardó 22.6 MB al
+  cerrar (empezó vacía: 52 bytes). Cierre limpio. FSR 4: descargó los archivos de AMD, pero
+  `ocarina_fsr`/`amd_fsr4` seguían en false al arrancar el juego.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
