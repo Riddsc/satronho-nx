@@ -1345,7 +1345,7 @@
         "radeon",
         "rdna"
       ],
-      "respuesta": "Son dos opciones de «Graphics» para Ocarina of Time que vienen apagadas. «Use AMD FSR 3.1 upscaling in Ocarina of Time» reemplaza el escalado y el antialiasing propios del juego por AMD FSR 3.1, que usa la profundidad y el movimiento de la cámara; funciona en cualquier tarjeta. «Use AMD FSR 4 in place of FSR 3.1» usa la versión con inteligencia artificial de AMD, para Radeon RX 6000 o más nuevas con el driver al día; necesita unos archivos de AMD que Satronho descarga cuando tú lo pides. Si FSR 4 no puede funcionar, se usa FSR 3.1. Ambas se aplican al iniciar el juego.",
+      "respuesta": "Son dos opciones de «Graphics» para Ocarina of Time que vienen apagadas. «Use AMD FSR 3.1 upscaling in Ocarina of Time» reemplaza el escalado y el antialiasing propios del juego por AMD FSR 3.1, que usa la profundidad y el movimiento de la cámara; funciona en cualquier tarjeta. «Use AMD FSR 4 in place of FSR 3.1» usa la versión con inteligencia artificial de AMD, para Radeon RX 6000 o más nuevas con el driver al día; necesita unos archivos de AMD que Satronho descarga cuando tú lo pides. Si FSR 4 no puede funcionar, se usa FSR 3.1. Ambas se aplican al iniciar el juego. ¿Conviene? Todavía no lo recomendamos: en nuestras pruebas con una RX 9070 XT, FSR 4 congeló el juego unos 6 segundos al arrancar, dibuja a 4K aunque el monitor sea de 1440p (se ve más fino, pero la tarjeta trabaja de más) y dio algunos FPS menos y más tirones. Fueron pocos minutos: haremos más pruebas antes de sugerirlo.",
       "ver": [
         "dlss",
         "antialias",

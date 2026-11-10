@@ -373,6 +373,22 @@ Suggestion Suggest(const Hardware& hardware) {
                "(experimental). No lo activo por ti porque necesita descargar los archivos de "
                "NVIDIA desde esa misma sección."));
     }
+    // Ocarina's FSR 3.1 / FSR 4 (Lichii #1060-#1062): measured on an RX 9070 XT, not suggested yet.
+    const bool fsr4_family = suggestion.family == GpuFamily::AmdRdna4 ||
+                             suggestion.family == GpuFamily::AmdRdna3 ||
+                             suggestion.family == GpuFamily::AmdRdna2;
+    if (fsr4_family) {
+        suggestion.notes.push_back(
+            Tr("Tu tarjeta puede usar AMD FSR 4 en Ocarina («Graphics»), pero por ahora no lo "
+               "recomiendo: en nuestras pruebas con una RX 9070 XT congeló el juego unos 6 "
+               "segundos al arrancar, dibuja a 4K aunque tu monitor sea menor (se ve más fino, "
+               "pero la tarjeta trabaja de más) y dio algunos FPS menos y más tirones. Fueron "
+               "pocos minutos de prueba: hacen falta más antes de recomendarlo."));
+    } else {
+        suggestion.notes.push_back(
+            Tr("Para Ocarina existe «Use AMD FSR 3.1 upscaling in Ocarina of Time» («Graphics»). "
+               "No lo activo por ti: todavía no lo hemos probado lo suficiente para recomendarlo."));
+    }
     if (hardware.cpu_threads > 0) {
         if (hardware.cpu_threads < 12) {
             suggestion.notes.push_back(
@@ -413,7 +429,8 @@ QString GenerationGuideHtml() {
         {"AMD Radeon RX 9000 (RDNA 4)",
          "1x con AMD FSR o ScaleForce y SMAA; puede subir a 1.5x o 2x (en una RX 9070 XT, 2x "
          "costó cerca de un 20 % de FPS). Memoria de video en Conservative y Bounded. Probada a "
-         "fondo."},
+         "fondo. FSR 4 para Ocarina funciona, pero aún no lo recomendamos: congela ~6 s al "
+         "arrancar, dibuja a 4K y dio algunos FPS menos en pruebas cortas."},
         {"AMD Radeon RX 7000 (RDNA 3)",
          "Como la RX 9000: 1x con FSR y SMAA, Conservative y Bounded. Con 16 GB o más, hasta "
          "1.5x."},

@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-37",
+      "fecha": "10 de noviembre de 2026",
+      "titulo": "Medimos cada build de verdad",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "Nuestro comparador de registros ahora separa el tiempo jugando del tiempo quieto en menús, pausa o la pantalla de título, que antes inflaba los FPS. Con eso medimos cada build en el mismo recorrido y con la misma vara, y las cifras que publicamos son las reales."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Resultados de la build 36 en nuestro recorrido de prueba (Docked, de la llanura de Hyrule al río Zora, en una RX 9070 XT): cero congeladas por shaders en tres sesiones seguidas, contra 12 de hasta 5,5 segundos con la build 34 en el mismo camino. Nuestra caché de cómputo para AMD guardó los shaders y los volvió a servir al instante en cada sesión."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "«Configuraciones sugeridas» y los guías ahora hablan de FSR 3.1 y FSR 4 para Ocarina. FSR 4 funciona en tarjetas AMD RX 6000 o más nuevas, pero por ahora no lo sugerimos: en nuestras pruebas congeló el juego unos 6 segundos al arrancar, dibuja a 4K aunque el monitor sea de 1440p y dio algunos FPS menos. Fueron pruebas cortas; seguiremos midiéndolo."
+        }
+      ]
+    },
+    {
       "tag": "build-36",
       "fecha": "9 de noviembre de 2026",
       "titulo": "Adiós a las congeladas que volvían en AMD",
