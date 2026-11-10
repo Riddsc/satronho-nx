@@ -1,6 +1,33 @@
 {
   "builds": [
     {
+      "tag": "build-36",
+      "fecha": "9 de noviembre de 2026",
+      "titulo": "Adiós a las congeladas que volvían en AMD",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "En tarjetas AMD, los shaders de cómputo grandes se volvían a compilar cada pocas sesiones aunque ya estuvieran preparados: en Ocarina eran congeladas de 2 a 6 segundos que regresaban una y otra vez, con cualquier build. Lo descubrimos comparando nuestros registros de varias sesiones: el driver de AMD los sacaba de su propia caché. Ahora Satronho los guarda además en una caché propia, para que no vuelvan a compilarse."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Diagnóstico siempre encendido: cada log anota la causa de cada cuadro que tarda de más y, con nuestro detector de pausas, el shader exacto que lo frenó y cuánto. Nada que configurar."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Cada build pasa nuestros controles antes de publicarse: respuestas de los guías, novedades, configuraciones sugeridas y textos de Satronho. Y la medimos con nuestro comparador de registros en el mismo recorrido que la anterior."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Integramos 21 cambios de Lichii, entre ellos AMD FSR 3.1 y FSR 4 para Ocarina (en «Graphics», apagados por defecto; FSR 4 para Radeon RX 6000 o más nuevas), el arreglo del emulador que a veces no lograba cerrarse solo y descargas del actualizador que se reintentan si se cortan."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Los guías ahora explican FSR 3.1 y FSR 4 para Ocarina, y si conviene jugar en Docked o en Handheld según tu equipo."
+        }
+      ]
+    },
+    {
       "tag": "build-35",
       "fecha": "9 de noviembre de 2026",
       "titulo": "Caché de shaders nueva y diagnóstico en conjunto con Lichii",

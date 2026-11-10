@@ -25,6 +25,7 @@ TOOLS = pathlib.Path(__file__).resolve().parent
 ROOT = TOOLS.parents[1]
 sys.path.insert(0, str(TOOLS))
 
+sys.dont_write_bytecode = True
 import compare_logs  # noqa: E402
 
 # Visible text may name Lichii in these (credits, Lichii's compatibility site, the report's

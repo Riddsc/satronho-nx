@@ -37,3 +37,6 @@ quien es nono|guias
 quiero apagar a todas las mascotas|apagar-guias
 es un emulador de switch 2|que-es
 como gano mas rupias|-
+conviene docked o handheld|docked-handheld
+que es fsr 4|fsr-ocarina
+como activo fsr 3.1 en ocarina|fsr-ocarina

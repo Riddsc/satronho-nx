@@ -9,9 +9,10 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`1a5e995a`** (2026-11-09, #1056; build 35: caché de shaders v2
-  #1036, lectura asíncrona #1028, HostTiming #1016, formato .nx #923, rastreador de tirones
-  #975/#1039, semáforos #979/#1014/#949). Antes: `cbb512ee` (#932).
+- Último commit de Lichii integrado: **`d2eaae4f`** (2026-11-09, #1143; build 36: arreglo del cierre
+  #1058, FSR 3.1/4 para Ocarina #1060-#1062, nxformat 1.0.1 #1078/#1127, reintentos del
+  actualizador #1101). Antes: `1a5e995a` (#1056, build 35: caché v2 #1036, lectura asíncrona
+  #1028, HostTiming #1016, .nx #923, rastreador #975/#1039), `cbb512ee` (#932).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
   El historial se reescribió el 2026-11-08 (mismo código, commits a nombre de Riddsc) y las builds
@@ -277,3 +278,35 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   muestrea mal en las costuras del terreno lejano, así que esas texturas quedan en RGBA8. Solo actúa
   con ASTC decodificado en GPU y recompresión distinta de "Uncompressed". Verificado por el usuario
   en build-23 (RX 9070 XT) en el mismo punto donde Lichii 117 mostraba las líneas.
+
+## Build 36: método de medición y caché de cómputo en AMD
+
+- **Recorrido oficial de prueba:** Docked, Fast, desde la llanura de Hyrule hasta el río Zora, unos
+  5–10 minutos. Cada build se juzga ahí, con `tools/satronho/compare_logs.py viejo.txt nuevo.txt`
+  (misma tabla siempre y avisos si las sesiones no son comparables: modo, precisión, filtro,
+  primera sesión tras cambiar la caché, rastreador, duración).
+- **Prueba 34 contra 35 en ese recorrido (2026-11-09):** la 35 no era más lenta. La 34 dio 36.9 FPS
+  típicos con 12 congeladas de 1.5–5.5 s; la 35, 48 FPS sin congeladas. Las congeladas de la 34
+  fueron los mismos 12 shaders de cómputo que la 35 había recompilado: el historial de
+  `pipeline_builds.txt` muestra que 74ab167d83c54073 (y otros) tardaban 4–6 s cada pocas sesiones
+  desde antes de la 35, con 0.2–0.8 ms entre medio: **el driver propietario de AMD los saca de su
+  propia caché.** Lichii no usa caché de pipelines propia en AMD/NVIDIA
+  (`Device::DriverCachesPipelines`) y en AMD tampoco VK_KHR_pipeline_binary.
+- **Arreglo (build 36):** en AMD propietario, los pipelines de cómputo se construyen en una
+  `VkPipelineCache` nuestra (`satronho_compute_pipelines.fork-v54.bin` en la carpeta de shaders del
+  juego), cargada en `LoadDiskResources`, guardada al terminar la carga, tras el precache, a los
+  20 s de cada pipeline de cómputo nuevo y al cerrar; se borra con «Remove Vulkan Driver Pipeline
+  Cache». Para verificarlo: tras una sesión, en la siguiente no debe aparecer «kept the Vulkan
+  worker waiting» para hashes ya vistos, y el log dice «Satronho compute driver cache: N bytes».
+- En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
+  ~35 % de FPS en Ocarina.
+- El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
+  no cambia los FPS.
+- `tools/satronho/check_satronho.py` corre en `prepare-release` antes de etiquetar: base de los
+  guías (`kb_tests/`), novedades, sugerencias (nunca Wait; migración v4 a Bounded), marca visible y
+  comparador (registro de prueba en `fixtures/`).
+- Pendiente: la neblina blanca del río Zora (vista una vez, en la primera sesión de la 35 en Docked
+  con caché nueva) no volvió a aparecer. Si vuelve: probar con `EDEN_NX2_READ_CHECK=8` (compara la
+  lectura asíncrona con una síncrona y anota diferencias).
+- La caché v2, al migrar desde la v54, precarga variantes de cómputo (clave s0) distintas de las que
+  pide el juego (s6): la primera visita a cada zona tras migrar arma las nuevas. Se corrige solo.

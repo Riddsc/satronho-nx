@@ -551,6 +551,38 @@
       ]
     },
     {
+      "id": "docked-handheld",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Docked o Handheld: cuál rinde mejor?",
+      "frases": [
+        "docked o handheld",
+        "modo docked",
+        "modo portatil",
+        "handheld",
+        "modo dock",
+        "rinde mejor docked",
+        "cambiar a portatil",
+        "handheld da mas fps",
+        "docked da menos fps",
+        "portatil o dock"
+      ],
+      "claves": [
+        "docked",
+        "handheld",
+        "portatil",
+        "dock",
+        "acoplado",
+        "modo"
+      ],
+      "respuesta": "En Docked el juego dibuja como en la consola conectada al televisor (en Ocarina, a 2560×1440) y en Handheld como en la pantalla de la consola (1920×1080). Docked se ve más nítido y exige más a la tarjeta gráfica. En nuestras pruebas con una Radeon RX 9070 XT, los dos dieron los mismos FPS, porque ahí el límite era el procesador: si tu tarjeta es potente, quédate en Docked. Con una tarjeta modesta, Handheld puede darte más FPS. Se cambia en «Emulation → Configure → System» o con el botón de la barra de abajo.",
+      "ver": [
+        "resolucion",
+        "gpu-modo",
+        "generaciones"
+      ]
+    },
+    {
       "id": "escalado",
       "guia": "troya",
       "tema": "Gráficos",
@@ -1120,7 +1152,7 @@
         "espian",
         "espia"
       ],
-      "respuesta": "No hay telemetría. Por internet solo sale lo que tú usas: la búsqueda de actualizaciones en GitHub, la descarga de carátulas, el informe de compatibilidad si lo envías, el multijugador si entras a una sala y el estado de Discord si lo activas. Los guías responden sin internet, desde lo que trae el emulador.",
+      "respuesta": "No hay telemetría. Por internet solo sale lo que tú usas: la búsqueda de actualizaciones en GitHub, la descarga de carátulas, el informe de compatibilidad si lo envías, el multijugador si entras a una sala y el estado de Discord si lo activas y los archivos de AMD para FSR 4 si los pides. Los guías responden sin internet, desde lo que trae el emulador.",
       "ver": [
         "informe",
         "multijugador"
@@ -1236,7 +1268,7 @@
         "compartir",
         "archivo"
       ],
-      "respuesta": "El log es un registro de lo que hace el emulador en cada sesión. Está en %APPDATA%\\eden\\log: «eden_log.txt» es el de la sesión actual o la última, y «eden_log.txt.old.txt» el de la anterior. Al abrir el emulador, el log se reemplaza, así que si te lo piden, mándalo antes de volver a abrirlo. Solo lo usamos para revisar qué pasó junto con quien desarrolla Satronho.",
+      "respuesta": "El log es un registro de lo que hace el emulador en cada sesión. Está en %APPDATA%\\eden\\log: «eden_log.txt» es el de la sesión actual o la última, y «eden_log.txt.old.txt» el de la anterior. Al abrir el emulador, el log se reemplaza, así que si te lo piden, mándalo antes de volver a abrirlo. Solo lo usamos para revisar qué pasó junto con quien desarrolla Satronho. Desde la build 36, cada cuadro que tarda de más queda anotado con su causa y, si fue un shader, cuál fue y cuánto tardó: así un solo log basta para saber qué frenó el juego.",
       "ver": [
         "datos"
       ]
@@ -1287,6 +1319,37 @@
       "ver": [
         "escalado",
         "resolucion"
+      ]
+    },
+    {
+      "id": "fsr-ocarina",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué son FSR 3.1 y FSR 4 para Ocarina?",
+      "frases": [
+        "fsr 3.1 ocarina",
+        "fsr 4",
+        "fsr4",
+        "ocarina fsr",
+        "escalado de ocarina",
+        "usar fsr 4",
+        "que es fsr 4",
+        "fsr con inteligencia artificial",
+        "fsr 3.1"
+      ],
+      "claves": [
+        "fsr4",
+        "fsr",
+        "ocarina",
+        "escalado",
+        "radeon",
+        "rdna"
+      ],
+      "respuesta": "Son dos opciones de «Graphics» para Ocarina of Time que vienen apagadas. «Use AMD FSR 3.1 upscaling in Ocarina of Time» reemplaza el escalado y el antialiasing propios del juego por AMD FSR 3.1, que usa la profundidad y el movimiento de la cámara; funciona en cualquier tarjeta. «Use AMD FSR 4 in place of FSR 3.1» usa la versión con inteligencia artificial de AMD, para Radeon RX 6000 o más nuevas con el driver al día; necesita unos archivos de AMD que Satronho descarga cuando tú lo pides. Si FSR 4 no puede funcionar, se usa FSR 3.1. Ambas se aplican al iniciar el juego.",
+      "ver": [
+        "dlss",
+        "antialias",
+        "escalado"
       ]
     },
     {
