@@ -4,7 +4,7 @@ los perritos de abajo a la derecha que son|burbuja
 como oculto los consejos de la esquina|burbuja
 gpu en fast o accurate|gpu-modo
 que es vram usage mode|vram
-como veo los fps|fps
+como veo los fps|medidor
 que es astc|astc
 wait bounded o skip|dibujos-sin-pipeline
 quienes son los guias|guias

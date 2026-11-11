@@ -35,7 +35,7 @@ que hace vram usage mode|vram
 conservative o aggressive|vram
 por que no cambia el ajuste en un juego|por-juego
 configuracion de cada juego|por-juego
-como veo los fps|fps
+como veo los fps|medidor
 como subo los fps|fps
 que es fps unlock|fps-unlock
 puedo jugar a 120 hz|fps-unlock
@@ -67,3 +67,4 @@ cual es la diferencia con lichii|lichii
 por que los ajustes vienen al 100|fidelidad
 cuanto cuesta una pizza|-
 como derroto a ganon|-
+quiero ver la ram mientras juego|medidor

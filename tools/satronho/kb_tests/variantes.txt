@@ -48,3 +48,5 @@ es igual que lichii|lichii
 por que viene todo al 100 por ciento|fidelidad
 que es satronho|que-es
 la receta del arroz con pollo|-
+como pongo el contador de fps|medidor
+que significan los numeros del overlay|medidor

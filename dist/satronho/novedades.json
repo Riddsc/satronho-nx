@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-38",
+      "fecha": "11 de noviembre de 2026",
+      "titulo": "Medidor de rendimiento con nuestro sello",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Medidor de rendimiento sobre el juego: actívalo en «View → Show Performance Overlay» o con Ctrl+V. Parte del diseño nuevo de Lichii (FPS en grande, milisegundos por cuadro, CPU y GPU, y la gráfica de los últimos 5 segundos), con los colores de Satronho y una fila que agregamos nosotros: la RAM que usa el emulador y la memoria de video que usa sobre lo que el driver le deja, en naranja cerca del límite y en rojo al tope. Samy te explica cómo leerlo."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Integramos los últimos cambios de Lichii, entre ellos el arreglo del congelamiento en la casa de la guardia de Ocarina, de un cierre por falta de memoria en Ocarina y del chasquido al tocar la ocarina, además de salida HDR nativa y los perfiles de DLSS. Tus datos siguen en la misma carpeta de siempre."
+        }
+      ]
+    },
+    {
       "tag": "build-37",
       "fecha": "10 de noviembre de 2026",
       "titulo": "Medimos cada build de verdad",

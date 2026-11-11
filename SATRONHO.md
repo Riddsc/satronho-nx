@@ -9,9 +9,17 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`d2eaae4f`** (2026-11-09, #1143; build 36: arreglo del cierre
+- Último commit de Lichii integrado: **`4d884cbb`** (2026-11-11, #1232; build 38: medidor
+  rediseñado #1345, HDR nativo #1326, perfiles DLSS #1249, pipelines con límite de RAM #1334,
+  casa de la guardia de OoT #1313, falta de memoria en OoT #1210, chasquido de la ocarina #1196).
+  **Excluidos a propósito** (revertidos tras aplicar el diff; vuelve a revertirlos al integrar):
+  `290da9e8` #1253 (carpeta de datos propia de Lichii: seguimos en `%APPDATA%\eden`),
+  `467e7724` #1200 + `093e264c` #1212 + `17baed71` #1264 (ventana de ajustes recomendados de
+  Lichii: tenemos nuestras «Configuraciones sugeridas», y Lichii no nos dio crédito).
+  `git show --binary <c> | git apply -R -3 --index`, en orden #1264, #1212, #1200, #1253.
+  Antes: `d2eaae4f` (#1143; build 36: arreglo del cierre
   #1058, FSR 3.1/4 para Ocarina #1060-#1062, nxformat 1.0.1 #1078/#1127, reintentos del
-  actualizador #1101). Antes: `1a5e995a` (#1056, build 35: caché v2 #1036, lectura asíncrona
+  actualizador #1101), `1a5e995a` (#1056, build 35: caché v2 #1036, lectura asíncrona
   #1028, HostTiming #1016, .nx #923, rastreador #975/#1039), `cbb512ee` (#932).
   Actualiza esta línea cada vez que integres.
 - Builds publicadas: release `build-N` en GitHub (N = número de ejecución del workflow).
@@ -93,6 +101,15 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Conflicto típico al integrar: el lambda de espera de `vk_compute_pipeline.cpp` (conservar la
   zona `PipelineWait` y `jobs->RunOrWait` de Lichii más nuestro `wait_start`/`NoteWorkerBuild`) y
   `vk_master_semaphore.cpp` (zona `GpuWait` + nuestro cronómetro).
+- Medidor de rendimiento (build 38): sobre el rediseño de Lichii #1345
+  (`src/yuzu/render/performance_overlay.{h,cpp}`) va nuestra paleta (morado noche + verde agua
+  `#4FD1C5`, franja a la izquierda, mediana punteada en verde agua) y la fila de memoria
+  (`paintMemory`): RAM = `Common::GetProcessMemoryUsage().private_working_set`, VRAM =
+  `RendererBase::GetVideoMemoryUsage()` (en Vulkan: uso + holgura de VMA contra
+  `GetDeviceMemoryBudget()`), naranja desde 85 % y rojo desde 97 %. Tema de Samy: `medidor`.
+  Al integrar, conservar la fila y los colores si Lichii toca el archivo.
+- Conflicto en `vk_rasterizer.cpp` (build 38): las lambdas de despacho llevan
+  `slot = note_slow_wait()` + `SlowWait::ResetSlot` nuestro y `RecordDispatchBarrier` de Lichii.
 - Caché v2: los registros guardan el código nativo, no SPIR-V, así que el ajuste de niebla y
   exposición de Ocarina (`CreateGraphicsPipeline`/`CreateComputePipeline`) se sigue aplicando.
 - CI (`.github/workflows/release-binaries.yml`): solo Windows, estándar + PGO (clang-cl, ThinLTO,

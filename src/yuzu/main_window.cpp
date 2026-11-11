@@ -51,6 +51,7 @@
 #include "yuzu/satronho/novedades.h"
 #include "video_core/shader_warm/shader_warm_builder.h"
 #ifdef LICHII_NX_TOOLS
+#include "core/file_sys/registered_cache.h"
 #include "yuzu/nx_tools.h"
 #endif
 
@@ -169,6 +170,7 @@ static FileSys::VirtualFile VfsDirectoryCreateFileWrapper(const FileSys::Virtual
 #include "core/file_sys/nup_writer.h"
 #include "core/file_sys/romfs.h"
 #include "core/file_sys/savedata_factory.h"
+#include "core/loader/nx.h"
 
 #include "core/tools/renderdoc.h"
 
@@ -1035,13 +1037,17 @@ void MainWindow::InitializeWidgets() {
     game_fps_label = new QLabel();
     game_fps_label->setToolTip(tr("How many frames per second the game is currently displaying. "
                                   "This will vary from game to game and scene to scene."));
+    dlss_status_label = new QLabel();
+    dlss_status_label->setToolTip(
+        tr("NVIDIA DLSS is upscaling the game, in the mode shown. The window adapting filter "
+           "runs after it."));
     emu_frametime_label = new QLabel();
     emu_frametime_label->setToolTip(
         tr("Time taken to emulate a Switch frame, not counting framelimiting or v-sync. For "
            "full-speed emulation this should be at most 16.67 ms."));
 
     for (auto& label : {shader_building_label, res_scale_label, emu_speed_label, game_fps_label,
-                        emu_frametime_label}) {
+                        dlss_status_label, emu_frametime_label}) {
         label->setVisible(false);
         label->setFrameStyle(QFrame::NoFrame);
         label->setContentsMargins(4, 0, 4, 0);
@@ -1578,6 +1584,14 @@ void MainWindow::ConnectWidgetEvents() {
     nx_tools = new NxTools(QtCommon::vfs, this);
     connect(nx_tools, &NxTools::RunningChanged, game_list, &GameList::SetNxToolRunning);
     connect(nx_tools, &NxTools::ArchivesChanged, this, &MainWindow::OnGameListRefresh);
+    connect(nx_tools, &NxTools::MetadataWriteFinished, this, [this] {
+        nx_metadata_write_in_progress = false;
+        if (!close_pending) {
+            QtCommon::Game::ResetMetadata(false);
+            game_list->SetScanEnabled(true);
+            game_list->PopulateAsync(UISettings::values.game_dirs);
+        }
+    });
     connect(game_list, &GameList::ConvertToNxRequested, this,
             [this](const std::string& path) { OnGameListNxTool(path, &NxTools::ConvertToNx); });
     connect(game_list, &GameList::AddToNxRequested, this,
@@ -1585,7 +1599,7 @@ void MainWindow::ConnectWidgetEvents() {
     connect(game_list, &GameList::RemoveFromNxRequested, this,
             [this](const std::string& path) { OnGameListNxTool(path, &NxTools::RemoveFromNx); });
     connect(game_list, &GameList::EditNxMetadataRequested, this,
-            [this](const std::string& path) { OnGameListNxTool(path, &NxTools::EditNxMetadata); });
+            &MainWindow::OnGameListEditNxMetadata);
 #endif
     connect(game_list, &GameList::CopyTIDRequested, this, &MainWindow::OnGameListCopyTID);
     connect(game_list, &GameList::CreateShortcut, this, &MainWindow::OnGameListCreateShortcut);
@@ -2084,6 +2098,13 @@ bool MainWindow::SelectAndSetCurrentUser(
 
 void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletParameters params,
                           StartGameType type) {
+#ifdef LICHII_NX_TOOLS
+    if (nx_metadata_write_in_progress) {
+        QMessageBox::information(this, tr("NX Archive"),
+                                 tr("Wait for the NX metadata edit to finish before starting a game."));
+        return;
+    }
+#endif
     if (nup_running && filename.toStdString() == nup_source_path) {
         QMessageBox::information(this, tr("Conversion in Progress"),
                                  tr("This game cannot be started while its dump is being "
@@ -2371,6 +2392,8 @@ void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletPa
     frame_gen_state = VideoCore::FrameGenState::Pending;
     frame_gen_frames = 0;
     frame_gen_generating = false;
+    frame_gen_fps = 0.0;
+    frame_gen_fps_timer.invalidate();
     refresh_button->setDisabled(true);
     SetFPSSuffix();
 
@@ -2587,6 +2610,7 @@ void MainWindow::OnEmulationStopped() {
     res_scale_label->setVisible(false);
     emu_speed_label->setVisible(false);
     game_fps_label->setVisible(false);
+    dlss_status_label->setVisible(false);
     emu_frametime_label->setVisible(false);
     renderer_status_button->setEnabled(!UISettings::values.has_broken_vulkan);
     frame_gen_status_button->setEnabled(true);
@@ -2942,33 +2966,49 @@ void MainWindow::OnGameListDumpRomFS(u64 program_id, const std::string& game_pat
         return;
     }
 
-    FileSys::VirtualFile packed_update_raw{};
-    loader->ReadUpdateRaw(packed_update_raw);
-
     const auto& installed = QtCommon::system->GetContentProvider();
 
     u64 title_id{};
-    u8 raw_type{};
-    if (!SelectRomFSDumpTarget(installed, program_id, &title_id, &raw_type)) {
-        failed();
-        return;
+    FileSys::VirtualFile romfs;
+    if (loader->GetFileType() == Loader::FileType::NX) {
+        // An NX archive is never installed: it gives its own RomFS, update applied.
+        Loader::AppLoader_NX nx_loader{*QtCommon::system,
+                                       QtCommon::vfs->OpenFile(game_path, FileSys::OpenMode::Read),
+                                       program_id};
+        title_id = program_id;
+        if (nx_loader.ReadPatchedRomFS(romfs) != Loader::ResultStatus::Success) {
+            failed();
+            return;
+        }
+    } else {
+        FileSys::VirtualFile packed_update_raw{};
+        loader->ReadUpdateRaw(packed_update_raw);
+
+        u8 raw_type{};
+        if (!SelectRomFSDumpTarget(installed, program_id, &title_id, &raw_type)) {
+            failed();
+            return;
+        }
+
+        const auto type = static_cast<FileSys::ContentRecordType>(raw_type);
+        const auto base_nca = installed.GetEntry(title_id, type);
+        if (!base_nca) {
+            failed();
+            return;
+        }
+
+        const FileSys::NCA update_nca{packed_update_raw, nullptr};
+        if (type != FileSys::ContentRecordType::Program ||
+            update_nca.GetStatus() != Loader::ResultStatus::ErrorMissingBKTRBaseRomFS ||
+            update_nca.GetTitleId() != FileSys::GetUpdateTitleID(title_id)) {
+            packed_update_raw = {};
+        }
+
+        const FileSys::PatchManager pm{title_id, QtCommon::system->GetFileSystemController(),
+                                       installed};
+        romfs = pm.PatchRomFS(base_nca.get(), base_nca->GetRomFS(), type, packed_update_raw, false);
     }
 
-    const auto type = static_cast<FileSys::ContentRecordType>(raw_type);
-    const auto base_nca = installed.GetEntry(title_id, type);
-    if (!base_nca) {
-        failed();
-        return;
-    }
-
-    const FileSys::NCA update_nca{packed_update_raw, nullptr};
-    if (type != FileSys::ContentRecordType::Program ||
-        update_nca.GetStatus() != Loader::ResultStatus::ErrorMissingBKTRBaseRomFS ||
-        update_nca.GetTitleId() != FileSys::GetUpdateTitleID(title_id)) {
-        packed_update_raw = {};
-    }
-
-    const auto base_romfs = base_nca->GetRomFS();
     const auto dump_dir =
         target == DumpRomFSTarget::Normal
             ? Common::FS::GetEdenPath(Common::FS::EdenPath::DumpDir)
@@ -2976,10 +3016,6 @@ void MainWindow::OnGameListDumpRomFS(u64 program_id, const std::string& game_pat
     const auto romfs_dir = fmt::format("{:016X}/romfs", title_id);
 
     const auto path = Common::FS::PathToUTF8String(dump_dir / romfs_dir);
-
-    const FileSys::PatchManager pm{title_id, QtCommon::system->GetFileSystemController(),
-                                   installed};
-    auto romfs = pm.PatchRomFS(base_nca.get(), base_romfs, type, packed_update_raw, false);
 
     const auto out = VfsFilesystemCreateDirectoryWrapper(path, FileSys::OpenMode::ReadWrite);
 
@@ -4372,6 +4408,33 @@ void MainWindow::OnGameListRefresh() {
 }
 
 #ifdef LICHII_NX_TOOLS
+void MainWindow::OnGameListEditNxMetadata(const std::string& game_path) {
+    const auto can_edit = [this] {
+        if (boot_in_progress || close_pending || nx_metadata_write_in_progress) {
+            return false;
+        }
+        if (emulation_running || QtCommon::system->IsPoweredOn()) {
+            QMessageBox::information(this, tr("NX Archive"),
+                                     tr("Stop emulation before editing NX metadata."));
+            return false;
+        }
+        return true;
+    };
+    if (!can_edit()) {
+        return;
+    }
+    nx_tools->EditNxMetadata(game_path, [this, &can_edit] {
+        if (!can_edit()) {
+            return false;
+        }
+        nx_metadata_write_in_progress = true;
+        game_list->SetScanEnabled(false);
+        // The manual provider keeps NX sessions alive through registered updates and DLC.
+        QtCommon::provider->ClearAllEntries();
+        return true;
+    });
+}
+
 void MainWindow::OnGameListNxTool(const std::string& game_path,
                                   void (NxTools::*tool)(const std::string&)) {
     // An archive edited in place must not be read by a running game.
@@ -4389,7 +4452,8 @@ void MainWindow::OnGameListConvertToNup(const std::string& game_path) {
     if (nup_running)
         return;
 
-    const auto root = FileSys::Nup::DumpRootFromMain(game_path);
+    const auto root =
+        FileSys::Nup::DumpRootFromMain(std::filesystem::path{Common::FS::ToU8String(game_path)});
     if (!root)
         return;
     const QString convert_title = tr("Convert to NUP");
@@ -5133,6 +5197,45 @@ void MainWindow::UpdateStatusBar() {
     auto& shader_notify = QtCommon::system->GPU().ShaderNotify();
     const int shaders_building = shader_notify.ShadersBuilding();
 
+    // Before statsUpdated, so the performance overlay reads this update's generated frame rate.
+    const auto frame_gen = QtCommon::system->GPU().Renderer().GetFrameGenStatus();
+    const u64 new_generated_frames = frame_gen.generated_frames - frame_gen_frames;
+    const qint64 frame_gen_ms = frame_gen_fps_timer.isValid() ? frame_gen_fps_timer.restart() : 0;
+    if (!frame_gen_fps_timer.isValid()) {
+        frame_gen_fps_timer.start();
+    }
+    frame_gen_fps = frame_gen_ms > 0 ? static_cast<double>(new_generated_frames) * 1000.0 /
+                                           static_cast<double>(frame_gen_ms)
+                                     : 0.0;
+    frame_gen_generating = frame_gen.generated_frames > frame_gen_frames;
+    frame_gen_frames = frame_gen.generated_frames;
+    frame_gen_state = frame_gen.state;
+
+    const auto dlss = QtCommon::system->GPU().Renderer().GetDlssStatus();
+    dlss_status_text.clear();
+    if (dlss.evaluations > dlss_evaluations) {
+        const auto mode_text = [this](Settings::NvidiaDlssQuality mode) {
+            return ConfigurationShared::TranslateMapText(
+                       translator, ConfigurationShared::nvidia_dlss_quality_texts_map.at(mode))
+                .toUpper();
+        };
+        dlss_status_text =
+            tr("DLSS %1 %2", "NVIDIA DLSS mode and model preset, e.g. DLSS DLAA M")
+                .arg(mode_text(dlss.mode),
+                     ConfigurationShared::TranslateMapText(
+                         translator,
+                         ConfigurationShared::nvidia_dlss_preset_texts_map.at(dlss.preset))
+                         .toUpper());
+        if (dlss.requested != Settings::NvidiaDlssQuality::Automatic &&
+            dlss.requested != dlss.mode) {
+            dlss_status_text += tr(" (%1 DOESN'T FIT)", "The DLSS mode the user chose")
+                                    .arg(mode_text(dlss.requested));
+        }
+    }
+    dlss_evaluations = dlss.evaluations;
+    dlss_status_label->setText(dlss_status_text);
+    dlss_status_label->setVisible(!dlss_status_text.isEmpty());
+
     emit statsUpdated(results, shader_notify);
 
     if (shaders_building > 0) {
@@ -5156,6 +5259,9 @@ void MainWindow::UpdateStatusBar() {
     }
 
     QString fpsText = tr("Game: %1 FPS").arg(std::round(results.average_game_fps), 0, 'f', 0);
+    if (frame_gen_fps >= 0.5) {
+        fpsText = fpsText % tr(" + %1 generated").arg(std::round(frame_gen_fps), 0, 'f', 0);
+    }
     if (!m_fpsSuffix.isEmpty())
         fpsText = fpsText % QStringLiteral(" (%1)").arg(m_fpsSuffix);
 
@@ -5163,10 +5269,6 @@ void MainWindow::UpdateStatusBar() {
 
     emu_frametime_label->setText(tr("Frame: %1 ms").arg(results.frametime * 1000.0, 0, 'f', 2));
 
-    const auto frame_gen = QtCommon::system->GPU().Renderer().GetFrameGenStatus();
-    frame_gen_generating = frame_gen.generated_frames > frame_gen_frames;
-    frame_gen_frames = frame_gen.generated_frames;
-    frame_gen_state = frame_gen.state;
     UpdateFrameGenButton();
 
     res_scale_label->setVisible(true);

@@ -944,8 +944,9 @@
         "aumentar",
         "mejorar"
       ],
-      "respuesta": "Abajo a la derecha, en la barra de estado, salen «Game» (los FPS del juego) y «Frame» (cuánto tarda cada cuadro). En Ocarina, los FPS dependen sobre todo del procesador. Lo que más ayuda es GPU Mode en Fast, cerrar programas en segundo plano y el precache de shaders. Subir o bajar la resolución cambia poco.",
+      "respuesta": "Abajo a la derecha, en la barra de estado, salen «Game» (los FPS del juego) y «Frame» (cuánto tarda cada cuadro); para verlo todo sobre el juego, con la RAM y la memoria de video, activa el medidor en «View → Show Performance Overlay». En Ocarina, los FPS dependen sobre todo del procesador. Lo que más ayuda es GPU Mode en Fast, cerrar programas en segundo plano y el precache de shaders. Subir o bajar la resolución cambia poco.",
       "ver": [
+        "medidor",
         "procesador",
         "gpu-modo",
         "fps-unlock"
@@ -1009,11 +1010,53 @@
         "perrito",
         "perritos"
       ],
-      "respuesta": "En la esquina de abajo a la derecha de la lista de juegos estamos MechaRidds y una de las mascotas. Haz clic y te damos un consejo sobre el emulador; con «Cuéntame más» lo ves completo y con «Otro consejo» pasas al siguiente. Cuando sale una build nueva, Juana te cuenta ahí qué trae. Mientras juegas no se ve. Para ocultarla, haz clic derecho sobre ella o ve a «Satronho → Guías».",
+      "respuesta": "En la esquina de abajo a la derecha de la lista de juegos estamos MechaRidds y una de las mascotas. Haz clic y te damos un consejo sobre el emulador; con «Cuéntame más» lo ves completo y con «Otro consejo» pasas al siguiente. Cuando sale una build nueva, Samy te cuenta ahí qué trae. Mientras juegas no se ve. Para ocultarla, haz clic derecho sobre ella o ve a «Satronho → Guías».",
       "ver": [
         "guias",
         "apagar-guias",
         "preguntar"
+      ]
+    },
+    {
+      "id": "medidor",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo veo los FPS, la RAM y la memoria de video mientras juego?",
+      "frases": [
+        "como veo los fps",
+        "mostrar los fps",
+        "contador de fps",
+        "medidor de rendimiento",
+        "ver fps en pantalla",
+        "ver la ram mientras juego",
+        "uso de ram",
+        "uso de cpu y gpu",
+        "cuanta memoria de video uso",
+        "overlay de rendimiento",
+        "el cuadro de fps",
+        "que significan los numeros del medidor",
+        "activar el overlay",
+        "grafica de tiempos de cuadro",
+        "cuanta ram usa el emulador",
+        "ram del emulador",
+        "ver cuanta ram",
+        "ver cuanta ram usa",
+        "linea roja",
+        "picos rojos"
+      ],
+      "claves": [
+        "fps",
+        "medidor",
+        "overlay",
+        "contador",
+        "pantalla",
+        "grafica"
+      ],
+      "respuesta": "Ve a «View → Show Performance Overlay» (o Ctrl+V) y aparece un cuadro sobre el juego; lo puedes arrastrar a donde quieras. El número grande son los FPS. Arriba a la derecha, los milisegundos por cuadro y cuánto trabajan la CPU y la GPU: la que sale en verde agua es la que te está frenando. La línea es el tiempo de cada cuadro de los últimos 5 segundos; los picos en rojo son tirones. Abajo, los FPS mínimo, típico y máximo, y lo que tienes activado (FSR, la escala…). La última fila es nuestra: la RAM que usa el emulador sobre la de tu PC, y la memoria de video que usa sobre la que el driver le deja; se pone naranja cerca del límite y roja al tope. Para medir de verdad entre builds seguimos usando el registro, pero el cuadro sirve para ver al momento qué pasa.",
+      "ver": [
+        "vram",
+        "log",
+        "docked-handheld"
       ]
     },
     {
