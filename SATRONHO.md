@@ -336,6 +336,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   ac898ad3f17a4df5, shaders de cómputo vistos una sola vez antes (5.8–6.3 s, en la build 30, antes de
   existir nuestra caché) en zonas que no se habían vuelto a visitar; ahora quedan en ella. Ninguno de
   los que ya estaban en nuestra caché volvió a compilarse.
+- **Builds 38 y 40 (2026-11-11), Docked/Fast/FSR/SMAA, Bounded, Conservative:**
+  | | 38 (1.ª tras actualizar, 5.5 min) | 40 (24 min jugando, 60 en total) |
+  | FPS típicos al jugar | 43.4 | 44.3 |
+  | 10 % más lento | 33.8 | 41.3 |
+  | Cuadros >100 ms/min | 8.0 | 3.4 |
+  | Congeladas por shaders | 1 (1.7 s) | 0 |
+  La 38 re-tradujo 4210 programas («of another build lowered again»: los commits de Lichii tocaron
+  el compilador de shaders), así que su SPIR-V cambió y el driver no lo tenía: el cómputo
+  37fa0bf79db426d7 (5.4 s en una build vieja) tardó 1.66 s; en la 40 salió de nuestra caché en
+  1.1 ms. Tras una actualización que toca el compilador, la primera sesión vuelve a armar shaders.
+  FPS por encima de la 36 (~38–39) en ambas; la sesión de la 40 no fue solo el recorrido oficial.
+  La 40 forzó la detención al cerrar («Emulation thread failed to stop»), la 38 no.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
