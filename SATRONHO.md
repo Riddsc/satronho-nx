@@ -348,6 +348,15 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   1.1 ms. Tras una actualización que toca el compilador, la primera sesión vuelve a armar shaders.
   FPS por encima de la 36 (~38–39) en ambas; la sesión de la 40 no fue solo el recorrido oficial.
   La 40 forzó la detención al cerrar («Emulation thread failed to stop»), la 38 no.
+- **Hookshot (port nativo de OoT, NotRexed/hookshot, GPL-3.0, revisado 2026-11-11):** recompilación
+  estática (ARM64 → C → clang) + Horizon y NVN2 reimplementados; reproduce las llamadas NVN2 en
+  Vulkan con el recompilador de shaders de Eden/Eglantine (su FSR 4 viene de la rama OoT de Lichii).
+  Nada de su núcleo se puede trasplantar a un emulador. Su perfil de CPU (`docs/cpu-profile.md`,
+  RX 9070 XT + Ryzen 7 5700X3D, 64 GB): llanura de Hyrule 51 FPS con 8 cuadros >100 ms, Kokiri 77,
+  ciudadela→Templo del Tiempo 91; el código del juego solo ya cuesta 1.7–2.1 núcleos. Nuestra 40
+  en llanura→Zora: 44 FPS típicos (~86 % del nativo ahí). 60 FPS fijos en la llanura no los da ni el
+  port en ese equipo. Idea útil: su método de medir qué limita el cuadro (tiempo por hilo y en qué
+  espera); nosotros no registramos aún cuánto trabajan los núcleos del juego.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
