@@ -68,3 +68,5 @@ por que los ajustes vienen al 100|fidelidad
 cuanto cuesta una pizza|-
 como derroto a ganon|-
 quiero ver la ram mientras juego|medidor
+por que no llega a 60 fps|techo-fps
+que significan las barras de nucleos|techo-fps

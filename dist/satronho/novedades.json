@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-41",
+      "fecha": "11 de noviembre de 2026",
+      "titulo": "Sabemos dónde está el techo",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Fila «Núcleos» en el Medidor Satronho: una barra por cada núcleo del juego y otra para la GPU emulada. Si una barra se llena (naranja), ese hilo es el que frena los FPS; si ninguna se llena, los hilos se están esperando entre sí. Se activa sola si no habías cambiado las filas del medidor."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El registro anota cada 10 segundos cuánto trabaja cada núcleo del juego, la GPU emulada y el hilo de Vulkan, y nuestro comparador de sesiones lo muestra. La idea de medir así viene del perfil de CPU que publica Hookshot, el port nativo de Ocarina."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Troya explica por qué Ocarina no llega a 60 FPS fijos: medimos el juego nativo en PC en la llanura de Hyrule y va a unos 50 FPS; Satronho saca unos 44 en el mismo tramo, cerca del 88 %."
+        }
+      ]
+    },
+    {
       "tag": "build-40",
       "fecha": "11 de noviembre de 2026",
       "titulo": "Medidor Satronho, a tu medida",

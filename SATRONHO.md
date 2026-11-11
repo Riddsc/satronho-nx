@@ -362,6 +362,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   FPS, 10 % más lento 40.3, mínimo 32.3; solo el 20 % del tiempo a 60 o más. GPU ~10 ms por cuadro
   (p90 14): también limitado por CPU. Satronho 40 (ventanas de 10 s, sesión distinta): 44.3 / 41.3,
   o sea ~88 % de la mediana del port. Techo práctico en la llanura en este PC: ~50 FPS.
+- **Build 41: medición de núcleos.** `LogCores` en `nx2_stutter_trace.cpp` (con cada
+  Nx2StutterSummary): «Satronho cores window_s guest=0:x,... busiest_guest guest_sum gpu_command
+  gpu_back vulkan_worker», % de un núcleo del host (DkbCpuTrace). compare_logs.py lo muestra
+  (medianas en ventanas de juego). El medidor tiene la fila `Cores` (barras; naranja ≥95 %); las
+  filas guardadas en 0x3FF (default de la 40) pasan a 0x7FF. Tema de Troya: `techo-fps`.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <chrono>
+#include <array>
 #include <deque>
 #include <functional>
 #include <optional>
@@ -46,8 +47,11 @@ public:
         Ram = 1u << 7,
         VideoMemory = 1u << 8,
         Shaders = 1u << 9,
+        Cores = 1u << 10,
     };
-    static constexpr u32 DefaultRows = 0x3FF;
+    static constexpr u32 DefaultRows = 0x7FF;
+    /// The default before the cores row (build 40): still at it means the user never chose rows.
+    static constexpr u32 DefaultRowsBuild40 = 0x3FF;
 
     /// The game's area on screen, in global coordinates.
     using AreaFn = std::function<QRect()>;
@@ -89,6 +93,7 @@ private:
     void PaintFull(QPainter& painter);
     void PaintCompact(QPainter& painter);
     void PaintGraph(QPainter& painter, const QRectF& plot);
+    void PaintCores(QPainter& painter, qreal top);
 
     MainWindow* main_window;
     AreaFn area;
@@ -108,6 +113,9 @@ private:
     std::optional<u64> ram_bytes;
     std::optional<VideoCore::RendererBase::VideoMemoryUsage> video_memory;
     int shaders_building = 0;
+    // How busy each guest core and the emulated GPU's back thread were, in % of a host core.
+    std::array<std::optional<double>, 6> core_busy{};
+    std::optional<double> gpu_back_busy;
 
     // Stutters: frames over 100 ms since the meter was shown.
     int stutters = 0;

@@ -583,6 +583,47 @@
       ]
     },
     {
+      "id": "techo-fps",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Por qué no llega a 60 FPS fijos? ¿Dónde está el techo?",
+      "frases": [
+        "por que no llega a 60 fps",
+        "no llega a 60",
+        "60 fps fijos",
+        "60 fps estables",
+        "techo de fps",
+        "limite de fps",
+        "por que se queda en 44",
+        "que me limita",
+        "cuello de botella",
+        "que significan las barras de nucleos",
+        "barras de nucleos",
+        "nucleos del juego",
+        "el procesador me limita",
+        "port nativo",
+        "comparado con el port"
+      ],
+      "claves": [
+        "techo",
+        "60",
+        "limite",
+        "limita",
+        "nucleos",
+        "barras",
+        "procesador",
+        "botella",
+        "port",
+        "nativo"
+      ],
+      "respuesta": "Un emulador traduce el procesador de la consola mientras juegas, y en Ocarina eso pesa más que los gráficos: en la llanura de Hyrule el que frena es el procesador, por eso Docked y Handheld van igual. Para saber dónde está el techo lo medimos contra el juego nativo en PC (un port) en un equipo potente: allí la llanura va a unos 50 FPS y solo pasa 60 una quinta parte del tiempo. Satronho saca unos 44 en el mismo tramo, cerca del 88 % del nativo. En el Medidor Satronho, la fila «Núcleos» tiene una barra por cada núcleo del juego y otra para la GPU emulada: una barra llena (naranja) es un hilo que no da más y que limita los FPS; si ninguna está llena, los hilos se están esperando entre sí. Lo que más ayuda es un procesador rápido por núcleo; Accurate cuesta cerca de un tercio de los FPS, y la generación de cuadros muestra más cuadros a cambio de un poco más de retraso al controlar.",
+      "ver": [
+        "medidor",
+        "docked-handheld",
+        "fps"
+      ]
+    },
+    {
       "id": "escalado",
       "guia": "troya",
       "tema": "Gráficos",
@@ -1061,11 +1102,12 @@
         "tirones",
         "personalizar"
       ],
-      "respuesta": "El Medidor Satronho se activa en «View → Show Satronho Meter», con Ctrl+V o en «Satronho → Medidor». Arriba van los FPS en grande, los milisegundos por cuadro y cuánto trabajan la CPU y la GPU: la que sale en color es la que te está frenando. La gráfica muestra cada cuadro de los últimos 5 segundos; los picos en rojo son tirones y el punto rojo marca los de más de 100 ms. Abajo: FPS mínimo, típico y máximo; el modo y los efectos activos (Docked o Handheld, Fast o Accurate, FSR…); los tirones desde que lo abriste y cuántos van por minuto, la misma vara con la que medimos cada build; los shaders que se están armando; la RAM del emulador sobre la de tu PC, y la memoria de video sobre lo que el driver le deja, en naranja cerca del límite y en rojo al tope. Con clic derecho sobre él (o en «Satronho → Medidor») eliges qué filas mostrar, el estilo completo o compacto en una línea, el tamaño, qué tan transparente es el fondo, el color (el de Satronho o el de un guía) y la esquina. También puedes arrastrarlo a donde quieras.",
+      "respuesta": "El Medidor Satronho se activa en «View → Show Satronho Meter», con Ctrl+V o en «Satronho → Medidor». Arriba van los FPS en grande, los milisegundos por cuadro y cuánto trabajan la CPU y la GPU: la que sale en color es la que te está frenando. La gráfica muestra cada cuadro de los últimos 5 segundos; los picos en rojo son tirones y el punto rojo marca los de más de 100 ms. Abajo: FPS mínimo, típico y máximo; el modo y los efectos activos (Docked o Handheld, Fast o Accurate, FSR…); los tirones desde que lo abriste y cuántos van por minuto, la misma vara con la que medimos cada build; los shaders que se están armando; la RAM del emulador sobre la de tu PC, y la memoria de video sobre lo que el driver le deja, en naranja cerca del límite y en rojo al tope; y la fila «Núcleos», con una barra por cada núcleo del juego y otra para la GPU emulada, que muestra cuál hilo no da más. Con clic derecho sobre él (o en «Satronho → Medidor») eliges qué filas mostrar, el estilo completo o compacto en una línea, el tamaño, qué tan transparente es el fondo, el color (el de Satronho o el de un guía) y la esquina. También puedes arrastrarlo a donde quieras.",
       "ver": [
         "vram",
         "log",
-        "docked-handheld"
+        "docked-handheld",
+        "techo-fps"
       ]
     },
     {

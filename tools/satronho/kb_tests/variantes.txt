@@ -52,3 +52,5 @@ como pongo el contador de fps|medidor
 que significan los numeros del overlay|medidor
 como cambio el color del medidor|medidor
 puedo poner el medidor en una sola linea|medidor
+cual es el limite de fps del emulador|techo-fps
+porque se queda en 44 fps|techo-fps

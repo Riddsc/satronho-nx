@@ -170,7 +170,7 @@ struct Values {
     // Satronho's performance meter (yuzu/satronho/meter.cpp): rows shown (Meter::Row bits), size,
     // background and accent (indices into the meter's lists), corner (4 = free, at x/y from the
     // game's top left) and the one-line style.
-    Setting<u32> satronho_meter_rows{linkage, 0x3FF, "satronho_meter_rows", Category::Ui};
+    Setting<u32> satronho_meter_rows{linkage, 0x7FF, "satronho_meter_rows", Category::Ui};
     Setting<u32> satronho_meter_size{linkage, 1, "satronho_meter_size", Category::Ui};
     Setting<u32> satronho_meter_opacity{linkage, 2, "satronho_meter_opacity", Category::Ui};
     Setting<u32> satronho_meter_color{linkage, 0, "satronho_meter_color", Category::Ui};

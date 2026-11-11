@@ -5,6 +5,7 @@
 #include <chrono>
 #include <filesystem>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <thread>
 #include <utility>
@@ -20,6 +21,7 @@
 #include <fstream>
 #endif
 
+#include "common/dkb_cpu_trace.h"
 #include "common/logging.h"
 #include "video_core/nx2_profile.h"
 #include "video_core/nx2_stutter_trace.h"
@@ -118,6 +120,8 @@ struct FrameState {
     u64 window_compute_builds{};
     std::array<u64, LookupCount> lookups{};
     std::array<u64, DriverBuildCount> driver_builds{};
+    // Satronho: the emulation threads' CPU time at the previous summary.
+    std::optional<Common::DkbCpuTrace::Snapshot> cores{};
 };
 
 FrameState g_frame;
@@ -129,6 +133,53 @@ std::string CacheFileBytes() {
     std::error_code error;
     const auto size = g_cache_file.empty() ? 0 : std::filesystem::file_size(g_cache_file, error);
     return g_cache_file.empty() || error ? std::string{"na"} : std::to_string(size);
+}
+
+/// Satronho: how busy each emulation thread was over the window, in % of one host core: the six
+/// guest cores, GPU command processing (gpu_command), the GPU back thread (gpu_back) and the Vulkan
+/// worker. Like Hookshot's CPU profile, it tells a frame limited by a saturated thread from one
+/// limited by threads waiting on each other. compare_logs.py reads it.
+void LogCores(FrameState& state) {
+    using namespace Common::DkbCpuTrace;
+    auto snapshot = ReadSnapshot();
+    if (state.cores) {
+        const double wall_ns =
+            std::chrono::duration<double, std::nano>(snapshot.wall_time - state.cores->wall_time)
+                .count();
+        const auto busy = [&](Role role) -> std::optional<double> {
+            const auto index = static_cast<size_t>(role);
+            const auto delta = CpuTimeDelta(state.cores->threads[index], snapshot.threads[index]);
+            if (!delta || wall_ns <= 0) {
+                return std::nullopt;
+            }
+            return static_cast<double>(*delta) / wall_ns * 100.0;
+        };
+        std::string guest;
+        double busiest = 0;
+        double sum = 0;
+        for (size_t core = 0; core < GuestCoreCount; ++core) {
+            if (const auto value = busy(static_cast<Role>(core))) {
+                guest += fmt::format("{}{}:{:.0f}", guest.empty() ? "" : ",", core, *value);
+                busiest = std::max(busiest, *value);
+                sum += *value;
+            }
+        }
+        if (const auto single = busy(Role::GuestSingleCore)) {
+            guest += fmt::format("{}single:{:.0f}", guest.empty() ? "" : ",", *single);
+            busiest = std::max(busiest, *single);
+            sum += *single;
+        }
+        const auto text = [&](Role role) {
+            const auto value = busy(role);
+            return value ? fmt::format("{:.0f}", *value) : std::string{"na"};
+        };
+        LOG_INFO(HW_GPU,
+                 "Satronho cores window_s={:.2f} guest={} busiest_guest={:.0f} guest_sum={:.0f} "
+                 "gpu_command={} gpu_back={} vulkan_worker={}",
+                 wall_ns / 1e9, guest.empty() ? "na" : guest, busiest, sum,
+                 text(Role::GpuCommand), text(Role::GpuBack), text(Role::VulkanWorker));
+    }
+    state.cores = std::move(snapshot);
 }
 
 void Summarize(FrameState& state, u64 now) {
@@ -182,6 +233,7 @@ void Summarize(FrameState& state, u64 now) {
     state.window_compute_builds = 0;
     state.window_site_ms = {};
     state.window_site_counts = {};
+    LogCores(state);
 }
 
 /// Each thread's zone ticks at now, its open zone's time so far included, and zone closes.

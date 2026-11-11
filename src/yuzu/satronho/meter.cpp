@@ -50,6 +50,7 @@ constexpr qreal GraphLabels = 40;
 constexpr qreal LineHeight = 16;
 constexpr qreal Bottom = 8;
 constexpr qreal CompactHeight = 26;
+constexpr qreal CoresHeight = 22;
 constexpr qreal Strip = 3;
 constexpr qreal Margin = 12;
 
@@ -185,6 +186,10 @@ Meter::Meter(MainWindow* main_window_, AreaFn area_, std::function<void()> save_
     setWindowTitle(Tr("Medidor Satronho"));
     main_window->installEventFilter(this);
     connect(main_window, &MainWindow::statsUpdated, this, &Meter::UpdateStats);
+    // Rows still at build 40's default get the new cores row.
+    if (Values().satronho_meter_rows.GetValue() == DefaultRowsBuild40) {
+        Values().satronho_meter_rows.SetValue(DefaultRows);
+    }
     Relayout();
 }
 
@@ -214,6 +219,9 @@ QSizeF Meter::BaseSize() const {
     if (cells > 0) {
         height += 6 + LineHeight * static_cast<qreal>((cells + 1) / 2) +
                   2 * static_cast<qreal>((cells + 1) / 2 - 1);
+    }
+    if (Shows(Cores)) {
+        height += 6 + CoresHeight;
     }
     height += Bottom;
     return {Width, std::max<qreal>(height, CompactHeight)};
@@ -340,6 +348,23 @@ void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::
         if (busiest && wall_ns > 0) {
             cpu_percent = std::min(100.0, static_cast<double>(*busiest) / wall_ns * 100.0);
         }
+        // Each guest core and the GPU back thread on their own, for the cores row.
+        const auto busy = [&](Role role) -> std::optional<double> {
+            const auto index = static_cast<std::size_t>(role);
+            const auto delta = Common::DkbCpuTrace::CpuTimeDelta(cpu_snapshot->threads[index],
+                                                                 snapshot.threads[index]);
+            if (!delta || wall_ns <= 0) {
+                return std::nullopt;
+            }
+            return std::min(100.0, static_cast<double>(*delta) / wall_ns * 100.0);
+        };
+        for (std::size_t core = 0; core < core_busy.size(); ++core) {
+            core_busy[core] = busy(static_cast<Role>(core));
+        }
+        if (!core_busy[0]) {
+            core_busy[0] = busy(Role::GuestSingleCore);
+        }
+        gpu_back_busy = busy(Role::GpuBack);
     }
     cpu_snapshot = snapshot;
 
@@ -600,6 +625,46 @@ void Meter::PaintFull(QPainter& painter) {
             y += LineHeight + 2;
         }
     }
+    if (Shows(Cores)) {
+        y += 4;
+        PaintCores(painter, y);
+    }
+}
+
+void Meter::PaintCores(QPainter& painter, qreal top) {
+    // One bar per guest core and one for the emulated GPU: a full bar is a host core kept busy the
+    // whole time. A frame rate held back by one full bar is limited by that thread; with no full
+    // bar, by threads waiting on each other.
+    const QColor accent = AccentColor();
+    const QFont font = Mono(11);
+    constexpr qreal bar_width = 14;
+    constexpr qreal gap = 5;
+    const qreal bar_top = top + 3;
+    const qreal bar_height = CoresHeight - 6;
+    const auto bar = [&](qreal x, const std::optional<double>& value) {
+        QColor track = Muted;
+        track.setAlpha(45);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(track);
+        painter.drawRoundedRect(QRectF{x, bar_top, bar_width, bar_height}, 2, 2);
+        if (!value) {
+            return;
+        }
+        const qreal filled = bar_height * std::clamp(*value, 0.0, 100.0) / 100.0;
+        painter.setBrush(*value >= 95.0 ? Warn : accent);
+        painter.drawRoundedRect(QRectF{x, bar_top + bar_height - filled, bar_width, filled}, 2, 2);
+    };
+    const std::vector<Run> label{{Tr("Núcleos "), font, Dim}};
+    DrawRuns(painter, Pad, top, CoresHeight, label);
+    qreal x = Pad + RunsWidth(label) + 2;
+    for (const auto& value : core_busy) {
+        bar(x, value);
+        x += bar_width + gap;
+    }
+    const std::vector<Run> gpu{{QStringLiteral("GPU "), font, Dim}};
+    const qreal gpu_x = Pad + Content - bar_width - RunsWidth(gpu);
+    DrawRuns(painter, gpu_x, top, CoresHeight, gpu);
+    bar(Pad + Content - bar_width, gpu_back_busy);
 }
 
 void Meter::PaintGraph(QPainter& painter, const QRectF& plot) {
@@ -730,6 +795,8 @@ void Meter::Reset() {
     ram_bytes.reset();
     video_memory.reset();
     shaders_building = 0;
+    core_busy = {};
+    gpu_back_busy.reset();
     stutters = 0;
     counted_until.reset();
     last_stutter.reset();
@@ -807,7 +874,7 @@ void Meter::FillOptionsMenu(QMenu* menu, const std::function<void()>& changed) {
     auto& values = Values();
 
     QMenu* rows = menu->addMenu(Tr("Qué mostrar"));
-    const std::array<std::pair<Row, const char*>, 10> row_names{{
+    const std::array<std::pair<Row, const char*>, 11> row_names{{
         {Fps, QT_TRANSLATE_NOOP("Satronho::Meter", "FPS")},
         {FrameTime, QT_TRANSLATE_NOOP("Satronho::Meter", "Tiempo por cuadro")},
         {Load, QT_TRANSLATE_NOOP("Satronho::Meter", "CPU y GPU")},
@@ -818,6 +885,7 @@ void Meter::FillOptionsMenu(QMenu* menu, const std::function<void()>& changed) {
         {Shaders, QT_TRANSLATE_NOOP("Satronho::Meter", "Shaders armándose")},
         {Ram, QT_TRANSLATE_NOOP("Satronho::Meter", "RAM")},
         {VideoMemory, QT_TRANSLATE_NOOP("Satronho::Meter", "Memoria de video (VRAM)")},
+        {Cores, QT_TRANSLATE_NOOP("Satronho::Meter", "Núcleos del juego (barras)")},
     }};
     for (const auto& [row, name] : row_names) {
         QAction* action = rows->addAction(Tr(name));
