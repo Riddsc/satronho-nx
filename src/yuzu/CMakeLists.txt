@@ -239,6 +239,8 @@ add_executable(yuzu
     satronho/hub.h
     satronho/knowledge.cpp
     satronho/knowledge.h
+    satronho/meter.cpp
+    satronho/meter.h
     satronho/novedades.cpp
     satronho/novedades.h
     satronho/presets.cpp

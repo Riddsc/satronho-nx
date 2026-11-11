@@ -101,7 +101,7 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Conflicto típico al integrar: el lambda de espera de `vk_compute_pipeline.cpp` (conservar la
   zona `PipelineWait` y `jobs->RunOrWait` de Lichii más nuestro `wait_start`/`NoteWorkerBuild`) y
   `vk_master_semaphore.cpp` (zona `GpuWait` + nuestro cronómetro).
-- Medidor Satronho (build 39, `src/yuzu/satronho/meter.{h,cpp}`): medidor propio que reemplaza al
+- Medidor Satronho (build 40; la ejecución 39 quedó cancelada porque le faltaba meter.cpp en CMakeLists, `src/yuzu/satronho/meter.{h,cpp}`): medidor propio que reemplaza al
   `PerformanceOverlay` de Lichii (sus archivos quedan intactos y sin usar, para integrar sin
   conflictos; `perf_overlay` en `main_window` es `Satronho::Meter*`). Mismos datos que el de
   Lichii (PerfStats, DkbCpuTrace, GPU busy) más: tirones >100 ms y por minuto, shaders armándose
