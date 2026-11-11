@@ -101,13 +101,17 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Conflicto típico al integrar: el lambda de espera de `vk_compute_pipeline.cpp` (conservar la
   zona `PipelineWait` y `jobs->RunOrWait` de Lichii más nuestro `wait_start`/`NoteWorkerBuild`) y
   `vk_master_semaphore.cpp` (zona `GpuWait` + nuestro cronómetro).
-- Medidor de rendimiento (build 38): sobre el rediseño de Lichii #1345
-  (`src/yuzu/render/performance_overlay.{h,cpp}`) va nuestra paleta (morado noche + verde agua
-  `#4FD1C5`, franja a la izquierda, mediana punteada en verde agua) y la fila de memoria
-  (`paintMemory`): RAM = `Common::GetProcessMemoryUsage().private_working_set`, VRAM =
-  `RendererBase::GetVideoMemoryUsage()` (en Vulkan: uso + holgura de VMA contra
-  `GetDeviceMemoryBudget()`), naranja desde 85 % y rojo desde 97 %. Tema de Samy: `medidor`.
-  Al integrar, conservar la fila y los colores si Lichii toca el archivo.
+- Medidor Satronho (build 39, `src/yuzu/satronho/meter.{h,cpp}`): medidor propio que reemplaza al
+  `PerformanceOverlay` de Lichii (sus archivos quedan intactos y sin usar, para integrar sin
+  conflictos; `perf_overlay` en `main_window` es `Satronho::Meter*`). Mismos datos que el de
+  Lichii (PerfStats, DkbCpuTrace, GPU busy) más: tirones >100 ms y por minuto, shaders armándose
+  (`MainWindow::ShadersBuildingNow`), modo Docked/Handheld y Fast/Accurate, RAM
+  (`Common::GetProcessMemoryUsage`) y VRAM (`RendererBase::GetVideoMemoryUsage`: uso + holgura de
+  VMA contra el presupuesto; naranja 85 %, rojo 97 %). Opciones en `UISettings::satronho_meter_*`
+  (filas por bits `Meter::Row`, tamaño, fondo, color, esquina/libre x-y, compacto), editables con
+  clic derecho o «Satronho → Medidor». El texto del menú View dice «Show Satronho Meter» (main.ui).
+  Tema de Samy: `medidor`. Vista previa sin emulador: harness con stubs (`meterharness` en el
+  scratchpad, compila meter.cpp con Qt de PySide).
 - Conflicto en `vk_rasterizer.cpp` (build 38): las lambdas de despacho llevan
   `slot = note_slow_wait()` + `SlowWait::ResetSlot` nuestro y `RecordDispatchBarrier` de Lichii.
 - Caché v2: los registros guardan el código nativo, no SPIR-V, así que el ajuste de niebla y

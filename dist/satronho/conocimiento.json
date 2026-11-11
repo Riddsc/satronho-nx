@@ -1021,7 +1021,7 @@
       "id": "medidor",
       "guia": "samy",
       "tema": "Funciones",
-      "pregunta": "¿Cómo veo los FPS, la RAM y la memoria de video mientras juego?",
+      "pregunta": "¿Cómo uso el Medidor Satronho (FPS, RAM, VRAM y tirones)?",
       "frases": [
         "como veo los fps",
         "mostrar los fps",
@@ -1042,7 +1042,14 @@
         "ver cuanta ram",
         "ver cuanta ram usa",
         "linea roja",
-        "picos rojos"
+        "picos rojos",
+        "medidor satronho",
+        "personalizar el medidor",
+        "cambiar el color del medidor",
+        "mover el medidor",
+        "medidor en una linea",
+        "que son los tirones",
+        "opciones del medidor"
       ],
       "claves": [
         "fps",
@@ -1050,9 +1057,11 @@
         "overlay",
         "contador",
         "pantalla",
-        "grafica"
+        "grafica",
+        "tirones",
+        "personalizar"
       ],
-      "respuesta": "Ve a «View → Show Performance Overlay» (o Ctrl+V) y aparece un cuadro sobre el juego; lo puedes arrastrar a donde quieras. El número grande son los FPS. Arriba a la derecha, los milisegundos por cuadro y cuánto trabajan la CPU y la GPU: la que sale en verde agua es la que te está frenando. La línea es el tiempo de cada cuadro de los últimos 5 segundos; los picos en rojo son tirones. Abajo, los FPS mínimo, típico y máximo, y lo que tienes activado (FSR, la escala…). La última fila es nuestra: la RAM que usa el emulador sobre la de tu PC, y la memoria de video que usa sobre la que el driver le deja; se pone naranja cerca del límite y roja al tope. Para medir de verdad entre builds seguimos usando el registro, pero el cuadro sirve para ver al momento qué pasa.",
+      "respuesta": "El Medidor Satronho se activa en «View → Show Satronho Meter», con Ctrl+V o en «Satronho → Medidor». Arriba van los FPS en grande, los milisegundos por cuadro y cuánto trabajan la CPU y la GPU: la que sale en color es la que te está frenando. La gráfica muestra cada cuadro de los últimos 5 segundos; los picos en rojo son tirones y el punto rojo marca los de más de 100 ms. Abajo: FPS mínimo, típico y máximo; el modo y los efectos activos (Docked o Handheld, Fast o Accurate, FSR…); los tirones desde que lo abriste y cuántos van por minuto, la misma vara con la que medimos cada build; los shaders que se están armando; la RAM del emulador sobre la de tu PC, y la memoria de video sobre lo que el driver le deja, en naranja cerca del límite y en rojo al tope. Con clic derecho sobre él (o en «Satronho → Medidor») eliges qué filas mostrar, el estilo completo o compacto en una línea, el tamaño, qué tan transparente es el fondo, el color (el de Satronho o el de un guía) y la esquina. También puedes arrastrarlo a donde quieras.",
       "ver": [
         "vram",
         "log",

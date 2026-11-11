@@ -50,3 +50,5 @@ que es satronho|que-es
 la receta del arroz con pollo|-
 como pongo el contador de fps|medidor
 que significan los numeros del overlay|medidor
+como cambio el color del medidor|medidor
+puedo poner el medidor en una sola linea|medidor

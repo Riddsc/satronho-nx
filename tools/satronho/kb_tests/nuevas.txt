@@ -43,3 +43,4 @@ como activo fsr 3.1 en ocarina|fsr-ocarina
 hay forma de ver cuanta ram usa el emulador|medidor
 como muestro los fps en pantalla|medidor
 que es la linea roja del medidor|medidor
+que son los tirones del medidor|medidor

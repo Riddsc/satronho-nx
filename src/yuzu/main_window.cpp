@@ -16,6 +16,7 @@
 #include "common/settings_enums.h"
 #include "frontend_common/settings_generator.h"
 #include "render/performance_overlay.h"
+#include "yuzu/satronho/meter.h"
 #ifdef HAS_RESHADE
 #include "configuration/configure_post_processing.h"
 #include "video_core/post_processing/fx_preset.h"
@@ -472,6 +473,23 @@ MainWindow::MainWindow(bool has_broken_vulkan)
         add(tr("Configuraciones sugeridas"), Satronho::Hub::Page::Sugeridas);
         add(tr("Pregúntale a los guías"), Satronho::Hub::Page::Preguntas);
         satronho_menu->addSeparator();
+        // The meter: show it, and its options (also on right click over it).
+        QMenu* meter_menu = satronho_menu->addMenu(tr("Medidor"));
+        connect(meter_menu, &QMenu::aboutToShow, this, [this, meter_menu] {
+            meter_menu->clear();
+            QAction* show = meter_menu->addAction(tr("Mostrar el medidor"));
+            show->setCheckable(true);
+            show->setChecked(ui->action_Show_Performance_Overlay->isChecked());
+            connect(show, &QAction::triggered, this,
+                    [this] { ui->action_Show_Performance_Overlay->trigger(); });
+            meter_menu->addSeparator();
+            Satronho::Meter::FillOptionsMenu(meter_menu, [this] {
+                if (perf_overlay != nullptr) {
+                    perf_overlay->ApplySettings();
+                }
+                OnSaveConfig();
+            });
+        });
         add(tr("Guías"), Satronho::Hub::Page::Guias);
         ui->menubar->insertMenu(ui->menu_Help->menuAction(), satronho_menu);
     }
@@ -3536,10 +3554,22 @@ bool MainWindow::ConfirmShutdownGame() {
 void MainWindow::OnLoadComplete() {
     loading_screen->OnLoadComplete();
 
-    perf_overlay = new PerformanceOverlay(this);
+    // Satronho's own meter in place of Lichii's overlay, over the game's area.
+    perf_overlay = new Satronho::Meter(
+        this,
+        [this] {
+            QWidget* game = render_window != nullptr && render_window->isVisible()
+                                ? static_cast<QWidget*>(render_window)
+                                : centralWidget();
+            return QRect{game->mapToGlobal(QPoint{}), game->size()};
+        },
+        [this] { OnSaveConfig(); });
+    if (render_window != nullptr) {
+        render_window->installEventFilter(perf_overlay);
+    }
     perf_overlay->setVisible(ui->action_Show_Performance_Overlay->isChecked());
 
-    connect(perf_overlay, &PerformanceOverlay::closed, perf_overlay,
+    connect(perf_overlay, &Satronho::Meter::closed, perf_overlay,
             [this]() { ui->action_Show_Performance_Overlay->setChecked(false); });
 }
 
@@ -5196,6 +5226,7 @@ void MainWindow::UpdateStatusBar() {
     auto results = QtCommon::system->GetAndResetPerfStats();
     auto& shader_notify = QtCommon::system->GPU().ShaderNotify();
     const int shaders_building = shader_notify.ShadersBuilding();
+    shaders_building_now = shaders_building;
 
     // Before statsUpdated, so the performance overlay reads this update's generated frame rate.
     const auto frame_gen = QtCommon::system->GPU().Renderer().GetFrameGenStatus();

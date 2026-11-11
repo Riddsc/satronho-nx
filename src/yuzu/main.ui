@@ -602,7 +602,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Show &amp;Performance Overlay</string>
+    <string>Show Satronho &amp;Meter</string>
    </property>
   </action>
   <action name="action_Post_Processing_Shaders">

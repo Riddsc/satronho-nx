@@ -139,6 +139,7 @@ class MainWindow;
 
 namespace Satronho {
 class GuideDock;
+class Meter;
 }
 
 enum class EmulatedDirectoryTarget {
@@ -195,6 +196,11 @@ public:
     }
 
     /// What NVIDIA DLSS ran as since the last status bar update, empty when it didn't run
+    /// Shaders being built at the last status bar update (Satronho's meter).
+    [[nodiscard]] int ShadersBuildingNow() const {
+        return shaders_building_now;
+    }
+
     [[nodiscard]] const QString& DlssStatusText() const {
         return dlss_status_text;
     }
@@ -540,7 +546,7 @@ private:
     QTimer shutdown_timer;
     QTimer emu_terminate_timer;
     OverlayDialog* shutdown_dialog{};
-    PerformanceOverlay* perf_overlay = nullptr;
+    Satronho::Meter* perf_overlay = nullptr;
 #ifdef HAS_RESHADE
     ConfigurePostProcessing* post_processing_dialog = nullptr;
 #endif
@@ -573,6 +579,7 @@ private:
     QString dlss_status_text;
     bool frame_gen_generating = false;
     double frame_gen_fps = 0.0;
+    int shaders_building_now = 0;
     QElapsedTimer frame_gen_fps_timer;
     VolumeButton* volume_button = nullptr;
     QWidget* volume_popup = nullptr;

@@ -1,5 +1,4 @@
 // SPDX-FileCopyrightText: Copyright 2026 Eden Emulator Project
-// SPDX-FileCopyrightText: Copyright 2026 Satronho NX
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "performance_overlay.h"
@@ -16,7 +15,6 @@
 #include <QStringList>
 #include <QWindow>
 
-#include "common/memory_detect.h"
 #include "common/settings.h"
 #include "core/core.h"
 #include "main_window.h"
@@ -28,13 +26,12 @@ namespace {
 
 using Common::DkbCpuTrace::Role;
 
-// Layout of the "6 · 3 + big number" design at 100% scale; Qt scales it with the DPI. Satronho NX
-// adds a memory row (RAM and video memory) under the footer and its accent strip on the left.
+// Layout of the "6 · 3 + big number" design at 100% scale; Qt scales it with the DPI.
 constexpr int OverlayWidth = 300;
-constexpr int OverlayHeight = 176;
-constexpr qreal PaddingX = 12;
+constexpr int OverlayHeight = 158;
+constexpr qreal PaddingX = 10;
 constexpr qreal PaddingTop = 6;
-constexpr qreal ContentWidth = 278;
+constexpr qreal ContentWidth = 280;
 constexpr qreal HeaderHeight = 44;
 constexpr qreal GraphTop = PaddingTop + HeaderHeight + 4;
 constexpr qreal GraphHeight = 72;
@@ -43,8 +40,6 @@ constexpr qreal AxisX = 240;
 constexpr qreal LabelX = 247;
 constexpr qreal LabelHeight = 14;
 constexpr qreal FooterTop = GraphTop + GraphHeight + 10;
-constexpr qreal MemoryTop = FooterTop + 18;
-constexpr qreal StripWidth = 3;
 
 constexpr auto HistoryWindow = std::chrono::seconds{5};
 constexpr auto StatsWindow = std::chrono::milliseconds{500};
@@ -52,21 +47,15 @@ constexpr std::size_t FpsSamples = 10;
 /// A frame this much slower than the median is a spike.
 constexpr float SpikeRatio = 1.2f;
 
-// Satronho NX's palette: the hub's night purple and its teal accent.
-constexpr QRgb TextColor = qRgb(0xEB, 0xE8, 0xF5);
-constexpr QRgb MutedColor = qRgb(0xA9, 0xA4, 0xC2);
-constexpr QRgb DimColor = qRgb(0x6E, 0x6A, 0x86);
-constexpr QRgb AccentColor = qRgb(0x4F, 0xD1, 0xC5);
-constexpr QRgb SpikeColor = qRgb(0xFF, 0x5D, 0x73);
-constexpr QRgb WarnColor = qRgb(0xFF, 0xB2, 0x3E);
-constexpr QRgb BackgroundColor = qRgba(0x1B, 0x18, 0x29, 200);
-constexpr QRgb LineColor = qRgba(0xEB, 0xE8, 0xF5, 217);
-constexpr QRgb AxisColor = qRgba(0xA9, 0xA4, 0xC2, 60);
-constexpr QRgb MedianLineColor = qRgba(0x4F, 0xD1, 0xC5, 110);
-constexpr double GiB = 1024.0 * 1024.0 * 1024.0;
-/// Video memory past this share of the budget is shown as a warning, past the second as a spike.
-constexpr double VideoMemoryWarn = 0.85;
-constexpr double VideoMemoryFull = 0.97;
+constexpr QRgb TextColor = qRgb(0xF2, 0xF3, 0xF5);
+constexpr QRgb MutedColor = qRgb(0xA0, 0xA5, 0xAD);
+constexpr QRgb DimColor = qRgb(0x6E, 0x73, 0x7B);
+constexpr QRgb AccentColor = qRgb(0x5E, 0xB4, 0xFF);
+constexpr QRgb SpikeColor = qRgb(0xFF, 0x5D, 0x52);
+constexpr QRgb BackgroundColor = qRgba(0, 0, 0, 140);
+constexpr QRgb LineColor = qRgba(0xF2, 0xF3, 0xF5, 217);
+constexpr QRgb AxisColor = qRgba(255, 255, 255, 46);
+constexpr QRgb MedianLineColor = qRgba(255, 255, 255, 56);
 
 /// The busiest of these threads is the CPU side's limit: the guest cores and GPU emulation.
 constexpr std::array CpuRoles{
@@ -114,11 +103,6 @@ void DrawRuns(QPainter& painter, qreal x, qreal baseline, const std::vector<Run>
         painter.drawText(QPointF{x, baseline}, run.text);
         x += QFontMetricsF{run.font}.horizontalAdvance(run.text);
     }
-}
-
-QString Gigabytes(u64 bytes, bool always_decimal = false) {
-    const double gib = static_cast<double>(bytes) / GiB;
-    return QString::number(gib, 'f', always_decimal || gib < 10.0 ? 1 : 0);
 }
 
 QString Percent(const std::optional<double>& percent) {
@@ -232,17 +216,6 @@ void PerformanceOverlay::updateStats(const Core::PerfStatsResults& results,
     }
     m_tags = tags.join(QStringLiteral("  "));
 
-    // Satronho NX: the emulator's memory (what the task manager shows for it) and its video memory
-    // against the driver's budget.
-    const auto process = Common::GetProcessMemoryUsage();
-    const u64 ram = process.private_working_set ? process.private_working_set
-                                                : process.working_set;
-    m_ramBytes.reset();
-    if (ram) {
-        m_ramBytes = ram;
-    }
-    m_videoMemory = renderer.GetVideoMemoryUsage();
-
     update();
 }
 
@@ -254,9 +227,6 @@ void PerformanceOverlay::paintEvent(QPaintEvent* event) {
     painter.setPen(Qt::NoPen);
     painter.setBrush(QColor::fromRgba(BackgroundColor));
     painter.drawRoundedRect(rect(), 5.0, 5.0);
-    // Satronho NX's teal strip on the left edge.
-    painter.setBrush(QColor::fromRgb(AccentColor));
-    painter.drawRoundedRect(QRectF{0, 6, StripWidth, height() - 12.0}, 1.5, 1.5);
 
     const QColor text = QColor::fromRgb(TextColor);
     const QColor muted = QColor::fromRgb(MutedColor);
@@ -273,7 +243,7 @@ void PerformanceOverlay::paintEvent(QPaintEvent* event) {
     };
     DrawRuns(painter, PaddingX, fps_baseline, fps_runs);
     DrawRuns(painter, PaddingX + Width(fps_runs) + 6, fps_baseline,
-             {{QStringLiteral("fps"), small_font, accent}});
+             {{QStringLiteral("fps"), small_font, muted}});
 
     const qreal right = PaddingX + ContentWidth;
     const qreal right_top = PaddingTop + (HeaderHeight - 34) / 2;
@@ -321,43 +291,6 @@ void PerformanceOverlay::paintEvent(QPaintEvent* event) {
         QFontMetricsF{footer_font}.elidedText(m_tags, Qt::ElideRight, tags_width);
     DrawRuns(painter, right - QFontMetricsF{footer_font}.horizontalAdvance(tags), footer_baseline,
              {{tags, footer_font, muted}});
-
-    paintMemory(painter, footer_font);
-}
-
-void PerformanceOverlay::paintMemory(QPainter& painter, const QFont& font) {
-    const QColor text = QColor::fromRgb(TextColor);
-    const QColor muted = QColor::fromRgb(MutedColor);
-    const QColor dim = QColor::fromRgb(DimColor);
-    const QFont bold = MonoFont(11, QFont::DemiBold);
-    const qreal baseline = Baseline(font, MemoryTop, LabelHeight);
-
-    std::vector<Run> ram_runs{{QStringLiteral("RAM "), font, dim}};
-    if (m_ramBytes) {
-        ram_runs.push_back({Gigabytes(*m_ramBytes), bold, text});
-        if (const u64 total = Common::GetMemInfo().TotalPhysicalMemory) {
-            ram_runs.push_back({QStringLiteral(" / ") + Gigabytes(total), font, muted});
-        }
-        ram_runs.push_back({QStringLiteral(" GB"), font, dim});
-    } else {
-        ram_runs.push_back({QStringLiteral("—"), font, muted});
-    }
-    DrawRuns(painter, PaddingX, baseline, ram_runs);
-
-    std::vector<Run> vram_runs{{QStringLiteral("VRAM "), font, dim}};
-    if (m_videoMemory && m_videoMemory->budget) {
-        const double share =
-            static_cast<double>(m_videoMemory->used) / static_cast<double>(m_videoMemory->budget);
-        const QColor used_color = share >= VideoMemoryFull   ? QColor::fromRgb(SpikeColor)
-                                  : share >= VideoMemoryWarn ? QColor::fromRgb(WarnColor)
-                                                             : text;
-        vram_runs.push_back({Gigabytes(m_videoMemory->used, true), bold, used_color});
-        vram_runs.push_back({QStringLiteral(" / ") + Gigabytes(m_videoMemory->budget, true), font, muted});
-        vram_runs.push_back({QStringLiteral(" GB"), font, dim});
-    } else {
-        vram_runs.push_back({QStringLiteral("—"), font, muted});
-    }
-    DrawRuns(painter, PaddingX + ContentWidth - Width(vram_runs), baseline, vram_runs);
 }
 
 void PerformanceOverlay::paintGraph(QPainter& painter, const QRectF& area) {
@@ -467,8 +400,6 @@ void PerformanceOverlay::hideEvent(QHideEvent* event) {
     m_gpuPercent.reset();
     m_cpuSnapshot.reset();
     m_frames.clear();
-    m_ramBytes.reset();
-    m_videoMemory.reset();
 }
 
 void PerformanceOverlay::mousePressEvent(QMouseEvent* event) {

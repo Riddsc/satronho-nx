@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-39",
+      "fecha": "11 de noviembre de 2026",
+      "titulo": "Medidor Satronho, a tu medida",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Medidor Satronho: nuestro propio medidor de rendimiento, en lugar del de Lichii. Se abre con Ctrl+V, en «View → Show Satronho Meter» o en «Satronho → Medidor». Muestra FPS, tiempo por cuadro, CPU y GPU, la gráfica de los últimos 5 segundos, el modo y los efectos activos, los shaders que se están armando, la RAM y la memoria de video."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "El medidor cuenta los tirones (cuadros de más de 100 ms) y cuántos van por minuto, la misma vara con la que medimos cada build. Los de más de 100 ms quedan marcados con un punto rojo en la gráfica."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Todo el medidor se personaliza con clic derecho: qué filas mostrar, estilo completo o compacto en una línea, cuatro tamaños, fondo de transparente a opaco, el color de Satronho o el de un guía, y cualquier esquina, o arrastrarlo a donde quieras. Se acuerda de cómo lo dejaste."
+        }
+      ]
+    },
+    {
       "tag": "build-38",
       "fecha": "11 de noviembre de 2026",
       "titulo": "Medidor de rendimiento con nuestro sello",
