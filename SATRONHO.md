@@ -357,6 +357,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   en llanura→Zora: 44 FPS típicos (~86 % del nativo ahí). 60 FPS fijos en la llanura no los da ni el
   port en ese equipo. Idea útil: su método de medir qué limita el cuadro (tiempo por hilo y en qué
   espera); nosotros no registramos aún cuánto trabajan los núcleos del juego.
+- **Hookshot en el PC de Riddsc (2026-11-11, v2.1.0, 2560×1440, tope 144, sin generación de cuadros,
+  recorrido largo que incluye llanura→Zora):** 9.5 min de juego en ventanas de 5 s: mediana 50.3
+  FPS, 10 % más lento 40.3, mínimo 32.3; solo el 20 % del tiempo a 60 o más. GPU ~10 ms por cuadro
+  (p90 14): también limitado por CPU. Satronho 40 (ventanas de 10 s, sesión distinta): 44.3 / 41.3,
+  o sea ~88 % de la mediana del port. Techo práctico en la llanura en este PC: ~50 FPS.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
