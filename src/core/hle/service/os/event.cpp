@@ -16,6 +16,12 @@ Event::Event(KernelHelpers::ServiceContext& ctx_)
     m_event = ctx.CreateEvent("Event");
 }
 
+Event::Event(KernelHelpers::ServiceContext& ctx_, const char* name)
+    : ctx{ctx_}
+{
+    m_event = ctx.CreateEvent(name);
+}
+
 Event::~Event() {
     m_event->GetReadableEvent().Close(ctx.kernel);
     m_event->Close(ctx.kernel);

@@ -4,10 +4,13 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/satronho_waits.h"
 #include "common/scope_exit.h"
 #include "common/scratch_buffer.h"
 #include "core/core.h"
+#include "core/hle/kernel/k_client_port.h"
 #include "core/hle/kernel/k_client_session.h"
+#include "core/hle/kernel/k_port.h"
 #include "core/hle/kernel/k_hardware_timer.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_scoped_resource_reservation.h"
@@ -29,8 +32,17 @@ Result SendSyncRequestImpl(KernelCore& kernel, uintptr_t message, size_t buffer_
     KScopedAutoObject parent = {kernel, session->GetParent()};
     ASSERT(parent.IsNotNull());
 
-    // Send the request.
+    // Send the request. Satronho: the time the thread waited for the service's reply, by service.
+    const u64 wait_start = Satronho::Waits::NowNs();
     const Result result = session->SendSyncRequest(kernel, message, buffer_size);
+    {
+        const u64 waited = Satronho::Waits::NowNs() - wait_start;
+        const KClientPort* port = parent->GetParent();
+        Satronho::Waits::Add(Satronho::Waits::Kind::Services,
+                             port != nullptr ? Satronho::Waits::PortName(port->GetParent())
+                                             : std::string{"?"},
+                             waited);
+    }
     if (R_SUCCEEDED(result)) {
         GetCurrentThread(kernel).WaitForStartupThreads(kernel);
     }

@@ -12,6 +12,7 @@
 #include <memory>
 #include <utility>
 
+#include "common/satronho_waits.h"
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "common/settings.h"
@@ -317,6 +318,9 @@ struct GPU::Impl {
         AsyncReadback::CountRead(raster_area.in_flight ? AsyncReadback::Read::InFlight
                                                        : AsyncReadback::Read::Async,
                                  AsyncReadback::Now() - request);
+        // Satronho: the guest thread waited this long for the GPU (satronho_waits.h).
+        Satronho::Waits::Add(Satronho::Waits::Kind::GpuRead, {}, AsyncReadback::Now() - request,
+                             true);
         if (VideoCommon::Nx2Profile::Enabled()) {
             AsyncReadback::MaybeReport();
         }

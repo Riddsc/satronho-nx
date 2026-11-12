@@ -602,7 +602,10 @@
         "nucleos del juego",
         "el procesador me limita",
         "port nativo",
-        "comparado con el port"
+        "comparado con el port",
+        "esperan sobre todo a",
+        "a que esperan los hilos",
+        "que significa esperan sobre todo"
       ],
       "claves": [
         "techo",
@@ -616,7 +619,7 @@
         "port",
         "nativo"
       ],
-      "respuesta": "Un emulador traduce el procesador de la consola mientras juegas, y en Ocarina eso pesa más que los gráficos: en la llanura de Hyrule el que frena es el procesador, por eso Docked y Handheld van igual. Para saber dónde está el techo lo medimos contra el juego nativo en PC (un port) en un equipo potente: allí la llanura va a unos 50 FPS y solo pasa 60 una quinta parte del tiempo. Satronho saca unos 44 en el mismo tramo, cerca del 88 % del nativo. En el Medidor Satronho, la fila «Núcleos» tiene una barra por cada núcleo del juego y otra para la GPU emulada: una barra llena (naranja) es un hilo que no da más y que limita los FPS; si ninguna está llena, los hilos se están esperando entre sí. Lo que más ayuda es un procesador rápido por núcleo; Accurate cuesta cerca de un tercio de los FPS, y la generación de cuadros muestra más cuadros a cambio de un poco más de retraso al controlar.",
+      "respuesta": "Un emulador traduce el procesador de la consola mientras juegas, y en Ocarina eso pesa más que los gráficos: en la llanura de Hyrule el que frena es el procesador, por eso Docked y Handheld van igual. Para saber dónde está el techo lo medimos contra el juego nativo en PC (un port) en un equipo potente: allí la llanura va a unos 50 FPS y solo pasa 60 una quinta parte del tiempo. Satronho saca unos 44 en el mismo tramo, cerca del 88 % del nativo. En el Medidor Satronho, la fila «Núcleos» tiene una barra por cada núcleo del juego y otra para la GPU emulada: una barra llena (naranja) es un hilo que no da más y que limita los FPS; si ninguna está llena, los hilos se están esperando entre sí, y la línea de abajo («Esperan sobre todo a…») dice a qué: a la GPU, a la pantalla, a sus otros hilos o a los servicios del sistema. Lo que más ayuda es un procesador rápido por núcleo; Accurate cuesta cerca de un tercio de los FPS, y la generación de cuadros muestra más cuadros a cambio de un poco más de retraso al controlar.",
       "ver": [
         "medidor",
         "docked-handheld",

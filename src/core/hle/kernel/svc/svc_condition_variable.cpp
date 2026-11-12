@@ -4,6 +4,7 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/satronho_waits.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_hardware_timer.h"
 #include "core/hle/kernel/k_memory_layout.h"
@@ -41,9 +42,13 @@ Result WaitProcessWideKeyAtomic(Core::System& system, u64 address, u64 cv_key, u
     }
 
     // Wait on the condition variable.
-    R_RETURN(
+    const u64 wait_start = Satronho::Waits::NowNs();
+    const Result result =
         GetCurrentProcess(system.Kernel())
-            .WaitConditionVariable(address, Common::AlignDown(cv_key, sizeof(u32)), tag, timeout));
+            .WaitConditionVariable(address, Common::AlignDown(cv_key, sizeof(u32)), tag, timeout);
+    Satronho::Waits::Add(Satronho::Waits::Kind::Threads, "condvar",
+                         Satronho::Waits::NowNs() - wait_start);
+    R_RETURN(result);
 }
 
 /// Signal process wide key

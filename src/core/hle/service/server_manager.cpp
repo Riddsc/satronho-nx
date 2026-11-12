@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "common/satronho_waits.h"
 #include "common/scope_exit.h"
 
 #include "core/core.h"
@@ -192,6 +193,8 @@ Result ServerManager::ManageNamedPort(const std::string& service_name,
     // Create a new port.
     auto* port = Kernel::KPort::Create(m_system.Kernel());
     port->Initialize(m_system.Kernel(), max_sessions, false, 0);
+    // Satronho: the service's name for what the game waits on (satronho_waits.h).
+    Satronho::Waits::NamePort(port, service_name);
 
     // Register the port.
     Kernel::KPort::Register(m_system.Kernel(), port);

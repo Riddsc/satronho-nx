@@ -4,6 +4,7 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/satronho_waits.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_hardware_timer.h"
 #include "core/hle/kernel/k_memory_layout.h"
@@ -69,8 +70,14 @@ Result WaitForAddress(Core::System& system, u64 address, ArbitrationType arb_typ
         timeout = timeout_ns;
     }
 
-    R_RETURN(
-        GetCurrentProcess(system.Kernel()).WaitAddressArbiter(address, arb_type, value, timeout));
+    const u64 wait_start = Satronho::Waits::NowNs();
+    const Result result =
+        GetCurrentProcess(system.Kernel()).WaitAddressArbiter(address, arb_type, value, timeout);
+    if (timeout_ns != 0) {
+        Satronho::Waits::Add(Satronho::Waits::Kind::Threads, "address",
+                             Satronho::Waits::NowNs() - wait_start);
+    }
+    R_RETURN(result);
 }
 
 // Signals to an address (via Address Arbiter)

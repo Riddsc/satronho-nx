@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 
+#include "common/satronho_waits.h"
 #include "common/scope_exit.h"
 #include "core/core.h"
 #include "core/core_timing.h"
@@ -185,7 +186,10 @@ void SleepThread(Core::System& system, s64 ns) {
 
         // Sleep.
         // NOTE: Nintendo does not check the result of this sleep.
+        const u64 wait_start = Satronho::Waits::NowNs();
         static_cast<void>(GetCurrentThread(kernel).Sleep(kernel, timeout));
+        Satronho::Waits::Add(Satronho::Waits::Kind::Sleep, {},
+                             Satronho::Waits::NowNs() - wait_start);
     } else if (yield_type == Svc::YieldType::WithoutCoreMigration) {
         KScheduler::YieldWithoutCoreMigration(kernel);
     } else if (yield_type == Svc::YieldType::WithCoreMigration) {

@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <tuple>
+#include "common/satronho_waits.h"
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "core/core.h"
@@ -73,6 +74,8 @@ Result ServiceManager::RegisterService(Kernel::KServerPort** out_server_port, st
 
     auto* port = Kernel::KPort::Create(kernel);
     port->Initialize(kernel, max_sessions, false, 0);
+    // Satronho: the service's name for what the game waits on (satronho_waits.h).
+    Satronho::Waits::NamePort(port, name);
 
     // Register the port.
     Kernel::KPort::Register(kernel, port);

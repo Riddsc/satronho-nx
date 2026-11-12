@@ -21,6 +21,8 @@ class ServiceContext;
 class Event {
 public:
     explicit Event(KernelHelpers::ServiceContext& ctx);
+    /// Satronho: a name for the event (what the game waits on, in the log).
+    Event(KernelHelpers::ServiceContext& ctx, const char* name);
     ~Event();
 
     void Signal(Kernel::KernelCore& kernel) noexcept;

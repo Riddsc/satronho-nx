@@ -8,6 +8,8 @@
 #include <optional>
 #include <string>
 #include <thread>
+#include <tuple>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -22,6 +24,7 @@
 #endif
 
 #include "common/dkb_cpu_trace.h"
+#include "common/satronho_waits.h"
 #include "common/logging.h"
 #include "video_core/nx2_profile.h"
 #include "video_core/nx2_stutter_trace.h"
@@ -122,6 +125,9 @@ struct FrameState {
     std::array<u64, DriverBuildCount> driver_builds{};
     // Satronho: the emulation threads' CPU time at the previous summary.
     std::optional<Common::DkbCpuTrace::Snapshot> cores{};
+    // Satronho: what the game's threads waited on, at the previous summary.
+    std::optional<Satronho::Waits::Totals> waits{};
+    std::unordered_map<std::string, std::pair<u64, u64>> wait_labels{};
 };
 
 FrameState g_frame;
@@ -133,6 +139,47 @@ std::string CacheFileBytes() {
     std::error_code error;
     const auto size = g_cache_file.empty() ? 0 : std::filesystem::file_size(g_cache_file, error);
     return g_cache_file.empty() || error ? std::string{"na"} : std::to_string(size);
+}
+
+/// Satronho: what the game's threads waited on over the window (satronho_waits.h), in ms with the
+/// number of waits, per kind and for the labels that took the most. Only waits under 100 ms count:
+/// hand-offs inside a frame, not idle workers. compare_logs.py reads it.
+void LogWaits(FrameState& state) {
+    namespace Waits = Satronho::Waits;
+    const auto totals = Waits::ReadTotals();
+    auto labels = Waits::ReadLabels();
+    if (state.waits) {
+        std::string kinds;
+        for (size_t i = 0; i < totals.ns.size(); ++i) {
+            kinds += fmt::format(" {}={:.0f}/{}", Waits::kind_names[i],
+                                 static_cast<double>(totals.ns[i] - state.waits->ns[i]) / 1e6,
+                                 totals.count[i] - state.waits->count[i]);
+        }
+        std::vector<std::tuple<u64, u64, std::string>> top;
+        for (const auto& label : labels) {
+            const auto it = state.wait_labels.find(label.label);
+            const u64 ns = label.ns - (it != state.wait_labels.end() ? it->second.first : 0);
+            const u64 count = label.count - (it != state.wait_labels.end() ? it->second.second : 0);
+            if (count > 0) {
+                top.emplace_back(ns, count, label.label);
+            }
+        }
+        std::sort(top.begin(), top.end(), [](const auto& a, const auto& b) {
+            return std::get<0>(a) > std::get<0>(b);
+        });
+        std::string top_text;
+        for (size_t i = 0; i < std::min<size_t>(top.size(), 8); ++i) {
+            top_text += fmt::format("{}{}={:.0f}/{}", i == 0 ? "" : ",", std::get<2>(top[i]),
+                                    static_cast<double>(std::get<0>(top[i])) / 1e6,
+                                    std::get<1>(top[i]));
+        }
+        LOG_INFO(HW_GPU, "Satronho waits{} top={}", kinds, top_text.empty() ? "na" : top_text);
+    }
+    state.waits = totals;
+    state.wait_labels.clear();
+    for (const auto& label : labels) {
+        state.wait_labels.emplace(label.label, std::make_pair(label.ns, label.count));
+    }
 }
 
 /// Satronho: how busy each emulation thread was over the window, in % of one host core: the six
@@ -180,6 +227,7 @@ void LogCores(FrameState& state) {
                  text(Role::GpuCommand), text(Role::GpuBack), text(Role::VulkanWorker));
     }
     state.cores = std::move(snapshot);
+    LogWaits(state);
 }
 
 void Summarize(FrameState& state, u64 now) {

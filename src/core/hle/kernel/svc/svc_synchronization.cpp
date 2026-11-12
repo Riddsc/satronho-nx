@@ -4,12 +4,15 @@
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/satronho_waits.h"
 #include "common/scope_exit.h"
 #include "common/scratch_buffer.h"
 #include "core/core.h"
 #include "core/hle/kernel/k_hardware_timer.h"
 #include "core/hle/kernel/k_process.h"
 #include "core/hle/kernel/k_readable_event.h"
+#include "core/hle/kernel/k_thread.h"
+#include "core/hle/service/kernel_helpers.h"
 #include "core/hle/kernel/svc.h"
 #include "core/hle/kernel/svc_results.h"
 
@@ -53,6 +56,34 @@ Result ResetSignal(Core::System& system, Handle handle) {
 }
 
 /// Wait for the given handles to synchronize, timeout after the specified nanoseconds
+namespace {
+
+/// Satronho: what a WaitSynchronization that waited `ns` was waiting on (satronho_waits.h).
+void NoteSyncWait(KSynchronizationObject* object, u64 ns) {
+    using Satronho::Waits::Add;
+    using Satronho::Waits::Kind;
+    if (auto* event = object->DynamicCast<KReadableEvent*>(); event != nullptr) {
+        const std::string name = Service::KernelHelpers::DebugEventName(event);
+        if (name.starts_with("NVCTRL::NvEvent")) {
+            Add(Kind::GpuSync, "syncpoint", ns);
+        } else if (name.find("BufferQueue") != std::string::npos ||
+                   name.find("Vsync") != std::string::npos) {
+            Add(Kind::Present, name, ns);
+        } else if (name == "?") {
+            // Not a service's: one of the game's own events.
+            Add(Kind::Threads, "game_event", ns);
+        } else {
+            Add(Kind::Services, name, ns);
+        }
+    } else if (object->DynamicCast<KThread*>() != nullptr) {
+        Add(Kind::Threads, "thread_exit", ns);
+    } else {
+        Add(Kind::Threads, object->GetTypeObj().GetName(), ns);
+    }
+}
+
+} // namespace
+
 Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_handles,
                            int32_t num_handles, int64_t timeout_ns) {
     LOG_TRACE(Kernel_SVC, "called user_handles={:#x}, num_handles={}, timeout_ns={}", user_handles,
@@ -95,7 +126,16 @@ Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_ha
     }
 
     // Wait on the objects.
+    const u64 wait_start = Satronho::Waits::NowNs();
     Result res = KSynchronizationObject::Wait(system.Kernel(), out_index, objs.data(), num_handles, timeout);
+    if (timeout_ns != 0) {
+        const u64 waited = Satronho::Waits::NowNs() - wait_start;
+        if (res == ResultSuccess && *out_index >= 0 && *out_index < num_handles) {
+            NoteSyncWait(objs[*out_index], waited);
+        } else if (res == ResultTimedOut) {
+            Satronho::Waits::Add(Satronho::Waits::Kind::Threads, "timeout", waited);
+        }
+    }
 
     R_SUCCEED_IF(res == ResultSessionClosed);
     R_RETURN(res);

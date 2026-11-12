@@ -256,7 +256,7 @@ Result IApplicationDisplayService::GetDisplayVsyncEvent(
 
     std::scoped_lock lk{m_lock};
 
-    auto [it, created] = m_display_vsync_events.emplace(display_id, m_context);
+    auto [it, created] = m_display_vsync_events.try_emplace(display_id, m_context, "VI::VsyncEvent");
     R_UNLESS(created, VI::ResultPermissionDenied);
 
     m_container->LinkVsyncEvent(display_id, &it->second);

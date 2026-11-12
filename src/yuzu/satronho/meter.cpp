@@ -221,7 +221,7 @@ QSizeF Meter::BaseSize() const {
                   2 * static_cast<qreal>((cells + 1) / 2 - 1);
     }
     if (Shows(Cores)) {
-        height += 6 + CoresHeight;
+        height += 6 + CoresHeight + LineHeight;
     }
     height += Bottom;
     return {Width, std::max<qreal>(height, CompactHeight)};
@@ -367,6 +367,28 @@ void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::
         gpu_back_busy = busy(Role::GpuBack);
     }
     cpu_snapshot = snapshot;
+
+    // What the game's threads waited on since the last update, by group, smoothed.
+    {
+        namespace Waits = Satronho::Waits;
+        const auto totals = Waits::ReadTotals();
+        if (wait_totals) {
+            const auto delta = [&](Waits::Kind kind) {
+                const auto index = static_cast<std::size_t>(kind);
+                return static_cast<double>(totals.ns[index] - wait_totals->ns[index]);
+            };
+            const std::array<double, 4> now{
+                delta(Waits::Kind::GpuRead) + delta(Waits::Kind::GpuSync),
+                delta(Waits::Kind::Present),
+                delta(Waits::Kind::Threads),
+                delta(Waits::Kind::Services) + delta(Waits::Kind::Sleep),
+            };
+            for (std::size_t i = 0; i < now.size(); ++i) {
+                wait_share[i] = wait_share[i] * 0.7 + now[i] * 0.3;
+            }
+        }
+        wait_totals = totals;
+    }
 
     auto& renderer = system.GPU().Renderer();
     renderer.RequestGpuBusySample();
@@ -665,6 +687,26 @@ void Meter::PaintCores(QPainter& painter, qreal top) {
     const qreal gpu_x = Pad + Content - bar_width - RunsWidth(gpu);
     DrawRuns(painter, gpu_x, top, CoresHeight, gpu);
     bar(Pad + Content - bar_width, gpu_back_busy);
+
+    // Under the bars: what the game's threads wait on most (Satronho's wait measurement).
+    static const std::array<const char*, 4> groups{
+        QT_TRANSLATE_NOOP("Satronho::Meter", "la GPU"),
+        QT_TRANSLATE_NOOP("Satronho::Meter", "la pantalla"),
+        QT_TRANSLATE_NOOP("Satronho::Meter", "sus otros hilos"),
+        QT_TRANSLATE_NOOP("Satronho::Meter", "los servicios"),
+    };
+    const auto most = std::max_element(wait_share.begin(), wait_share.end());
+    const double sum = wait_share[0] + wait_share[1] + wait_share[2] + wait_share[3];
+    std::vector<Run> waits{{Tr("Esperan sobre todo a "), font, Dim}};
+    if (sum > 0) {
+        waits.push_back({Tr(groups[static_cast<std::size_t>(most - wait_share.begin())]),
+                         Mono(11, QFont::DemiBold), accent});
+        waits.push_back({QStringLiteral(" (%1 %)").arg(*most / sum * 100.0, 0, 'f', 0), font,
+                         Muted});
+    } else {
+        waits.back().text = Tr("Esperas: —");
+    }
+    DrawRuns(painter, Pad, top + CoresHeight, LineHeight, waits);
 }
 
 void Meter::PaintGraph(QPainter& painter, const QRectF& plot) {
@@ -797,6 +839,8 @@ void Meter::Reset() {
     shaders_building = 0;
     core_busy = {};
     gpu_back_busy.reset();
+    wait_totals.reset();
+    wait_share = {};
     stutters = 0;
     counted_until.reset();
     last_stutter.reset();

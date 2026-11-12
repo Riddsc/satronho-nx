@@ -377,6 +377,14 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   GPU command 48 %, worker de Vulkan 24 %. En ventanas <38 FPS los núcleos trabajan MENOS
   (57–67 %) que en ventanas ≥44 FPS (67–86 %): no hay un hilo saturado, los hilos esperan. Siguiente
   medición: en qué esperan los núcleos del juego (sincronización con la GPU emulada, locks, etc.).
+- **Build 42: esperas.** `src/common/satronho_waits.{h,cpp}`: esperas de los hilos del juego <100 ms
+  por tipo (gpu_read = GPU::OnCPURead, gpu_sync = evento NVCTRL::NvEvent, present = BufferQueue/
+  VI::VsyncEvent, threads = condvar/address/eventos del juego/timeout, sleep, services = IPC por
+  nombre de servicio: `NamePort` en sm.cpp y server_manager.cpp). Ganchos en svc_synchronization,
+  svc_condition_variable, svc_address_arbiter, svc_thread (SleepThread), svc_ipc y gpu.cpp.
+  `LogWaits` escribe «Satronho waits gpu_read=ms/n ... top=etiqueta=ms/n,...» con cada resumen;
+  compare_logs.py tiene filas «ms por 10 s esperando …». El medidor muestra «Esperan sobre todo a …»
+  bajo las barras. `Service::Event(ctx, name)` nuevo para nombrar el evento de vsync.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

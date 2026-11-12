@@ -16,6 +16,7 @@
 
 #include "common/common_types.h"
 #include "common/dkb_cpu_trace.h"
+#include "common/satronho_waits.h"
 #include "core/perf_stats.h"
 #include "video_core/renderer_base.h"
 
@@ -116,6 +117,9 @@ private:
     // How busy each guest core and the emulated GPU's back thread were, in % of a host core.
     std::array<std::optional<double>, 6> core_busy{};
     std::optional<double> gpu_back_busy;
+    // What the game's threads wait on most (satronho_waits.h), smoothed over a few seconds.
+    std::optional<Satronho::Waits::Totals> wait_totals;
+    std::array<double, 4> wait_share{};
 
     // Stutters: frames over 100 ms since the meter was shown.
     int stutters = 0;

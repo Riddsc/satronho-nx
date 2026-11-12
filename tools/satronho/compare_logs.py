@@ -60,6 +60,8 @@ class Session:
     forced_stop: bool = False
     # Satronho cores lines (build 41+): (time, busiest guest core %, guest cores summed %, gpu_back %)
     cores: list[tuple[float, float, float, float | None]] = field(default_factory=list)
+    # Satronho waits lines (build 42+): (time, {kind: ms})
+    waits: list[tuple[float, dict[str, float]]] = field(default_factory=list)
 
     # Play windows: from the first one slower than the title screen on, without the stretches
     # pinned at exactly 60 FPS (title screen, menus, pause or the game left idle): three or more
@@ -88,6 +90,10 @@ class Session:
                      len(self.windows))
         played = len([w for w in self.windows[start:] if w[1] < 1_000_000])
         return (played - len(self.play())) * 10 / 60
+
+    def play_waits(self) -> list[tuple[float, dict[str, float]]]:
+        times = [time for time, _, _ in self.play()]
+        return [w for w in self.waits if any(abs(w[0] - t) <= 10 for t in times)]
 
     def play_cores(self) -> list[tuple[float, float, float, float | None]]:
         """Cores lines within 10 s of a play window (menus, pauses and loading left out)."""
@@ -133,6 +139,11 @@ def parse(path: str) -> Session:
                 if match:
                     for name, value in re.findall(r"(\w+):([\d.]+)", match.group(1)):
                         session.category_ms[name] = session.category_ms.get(name, 0.0) + float(value)
+            elif "Satronho waits " in line:
+                time = TIME.match(line)
+                if time:
+                    kinds = {k: float(v) for k, v in re.findall(r" (\w+)=([\d.]+)/\d+", line)}
+                    session.waits.append((float(time.group(1)), kinds))
             elif "Satronho cores " in line:
                 match = re.search(r"busiest_guest=([\d.]+) guest_sum=([\d.]+).*gpu_back=(\S+)",
                                   line)
@@ -214,6 +225,16 @@ def table(sessions: list[Session]) -> str:
         cores_row("Núcleo del juego más ocupado (mediana)", lambda c: c[1])
         cores_row("Núcleos del juego sumados (100 % = un núcleo)", lambda c: c[2])
         cores_row("Hilo de la GPU emulada (mediana)", lambda c: c[3])
+    if any(s.waits for s in sessions):
+        names = {"gpu_read": "la GPU (lecturas de memoria)", "gpu_sync": "la GPU (syncpoints)",
+                 "present": "presentar el cuadro", "threads": "otros hilos del juego",
+                 "sleep": "dormir (temporizador)", "services": "servicios emulados"}
+        for kind, label in names.items():
+            values = []
+            for s in sessions:
+                picked = [w.get(kind, 0.0) for _, w in s.play_waits()]
+                values.append(f"{statistics.median(picked):.0f}" if picked else "—")
+            row(f"ms por 10 s esperando {label}", values)
     if any(s.stutter_trace for s in sessions):
         for name in CATEGORIES:
             row(f"ms por 10 s en {name}",

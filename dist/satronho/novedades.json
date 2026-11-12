@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-42",
+      "fecha": "12 de noviembre de 2026",
+      "titulo": "A qué esperan los núcleos",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "El Medidor Satronho dice, debajo de las barras de núcleos, a qué esperan sobre todo los hilos del juego: a la GPU, a la pantalla, a sus otros hilos o a los servicios del sistema, con el porcentaje."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El registro anota cada 10 segundos cuánto esperan los hilos del juego y en qué (lecturas de memoria de la GPU, syncpoints, presentar el cuadro, condiciones entre hilos, servicios emulados por nombre), y el comparador lo muestra. Es el paso previo a las mejoras de rendimiento: primero sabemos qué frena, después lo atacamos."
+        }
+      ]
+    },
+    {
       "tag": "build-41",
       "fecha": "11 de noviembre de 2026",
       "titulo": "Sabemos dónde está el techo",
