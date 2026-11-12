@@ -9,7 +9,16 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`4d884cbb`** (2026-11-11, #1232; build 38: medidor
+- Último commit de Lichii integrado: **`31b7d67e`** (2026-11-12, #1479; build 44: 52 commits, entre
+  ellos #1441 búferes uniformes, #1479 lecturas sin bloqueos, #1449/#1450 cierre, #1485 agua OoT,
+  #1493/#1508 generación de cuadros). **Excluido además:** `5b099465` #1365 (tema Lichii Dark,
+  ventana What's new, logo de Lichii en Acerca de; forzaba el cambio de tema): se revierte en un
+  worktree de lichii/nx2 (`git revert -n`, conflicto en style.qrc → borrar, uisettings.h → dejar
+  solo `show_low_ram_warning`) y se aplica el diff 4d884cbb..worktree con
+  `--exclude=src/common/recommended_settings.h --exclude='dist/qt_themes/lichii/*'
+  --exclude='dist/lichii_wordmark*'`. `IsLichiiTheme()` vive en game_list_p.h (#1371 lo usa;
+  siempre falso). Antes:
+- Último commit de Lichii integrado antes: **`4d884cbb`** (2026-11-11, #1232; build 38: medidor
   rediseñado #1345, HDR nativo #1326, perfiles DLSS #1249, pipelines con límite de RAM #1334,
   casa de la guardia de OoT #1313, falta de memoria en OoT #1210, chasquido de la ocarina #1196).
   **Excluidos a propósito** (revertidos tras aplicar el diff; vuelve a revertirlos al integrar):

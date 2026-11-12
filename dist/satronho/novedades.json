@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-44",
+      "fecha": "12 de noviembre de 2026",
+      "titulo": "Lo mejor de Lichii, elegido y medido por Satronho",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "Integramos 52 cambios nuevos de Lichii y elegimos los que suman. Los principales apuntan justo a lo que nuestras mediciones señalaron como el freno en las zonas pesadas de Ocarina: los datos constantes de cada dibujo ahora se escriben directo y se conservan entre dibujos (Lichii #1441), y las lecturas de memoria que el juego le pide a la GPU se saltan bloqueos innecesarios (Lichii #1479). Con la fila «Núcleos» y la comparación por tramos vamos a medir cuánto rinden en tu PC."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Cierre estable en dos capas: nuestro arreglo de la build 43 (esperar hasta 30 segundos y registrar cada paso del cierre, que mostró que desmontar la GPU emulada tarda unos 8 segundos) más el de Lichii que evita que la ventana quede bloqueada si de todos modos hay que cortar el juego (Lichii #1449). Además, al cerrar, el juego se detiene limpio en vez de terminar en un error (Lichii #1450)."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "De Lichii: la cuadrícula oscura en el agua de Ocarina (#1485), la generación de cuadros funciona con HDR (#1493) y llega DLSS Frame Generation para tarjetas NVIDIA (#1508)."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Satronho mantiene su identidad: dejamos fuera el tema de interfaz y la ventana de novedades de Lichii, porque ya tenemos los nuestros. Nuestro enfoque sigue siendo la estabilidad: cada cambio se prueba con el mismo recorrido en una PC real antes de recomendarlo."
+        }
+      ]
+    },
+    {
       "tag": "build-43",
       "fecha": "12 de noviembre de 2026",
       "titulo": "Cerrar sin colgarse y medir mejor a la GPU",

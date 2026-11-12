@@ -42,6 +42,12 @@ Q_DECLARE_METATYPE(GameListItemType);
  * @param size The desired width and height of the default icon.
  * @return QPixmap default icon
  */
+// Lichii's game list layout (#1371) draws its rows for the Lichii Dark theme (#1365), which
+// Satronho NX leaves out: this stays false unless that theme is ever installed.
+static bool IsLichiiTheme() {
+    return UISettings::values.theme == "lichii";
+}
+
 static QPixmap GetDefaultIcon(u32 size) {
     QPixmap icon(size, size);
     icon.fill(Qt::transparent);
@@ -112,7 +118,7 @@ public:
 
         setData(tooltip, Qt::ToolTipRole);
 
-        const u32 size = UISettings::values.game_icon_size.GetValue();
+        const u32 size = UISettings::CurrentGameIconSize().GetValue();
 
         QPixmap picture;
         if (!picture.loadFromData(picture_data.data(), static_cast<u32>(picture_data.size()))) {
@@ -136,7 +142,7 @@ public:
             const std::array<QString, 4> row_data{{
                 QString::fromStdString(filename),
                 data(FileTypeRole).toString(),
-                QString::fromStdString(fmt::format("{:#016x}", data(ProgramIdRole).toULongLong())),
+                QString::fromStdString(fmt::format("{:016X}", data(ProgramIdRole).toULongLong())),
                 data(TitleRole).toString(),
             }};
 
