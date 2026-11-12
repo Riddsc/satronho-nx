@@ -46,6 +46,16 @@ void Add(Kind kind, std::string_view label, u64 ns, bool always) {
     ++sum.count;
 }
 
+void AddLabel(Kind kind, std::string_view label, u64 ns) {
+    std::string key{kind_names[static_cast<size_t>(kind)]};
+    key += ':';
+    key += label;
+    std::scoped_lock lock{g_labels_mutex};
+    Sum& sum = g_labels[key];
+    sum.ns += ns;
+    ++sum.count;
+}
+
 void NamePort(const void* port, std::string name) {
     std::scoped_lock lock{g_ports_mutex};
     g_ports[port] = std::move(name);

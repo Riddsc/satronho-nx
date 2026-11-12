@@ -46,3 +46,4 @@ que es la linea roja del medidor|medidor
 que son los tirones del medidor|medidor
 que tan cerca esta del port nativo|techo-fps
 mi procesador es el cuello de botella?|techo-fps
+tuve que cerrarlo desde el administrador de tareas|cierre-colgado

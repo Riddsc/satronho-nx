@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "common/satronho_waits.h"
+#include "core/hle/kernel/k_thread.h"
 #include "common/assert.h"
 #include "common/scope_exit.h"
 #include "common/settings.h"
@@ -310,6 +311,7 @@ struct GPU::Impl {
             gpu_thread.TickGPU(is_async);
             WaitForSyncOperation(fence);
         }
+        const u64 synced = AsyncReadback::Now();
         // The GPU thread submitted the downloads without waiting for the host GPU: this thread
         // waits for them and writes them to guest memory, while the GPU thread goes on.
         AsyncReadback::t_reading = true;
@@ -318,9 +320,22 @@ struct GPU::Impl {
         AsyncReadback::CountRead(raster_area.in_flight ? AsyncReadback::Read::InFlight
                                                        : AsyncReadback::Read::Async,
                                  AsyncReadback::Now() - request);
-        // Satronho: the guest thread waited this long for the GPU (satronho_waits.h).
-        Satronho::Waits::Add(Satronho::Waits::Kind::GpuRead, {}, AsyncReadback::Now() - request,
-                             true);
+        // Satronho: the guest thread waited this long for the GPU (satronho_waits.h): by guest
+        // thread (id and priority), and split into reaching the GPU thread and the download.
+        {
+            const u64 done = AsyncReadback::Now();
+            const Kernel::KThread* thread = Kernel::GetCurrentThreadPointer(system.Kernel());
+            Satronho::Waits::Add(Satronho::Waits::Kind::GpuRead,
+                                 thread != nullptr
+                                     ? fmt::format("t{} p{}", thread->GetThreadId(),
+                                                   thread->GetPriority())
+                                     : std::string{"host"},
+                                 done - request, true);
+            Satronho::Waits::AddLabel(Satronho::Waits::Kind::GpuRead, "phase:gpu_thread",
+                                      synced - request);
+            Satronho::Waits::AddLabel(Satronho::Waits::Kind::GpuRead, "phase:download",
+                                      done - synced);
+        }
         if (VideoCommon::Nx2Profile::Enabled()) {
             AsyncReadback::MaybeReport();
         }

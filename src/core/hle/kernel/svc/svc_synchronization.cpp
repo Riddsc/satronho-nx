@@ -64,8 +64,13 @@ void NoteSyncWait(KSynchronizationObject* object, u64 ns) {
     using Satronho::Waits::Kind;
     if (auto* event = object->DynamicCast<KReadableEvent*>(); event != nullptr) {
         const std::string name = Service::KernelHelpers::DebugEventName(event);
-        if (name.starts_with("NVCTRL::NvEvent")) {
-            Add(Kind::GpuSync, "syncpoint", ns);
+        if (name.starts_with("NVCTRL::NvEvent") || name.starts_with("nx2:syncpt") ||
+            name.starts_with("nx2:gsv") || name.starts_with("nx2:gpu")) {
+            // GPU syncpoints and their notifications (Switch 2's nx2 events included).
+            Add(Kind::GpuSync, name, ns);
+        } else if (name.find("Audio") != std::string::npos) {
+            // The audio thread's periodic wake-ups: not part of a frame.
+            Add(Kind::Polling, name, ns);
         } else if (name.find("BufferQueue") != std::string::npos ||
                    name.find("Vsync") != std::string::npos) {
             Add(Kind::Present, name, ns);
@@ -133,7 +138,7 @@ Result WaitSynchronization(Core::System& system, int32_t* out_index, u64 user_ha
         if (res == ResultSuccess && *out_index >= 0 && *out_index < num_handles) {
             NoteSyncWait(objs[*out_index], waited);
         } else if (res == ResultTimedOut) {
-            Satronho::Waits::Add(Satronho::Waits::Kind::Threads, "timeout", waited);
+            Satronho::Waits::Add(Satronho::Waits::Kind::Polling, "timeout", waited);
         }
     }
 

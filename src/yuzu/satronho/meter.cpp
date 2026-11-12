@@ -381,7 +381,7 @@ void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::
                 delta(Waits::Kind::GpuRead) + delta(Waits::Kind::GpuSync),
                 delta(Waits::Kind::Present),
                 delta(Waits::Kind::Threads),
-                delta(Waits::Kind::Services) + delta(Waits::Kind::Sleep),
+                delta(Waits::Kind::Services),
             };
             for (std::size_t i = 0; i < now.size(); ++i) {
                 wait_share[i] = wait_share[i] * 0.7 + now[i] * 0.3;

@@ -228,7 +228,8 @@ def table(sessions: list[Session]) -> str:
     if any(s.waits for s in sessions):
         names = {"gpu_read": "la GPU (lecturas de memoria)", "gpu_sync": "la GPU (syncpoints)",
                  "present": "presentar el cuadro", "threads": "otros hilos del juego",
-                 "sleep": "dormir (temporizador)", "services": "servicios emulados"}
+                 "sleep": "dormir (temporizador)", "services": "servicios emulados",
+                 "polling": "esperas ociosas o periódicas (no frenan)"}
         for kind, label in names.items():
             values = []
             for s in sessions:

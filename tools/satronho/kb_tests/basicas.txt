@@ -70,3 +70,5 @@ como derroto a ganon|-
 quiero ver la ram mientras juego|medidor
 por que no llega a 60 fps|techo-fps
 que significan las barras de nucleos|techo-fps
+el emulador no cierra|cierre-colgado
+se cuelga al cerrar el juego|cierre-colgado

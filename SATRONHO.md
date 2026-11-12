@@ -399,6 +399,22 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   a ~1 ms cada una (falta saber cuáles y si el ms es cola del hilo del servicio o trabajo).
   La línea del medidor dice casi siempre «sus otros hilos» por los trabajadores sondeando: excluir
   `threads:address` (y los timeouts) de esa línea.
+- **Vuelta oficial limpia con la 42 (recién abierto, 4.7 min):** 45.4 FPS típicos, 32.3 el 10 % más
+  lento, 8.6 tirones/min, 0 shaders. Ruido entre vueltas: FPS típicos ±1; el 10 % más lento ±3; los
+  tirones dependen del calentamiento (8.6/min recién abierto contra 3.8 tras una hora). Para A/B:
+  vuelta oficial recién abierto en ambas builds y comparar sobre todo los FPS típicos.
+  Esperas de GPU en esa vuelta: lecturas ~130–230 ms/s («readers waited on their fence» hasta 227
+  ms/s, la más larga 10 ms) y syncpoints nx2:syncpt:Slot0 ~120 ms/s; GPU back 77 %. Es lo más grande
+  que no es ocioso. Candidato a la primera mejora.
+- **Cierre colgado (40, 42 y 42b; «Emulation thread failed to stop»):** tras la petición de cierre,
+  el desmontaje sigue 7–9 s después de `~Cache` (también en los cierres buenos: 38 tardó 9.4 s y 41
+  10.8 s desde OnShutdownBegin). Lichii termina el hilo a los 10 s del ForceStop
+  (`EmuThreadStopTimeoutMs`) y, terminado a mitad del desmontaje, la ventana se cuelga. Build 43:
+  30 s y `ShutdownMainProcess` registra cada paso de >100 ms («Satronho shutdown: X took N ms»).
+- **Build 43:** además, nuevo tipo `polling` (arbitraje de direcciones, timeouts, eventos de audio:
+  no frenan), los eventos `nx2:syncpt/gsv/gpu` cuentan como gpu_sync, las lecturas de GPU llevan el
+  hilo (`t<id> p<prioridad>`) y las fases `phase:gpu_thread` / `phase:download`. Tema de Juana:
+  `cierre-colgado`.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

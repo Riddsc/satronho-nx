@@ -554,6 +554,18 @@ struct System::Impl {
     }
 
     void ShutdownMainProcess() {
+        // Satronho: each teardown step that takes over 100 ms is logged. A long session's teardown
+        // took 7-9 s (builds 38-42) and nothing said where.
+        const auto satronho_step = [](const char* step, auto&& run) {
+            const auto start = std::chrono::steady_clock::now();
+            run();
+            const auto ms = std::chrono::duration<double, std::milli>(
+                                std::chrono::steady_clock::now() - start)
+                                .count();
+            if (ms >= 100.0) {
+                LOG_INFO(Core, "Satronho shutdown: {} took {:.0f} ms", step, ms);
+            }
+        };
         debug_service.reset();
         SetShuttingDown(true);
         Common::ADPF::Shutdown();
@@ -570,22 +582,22 @@ struct System::Impl {
         stop_event.request_stop();
         core_timing.SyncPause(false);
         Network::CancelPendingSocketOperations();
-        kernel.SuspendEmulation(true);
-        kernel.CloseServices();
-        kernel.ShutdownCores();
-        services.reset();
-        service_manager.reset();
-        fs_controller.Reset();
-        cheat_engine.reset();
-        core_timing.ClearPendingEvents();
-        app_loader.reset();
-        audio_core.reset();
-        gpu_core.reset();
-        host1x_core.reset();
-        perf_stats.reset();
-        cpu_manager.Shutdown();
-        debugger.reset();
-        kernel.Shutdown();
+        satronho_step("kernel.SuspendEmulation(true)", [&] { kernel.SuspendEmulation(true); });
+        satronho_step("kernel.CloseServices()", [&] { kernel.CloseServices(); });
+        satronho_step("kernel.ShutdownCores()", [&] { kernel.ShutdownCores(); });
+        satronho_step("services.reset()", [&] { services.reset(); });
+        satronho_step("service_manager.reset()", [&] { service_manager.reset(); });
+        satronho_step("fs_controller.Reset()", [&] { fs_controller.Reset(); });
+        satronho_step("cheat_engine.reset()", [&] { cheat_engine.reset(); });
+        satronho_step("core_timing.ClearPendingEvents()", [&] { core_timing.ClearPendingEvents(); });
+        satronho_step("app_loader.reset()", [&] { app_loader.reset(); });
+        satronho_step("audio_core.reset()", [&] { audio_core.reset(); });
+        satronho_step("gpu_core.reset()", [&] { gpu_core.reset(); });
+        satronho_step("host1x_core.reset()", [&] { host1x_core.reset(); });
+        satronho_step("perf_stats.reset()", [&] { perf_stats.reset(); });
+        satronho_step("cpu_manager.Shutdown()", [&] { cpu_manager.Shutdown(); });
+        satronho_step("debugger.reset()", [&] { debugger.reset(); });
+        satronho_step("kernel.Shutdown()", [&] { kernel.Shutdown(); });
         stop_event = {};
         Network::RestartSocketOperations();
 

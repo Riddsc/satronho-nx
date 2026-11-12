@@ -22,14 +22,16 @@ enum class Kind : u8 {
     GpuRead,     ///< A guest read of GPU-written memory waited for the GPU (GPU::OnCPURead)
     GpuSync,     ///< WaitSynchronization on a GPU syncpoint event (nvhost-ctrl)
     Present,     ///< WaitSynchronization on presentation (buffer queue, vsync, display)
-    Threads,     ///< The game's own threads: condition variables, address arbiters, other objects
+    Threads,     ///< The game's own threads: condition variables, its events, thread exits
     Sleep,       ///< SleepThread
     Services,    ///< IPC to an emulated service, waiting for its reply
+    Polling,     ///< Idle or periodic waits that hold no frame back: address-arbiter waits (idle
+                 ///< workers checking for work), timed-out waits and the audio thread's wake-ups
     Count,
 };
 
 inline constexpr std::array<std::string_view, static_cast<size_t>(Kind::Count)> kind_names{
-    "gpu_read", "gpu_sync", "present", "threads", "sleep", "services",
+    "gpu_read", "gpu_sync", "present", "threads", "sleep", "services", "polling",
 };
 
 /// Waits this long or longer are idle threads, not hand-offs: left out.
@@ -44,6 +46,9 @@ inline constexpr u64 ShortWaitNs = 100'000'000;
 /// Adds a wait. `label` may be empty (the kind is enough). Waits of ShortWaitNs or more are
 /// dropped unless `always` (a GPU read is never an idle thread).
 void Add(Kind kind, std::string_view label, u64 ns, bool always = false);
+
+/// Adds to a label only (a detail of a wait already counted with Add).
+void AddLabel(Kind kind, std::string_view label, u64 ns);
 
 /// Remembers a service port's name for the IPC labels.
 void NamePort(const void* port, std::string name);

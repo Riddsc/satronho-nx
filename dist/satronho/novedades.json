@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-43",
+      "fecha": "12 de noviembre de 2026",
+      "titulo": "Cerrar sin colgarse y medir mejor a la GPU",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Cerrar después de una sesión larga ya no debería colgar la ventana. El cierre tardaba 7 a 9 segundos y el emulador lo cortaba a la fuerza a los 10, dejando la ventana colgada; ahora espera hasta 30 segundos y el registro anota cuánto tarda cada paso del cierre, para acortar el lento después. Juana lo explica."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "La línea «Esperan sobre todo a…» del Medidor Satronho ya no cuenta a los hilos del juego que solo revisan si les llegó trabajo (no frenan nada), así que ahora muestra lo que de verdad hace esperar."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El registro separa las esperas a la GPU: cuánto espera cada hilo del juego para leer lo que dibujó la GPU (y si es esperando al hilo de la GPU o a la descarga) y las esperas a los syncpoints de la GPU. Es lo que más hace esperar al juego en la llanura de Hyrule."
+        }
+      ]
+    },
+    {
       "tag": "build-42",
       "fecha": "12 de noviembre de 2026",
       "titulo": "A qué esperan los núcleos",

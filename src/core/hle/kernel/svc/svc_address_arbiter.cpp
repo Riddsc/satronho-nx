@@ -74,7 +74,7 @@ Result WaitForAddress(Core::System& system, u64 address, ArbitrationType arb_typ
     const Result result =
         GetCurrentProcess(system.Kernel()).WaitAddressArbiter(address, arb_type, value, timeout);
     if (timeout_ns != 0) {
-        Satronho::Waits::Add(Satronho::Waits::Kind::Threads, "address",
+        Satronho::Waits::Add(Satronho::Waits::Kind::Polling, "address",
                              Satronho::Waits::NowNs() - wait_start);
     }
     R_RETURN(result);

@@ -336,7 +336,10 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
 constexpr int default_mouse_hide_timeout = 2500;
 constexpr int default_input_update_timeout = 1;
-constexpr int EmuThreadStopTimeoutMs = 10'000;
+// Satronho: 30 s, not 10. Tearing down a long Ocarina session took 7-9 s after the stop request
+// (builds 38-42); past 10 s the emulation thread was terminated mid-teardown and the window hung
+// until it was closed from the task manager.
+constexpr int EmuThreadStopTimeoutMs = 30'000;
 
 constexpr size_t CopyBufferSize = 1_MiB;
 

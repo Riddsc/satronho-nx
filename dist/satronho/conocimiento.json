@@ -1471,6 +1471,37 @@
       "ver": [
         "atajos"
       ]
+    },
+    {
+      "id": "cierre-colgado",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "Al cerrar el juego se queda en «Closing software…» o se cuelga, ¿qué hago?",
+      "frases": [
+        "no cierra",
+        "no se cierra",
+        "se cuelga al cerrar",
+        "se queda cerrando",
+        "closing software",
+        "tuve que cerrarlo desde el administrador de tareas",
+        "se congela al salir",
+        "cerrar el juego tarda"
+      ],
+      "claves": [
+        "cerrar",
+        "cierra",
+        "cierre",
+        "colgado",
+        "cuelga",
+        "closing",
+        "administrador",
+        "tareas",
+        "salir"
+      ],
+      "respuesta": "Después de una sesión larga, cerrar Ocarina puede tardar unos segundos mientras el emulador guarda las cachés y libera la memoria; la ventana muestra «Closing software…». Hasta la build 42, si eso pasaba de 10 segundos el emulador cortaba el cierre a la fuerza y a veces la ventana se colgaba hasta cerrarla desde el administrador de tareas. Desde la build 43 espera hasta 30 segundos y anota en el registro cuánto tarda cada paso, para encontrar el lento. Si aun así se cuelga, ciérralo desde el administrador de tareas y avísanos con el registro: tus cachés ya quedaron guardadas antes de ese punto.",
+      "ver": [
+        "log"
+      ]
     }
   ]
 }
