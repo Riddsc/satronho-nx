@@ -1,6 +1,17 @@
 {
   "builds": [
     {
+      "tag": "build-46",
+      "fecha": "12 de noviembre de 2026",
+      "titulo": "Nos quedamos solo con lo que suma",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Medimos la build 45 por tramos en una PC real (RX 9070 XT) y salió unos 2 FPS por debajo de las builds 42 y 43, con el hilo de la GPU más ocupado. Apagamos los cuatro cambios recientes de Lichii que tocan memoria y texturas y coinciden con esa baja: conservar las texturas de los últimos 150 cuadros (#1435, #1439), mantener rastreadas las páginas que escriben los motores de la GPU (#1436) y el atajo de lecturas sin bloqueos (#1479). El resto de lo de Lichii se queda, incluidos el cierre estable y el arreglo del agua de Ocarina."
+        }
+      ]
+    },
+    {
       "tag": "build-45",
       "fecha": "12 de noviembre de 2026",
       "titulo": "Lo mejor de Lichii, elegido y medido por Satronho",

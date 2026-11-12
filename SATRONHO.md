@@ -452,6 +452,12 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   (una sola vuelta). Lichii midió +1.4 FPS en el agua con #1436. Sospechosos con interruptor:
   #1435/#1439 (EDEN_NX2_TC_MIN_AGE), #1479 (EDEN_NX2_READ_FASTPATH); sin interruptor: #1436, #1441.
   Cierre: 11.9 s, solo.
+- **Build 46:** revertidos `31b7d67e` #1479, `6cd99d2e` #1436, `562f6ceb` #1439, `81b202fb` #1435
+  (`git show --binary <c> | git apply -R -3 --index`, en ese orden; en vk_rasterizer.cpp
+  `InvalidateCachedWrites` se queda con la estructura de #1441/#1460 pero `WriteMemory(addr, size)`
+  sin el «tracked» de #1436). #1441 se queda (revertirlo choca con #1460). Al integrar de nuevo:
+  volver a revertirlos salvo que una medición diga lo contrario. Si la 46 no recupera los ~2 FPS,
+  el siguiente sospechoso es #1441.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
