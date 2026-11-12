@@ -385,6 +385,20 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   `LogWaits` escribe «Satronho waits gpu_read=ms/n ... top=etiqueta=ms/n,...» con cada resumen;
   compare_logs.py tiene filas «ms por 10 s esperando …». El medidor muestra «Esperan sobre todo a …»
   bajo las barras. `Service::Event(ctx, name)` nuevo para nombrar el evento de vsync.
+- **Sesión de la 42 (2026-11-12, 40 min jugando; recorrido oficial al final, t≈4290–4903 s):**
+  oficial: 44.2 FPS típicos, 35.0 el 10 % más lento, 3.8 tirones/min, 0 shaders; núcleo más ocupado
+  64 %, suma 345 %, GPU back 78 %. Esperas cortas por 10 s en el oficial: threads 216 s (21 mil
+  esperas/s, ~1.0 ms c/u, casi todo `threads:address` = trabajadores del juego sondeando),
+  sleep 16.7 s (~1.2 ms c/u), services 13.5 s (IAudioRendererEvent ~9.7 s del hilo de audio;
+  `services:?` ~860 llamadas/s a sub-interfaces sin nombre, ~0.9 ms c/u), gpu_read 1.2 s
+  (~94/s, 1.25 ms c/u), gpu_sync y present 0 (los eventos se llaman `nx2:syncpt:Slot0`,
+  `nx2:gsv:SyncptNotify`, `nx2:gpu:Event1`: caen en services; corregir la clasificación).
+  Lo de ~1 ms por espera es la granularidad del reloj (HostTiming duerme en el SO, Lichii #1016):
+  Lichii midió que la espera por hardware NO cambia FPS en OoT (p50 0.1–0.3 ms tarde) → no es
+  objetivo. Candidatos reales: lecturas de GPU (~12 % de un hilo) y las ~860 llamadas/s a servicios
+  a ~1 ms cada una (falta saber cuáles y si el ms es cola del hilo del servicio o trabajo).
+  La línea del medidor dice casi siempre «sus otros hilos» por los trabajadores sondeando: excluir
+  `threads:address` (y los timeouts) de esa línea.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
