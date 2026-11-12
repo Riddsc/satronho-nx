@@ -367,6 +367,16 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   gpu_back vulkan_worker», % de un núcleo del host (DkbCpuTrace). compare_logs.py lo muestra
   (medianas en ventanas de juego). El medidor tiene la fila `Cores` (barras; naranja ≥95 %); las
   filas guardadas en 0x3FF (default de la 40) pasan a 0x7FF. Tema de Troya: `techo-fps`.
+- **Sesión de la 41 (2026-11-12, 51 min jugando, recorrido largo con zonas nuevas):** 43.3 FPS
+  típicos, 31.7 el 10 % más lento, 3.3 tirones/min, 42 shaders >100 ms (máx. 5.8 s) y 100 esperas
+  largas. Los 42 son cómputos que no se armaban desde antes de la build 36 (líneas ~75–80k de
+  pipeline_builds.txt), o sea antes de existir nuestra caché de cómputo; 1738 programas sin
+  registro en la caché v2. Costo de una sola vez: la caché pasó de 23 a 30 MB.
+  Núcleos (400 ventanas de juego): los 6 núcleos del juego entre 62 y 72 % de mediana, ninguno por
+  encima de 92 %; suma ~409 % (el port nativo gasta 167–214 % en el código del juego). GPU back 63 %,
+  GPU command 48 %, worker de Vulkan 24 %. En ventanas <38 FPS los núcleos trabajan MENOS
+  (57–67 %) que en ventanas ≥44 FPS (67–86 %): no hay un hilo saturado, los hilos esperan. Siguiente
+  medición: en qué esperan los núcleos del juego (sincronización con la GPU emulada, locks, etc.).
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
