@@ -437,6 +437,14 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   bind stage buffers 105 (178 mil/s), other 93, draw 64, update buffers 55, configure 42, compute
   36–61, read handles 35. ~87 mil dibujos/s. Lecturas de GPU: ~80 ms/s, mitad esperando al hilo de
   GPU y mitad la descarga; el hilo lector cambia de id entre zonas (p44).
+- **Sesión de la 45 (primera tras integrar 52 commits de Lichii):** el recompilador cambió
+  (#1468, #1511): «6523 programs of another build lowered again», 3673 sin registro durante el juego,
+  la caché de cómputo AMD pasó de 37 a 70 MB (todo cómputo re-armado). 8 cuadros >100 ms en pleno
+  juego (la 43: 0); 15/min en total con los de la carga. Por tramos contra la 43: pesado 33.0 vs 36.2
+  FPS (back 80 vs 84 %, syncpt 207 vs 354 ms/s, gpu_read 199 vs 77 ms/s), liviano 50.2 vs 51.9.
+  Cierre: solo, 11.5 s (gpu_core.reset 8.5 s). Pendiente: segunda vuelta (cachés calientes) antes
+  de juzgar; si el tramo pesado sigue peor y gpu_read sigue al doble, sospechar #1436 (páginas
+  escritas por los motores de la GPU siguen rastreadas) o #1441.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
