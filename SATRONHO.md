@@ -9,7 +9,7 @@ proyecto: léelo antes de tocar algo.
 - `Riddsc/satronho-nx`, rama **`main`** = Satronho NX. La rama `nx2` es una copia vieja de Lichii; no se usa.
 - `main` **no comparte historia git con Lichii**: empezó como snapshot de Lichii `588bfa6`.
   `git merge-base main lichii/nx2` sale vacío. Por eso **no se hace merge**; se aplican diffs.
-- Último commit de Lichii integrado: **`31b7d67e`** (2026-11-12, #1479; build 44: 52 commits, entre
+- Último commit de Lichii integrado: **`31b7d67e`** (2026-11-12, #1479; build 45 —la 44 falló por una función sin usar—: 52 commits, entre
   ellos #1441 búferes uniformes, #1479 lecturas sin bloqueos, #1449/#1450 cierre, #1485 agua OoT,
   #1493/#1508 generación de cuadros). **Excluido además:** `5b099465` #1365 (tema Lichii Dark,
   ventana What's new, logo de Lichii en Acerca de; forzaba el cambio de tema): se revierte en un

@@ -44,7 +44,7 @@ Q_DECLARE_METATYPE(GameListItemType);
  */
 // Lichii's game list layout (#1371) draws its rows for the Lichii Dark theme (#1365), which
 // Satronho NX leaves out: this stays false unless that theme is ever installed.
-static bool IsLichiiTheme() {
+inline bool IsLichiiTheme() {
     return UISettings::values.theme == "lichii";
 }
 
