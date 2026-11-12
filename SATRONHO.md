@@ -415,6 +415,19 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   no frenan), los eventos `nx2:syncpt/gsv/gpu` cuentan como gpu_sync, las lecturas de GPU llevan el
   hilo (`t<id> p<prioridad>`) y las fases `phase:gpu_thread` / `phase:download`. Tema de Juana:
   `cierre-colgado`.
+- **Sesión de la 43 (recién abierto, 6.3 min jugando):** cerró solo en 11.1 s desde OnShutdownBegin:
+  `kernel.CloseServices()` 1.3 s, `gpu_core.reset()` **8.2 s** (el desmontaje de la GPU/Vulkan es lo
+  lento), `kernel.Shutdown()` 0.5 s. 38.5 FPS típicos / 34.1 el 10 % más lento / 5.8 tirones/min,
+  pero la vuelta pasó ~4 min seguidos en un tramo pesado a ~36 FPS (la 42b tuvo tramos iguales de
+  35–39): los FPS típicos dependen de cuánto se queda uno en los tramos pesados; corregido el «±1».
+  Comparar por tramos (pesado <40 / liviano ≥44). En ventanas <40 FPS: esperas a syncpoints de la GPU
+  (nx2:syncpt:Slot0) 326 ms/s contra 67 ms/s en ventanas ≥44; GPU back 84 % contra 72 %; núcleos del
+  juego 47–55 % contra 57–66 %. Conclusión: en los tramos pesados el límite es el hilo «back» de la
+  GPU emulada. Su perfil (Nx2Profile, 10 s): host_cpu_busy ~850 ms/s; method 220 ms/s (4.4 M
+  métodos/s, el salto de escrituras repetidas ya está: EDEN_NX2_SKIP_SAME), split wait 156 (ocioso),
+  bind stage buffers 105 (178 mil/s), other 93, draw 64, update buffers 55, configure 42, compute
+  36–61, read handles 35. ~87 mil dibujos/s. Lecturas de GPU: ~80 ms/s, mitad esperando al hilo de
+  GPU y mitad la descarga; el hilo lector cambia de id entre zonas (p44).
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
