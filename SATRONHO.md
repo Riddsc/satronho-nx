@@ -445,6 +445,13 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Cierre: solo, 11.5 s (gpu_core.reset 8.5 s). Pendiente: segunda vuelta (cachés calientes) antes
   de juzgar; si el tramo pesado sigue peor y gpu_read sigue al doble, sospechar #1436 (páginas
   escritas por los motores de la GPU siguen rastreadas) o #1441.
+- **Segunda vuelta de la 45 (cachés calientes: 3637 de registros, 1 nuevo):** tirones a mitad del
+  juego iguales a las builds anteriores (42b 41, 43 33, 45b 34; ≥300 ms: 8, 8, 7; causa texture/other
+  en entradas de zona). Por tramos (42b / 43 / 45b): pesado 37.0 / 36.2 / 34.9 FPS, liviano 51.7 /
+  52.1 / 49.3; back en liviano 71 / 72 / 79 %. Probable baja de ~2 FPS (~5 %) con los 52 commits
+  (una sola vuelta). Lichii midió +1.4 FPS en el agua con #1436. Sospechosos con interruptor:
+  #1435/#1439 (EDEN_NX2_TC_MIN_AGE), #1479 (EDEN_NX2_READ_FASTPATH); sin interruptor: #1436, #1441.
+  Cierre: 11.9 s, solo.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
