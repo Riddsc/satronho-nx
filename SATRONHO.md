@@ -458,6 +458,12 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   sin el «tracked» de #1436). #1441 se queda (revertirlo choca con #1460). Al integrar de nuevo:
   volver a revertirlos salvo que una medición diga lo contrario. Si la 46 no recupera los ~2 FPS,
   el siguiente sospechoso es #1441.
+- **Vuelta oficial de la 46 (recién abierto, 5.3 min, cachés al día: 3705 de registros):** liviano
+  52.2 FPS (43: 52.1, 45b: 49.3) → recuperado; pesado solo 5 ventanas a 34.2 (poco tiempo ahí); las
+  ventanas más lentas 34/34/34/38 (43: 27/28/32/34; 45b: 29/32/32/34). Típicos 50.6, 10 % más lento
+  37.8 (mejor medido), 5.6 tirones/min (igual). Las lecturas de GPU siguen como en la 45 (~125 ms/s):
+  no eran la causa. Cierre solo en 9.4 s (gpu_core.reset 8.5 s). Veredicto: la 46 queda; candidata
+  para el amigo.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
