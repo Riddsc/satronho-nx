@@ -477,6 +477,15 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   ≤ 10 GiB; reintento de imagen en memoria del host restaurado (Lichii lo quitó en #1335);
   cherry-pick de Lichii #1580 (`6e887563`) y #1581 (`e633e165`), ambos de memoria del host. Al
   integrar Lichii de nuevo, esos dos ya están. Prueba: castillo con el stream abierto, mirando VRAM.
+- **Build 47 en uso:** castillo recién abierto (b47) 33–60 FPS sin presión de memoria. Segunda
+  sesión (b47b): a los 6 min, al cambiar de zona (411 imágenes nuevas, `memory_allocate` 208 en
+  0.6 s), cierre dentro de `amdvlk64.dll` 32.0.32015.7029, código 0xc0000409, sin volcado nuestro
+  ni final del log (Visor de eventos, Application Error 1000). Con desborde AMD apagado el driver
+  no aguanta: **no volver a apagar `VK_AMD_memory_overallocation_behavior`.**
+- **Build 48:** vulkan_device.cpp y vulkan_memory_allocator.cpp vuelven a la 46; se quedan #1580 y
+  #1581. Siguiente idea si el castillo vuelve a caer en sesión larga: medir el desborde (heap del
+  host vía VK_EXT_memory_budget) y bajar los umbrales del caché de texturas antes, sin tocar el
+  driver; mostrarlo también en el medidor.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

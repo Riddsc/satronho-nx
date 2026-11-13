@@ -558,31 +558,7 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         .pNext = first_next,
         .overallocationBehavior = VK_MEMORY_OVERALLOCATION_BEHAVIOR_ALLOWED_AMD,
     };
-    // Satronho NX: only on cards with little video memory, the ones Lichii allowed it for (8 GB
-    // in Ocarina). With overflow allowed, a full heap never fails an allocation, so the texture
-    // cache never sees the pressure that makes it free memory: on a 16 GB RX 9070 XT with OBS
-    // taking ~4 GB, Hyrule Castle (title 2) spilled textures into system memory, every GPU
-    // operation ran 5-10x slower (7-17 FPS) and a 64 MiB buffer finally failed and aborted.
-    u64 largest_device_local_heap = 0;
-    {
-        const auto memory_properties = physical.GetMemoryProperties().memoryProperties;
-        for (u32 heap = 0; heap < memory_properties.memoryHeapCount; ++heap) {
-            if (memory_properties.memoryHeaps[heap].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
-                largest_device_local_heap =
-                    (std::max)(largest_device_local_heap, memory_properties.memoryHeaps[heap].size);
-            }
-        }
-    }
-    constexpr u64 OverallocationMaxHeap = 10ULL << 30;
-    const bool small_vram = largest_device_local_heap <= OverallocationMaxHeap;
-    if (is_amd_driver && !small_vram &&
-        supported_extensions.contains(VK_AMD_MEMORY_OVERALLOCATION_BEHAVIOR_EXTENSION_NAME)) {
-        LOG_INFO(Render_Vulkan,
-                 "Satronho: VK_AMD_memory_overallocation_behavior left off ({} MiB of video "
-                 "memory): the texture cache frees memory when the heap is full",
-                 largest_device_local_heap >> 20);
-    }
-    if (is_amd_driver && small_vram &&
+    if (is_amd_driver &&
         supported_extensions.contains(VK_AMD_MEMORY_OVERALLOCATION_BEHAVIOR_EXTENSION_NAME)) {
         loaded_extensions.insert(VK_AMD_MEMORY_OVERALLOCATION_BEHAVIOR_EXTENSION_NAME);
         first_next = &overallocation_amd;

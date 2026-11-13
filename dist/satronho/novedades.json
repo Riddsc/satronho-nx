@@ -1,17 +1,32 @@
 {
   "builds": [
     {
-      "tag": "build-47",
+      "tag": "build-48",
       "fecha": "13 de noviembre de 2026",
-      "titulo": "Corregimos el castillo de Hyrule que rompió un cambio de Lichii",
+      "titulo": "Lo que Lichii rompió, lo encontramos y lo corregimos nosotros",
       "cambios": [
         {
           "tipo": "arreglo",
-          "texto": "Corregimos un error causado por un cambio de Lichii (#1335). Ese cambio deja que, en tarjetas AMD, la memoria de video se desborde a la RAM sin avisar, y con eso el emulador dejaba de liberar texturas. En una sesión larga con transmisión en vivo, el castillo de Hyrule cayó a 7–17 FPS y el emulador terminó cerrándose. Satronho apaga ese desborde en las tarjetas AMD de más de 10 GB: el caché de texturas vuelve a enterarse cuando la tarjeta se llena y libera memoria a tiempo. Si aun así una textura no cabe, la ponemos en la RAM en vez de dejarla vacía, el respaldo que ese mismo cambio de Lichii había quitado."
+          "texto": "Con las sesiones de juego, transmisiones y reportes de Riddsc encontramos por qué el castillo de Hyrule caía a 7–17 FPS y el emulador se cerraba tras casi una hora: la memoria se agotaba. Un cambio de Lichii (#1335) deja que la memoria de video se desborde a la RAM sin avisar y además quitó un respaldo que teníamos. Medimos el problema y probamos la corrección en tu PC; apagar ese desborde hizo caer el driver de AMD, así que lo dejamos como estaba y atacamos la memoria del lado de la RAM."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Del lado de la RAM, el registro de nuestra sesión mostró una limpieza de memoria que tardaba 8 segundos y la RAM agotándose. Para eso elegimos e integramos solo dos arreglos de memoria de Lichii (#1580 y #1581), sin el resto de su tanda, y los probamos en el castillo: la limpieza bajó a cerca de 1 segundo."
         },
         {
           "tipo": "mejora",
-          "texto": "Usamos dos arreglos de memoria de Lichii (#1580 y #1581): la memoria del juego ya no se saca de la RAM a la fuerza si al PC le sobra, y la limpieza periódica de páginas vacías es más liviana. En nuestro registro esa limpieza llegó a tardar 8 segundos."
+          "texto": "Seguimos limpiando lo que trae Lichii: en la build 46 tuvimos que quitar cuatro cambios suyos (#1435, #1436, #1439 y #1479) que bajaban unos 2 FPS en el recorrido oficial y subían el uso de la GPU y la VRAM. Ese tramo volvió a 52 FPS y el 10 % más lento quedó en 37.8, el mejor que hemos medido. Cada cambio de Lichii pasa por nuestras pruebas antes de quedarse."
+        }
+      ]
+    },
+    {
+      "tag": "build-47",
+      "fecha": "13 de noviembre de 2026",
+      "titulo": "Prueba de memoria, retirada en la 48",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Probamos apagar el desborde de memoria de video a la RAM en tarjetas AMD grandes. En nuestras pruebas el driver de AMD se cayó al cambiar de zona, así que lo retiramos en la build 48."
         }
       ]
     },
