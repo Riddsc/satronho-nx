@@ -482,7 +482,7 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   0.6 s), cierre dentro de `amdvlk64.dll` 32.0.32015.7029, código 0xc0000409, sin volcado nuestro
   ni final del log (Visor de eventos, Application Error 1000). Con desborde AMD apagado el driver
   no aguanta: **no volver a apagar `VK_AMD_memory_overallocation_behavior`.**
-- **Build 48:** vulkan_device.cpp y vulkan_memory_allocator.cpp vuelven a la 46; se quedan #1580 y
+- **Build 50** (la 48 fue un run cancelado y la 49 salió con las notas como build-48): vulkan_device.cpp y vulkan_memory_allocator.cpp vuelven a la 46; se quedan #1580 y
   #1581. Siguiente idea si el castillo vuelve a caer en sesión larga: medir el desborde (heap del
   host vía VK_EXT_memory_budget) y bajar los umbrales del caché de texturas antes, sin tocar el
   driver; mostrarlo también en el medidor.

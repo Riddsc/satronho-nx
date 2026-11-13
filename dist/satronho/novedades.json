@@ -1,7 +1,7 @@
 {
   "builds": [
     {
-      "tag": "build-48",
+      "tag": "build-50",
       "fecha": "13 de noviembre de 2026",
       "titulo": "Lo que Lichii rompió, lo encontramos y lo corregimos nosotros",
       "cambios": [
@@ -22,11 +22,11 @@
     {
       "tag": "build-47",
       "fecha": "13 de noviembre de 2026",
-      "titulo": "Prueba de memoria, retirada en la 48",
+      "titulo": "Prueba de memoria, retirada en la 50",
       "cambios": [
         {
           "tipo": "arreglo",
-          "texto": "Probamos apagar el desborde de memoria de video a la RAM en tarjetas AMD grandes. En nuestras pruebas el driver de AMD se cayó al cambiar de zona, así que lo retiramos en la build 48."
+          "texto": "Probamos apagar el desborde de memoria de video a la RAM en tarjetas AMD grandes. En nuestras pruebas el driver de AMD se cayó al cambiar de zona, así que lo retiramos en la build 50."
         }
       ]
     },
