@@ -464,6 +464,19 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   37.8 (mejor medido), 5.6 tirones/min (igual). Las lecturas de GPU siguen como en la 45 (~125 ms/s):
   no eran la causa. Cierre solo en 9.4 s (gpu_core.reset 8.5 s). Veredicto: la 46 queda; candidata
   para el amigo.
+- **Sesión larga de la 46 con stream (OBS + TikTok Live Studio, 64 min, castillo de Hyrule al
+  final; log b46c):** campo 23–42 FPS; castillo desde el min 53: 12–18 FPS con `memory_allocate`
+  de hasta 1 s por cuadro; desde el min 56: 7–17 FPS, cada operación del back 5–10× más lenta
+  (método 70 → 600 ns, cómputo 15 → 285 µs) con los núcleos poco ocupados; `TrimZeroPages` 8.5 s;
+  min 64: `abort()` en GPUBack al fallar un búfer Upload de 64 MiB «over the memory budget»
+  (eden_crash.dmp). Presupuesto de VRAM visto ~12 GB de 16 (el stream ocupa ~4). Nunca salió
+  «Out of device memory: keeping…»: con #1335 (desborde AMD permitido, desde la build 38) el caché
+  de texturas no recibe presión. Aparte: ~8 congeladas de 4–8 s esperando pipelines nuevos (597
+  nuevos, zonas nuevas; drivers AMD tardan 5–8 s en algunos).
+- **Build 47:** desborde AMD (`VK_AMD_memory_overallocation_behavior`) solo con heap de VRAM
+  ≤ 10 GiB; reintento de imagen en memoria del host restaurado (Lichii lo quitó en #1335);
+  cherry-pick de Lichii #1580 (`6e887563`) y #1581 (`e633e165`), ambos de memoria del host. Al
+  integrar Lichii de nuevo, esos dos ya están. Prueba: castillo con el stream abierto, mirando VRAM.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

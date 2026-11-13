@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-47",
+      "fecha": "13 de noviembre de 2026",
+      "titulo": "El castillo de Hyrule, sin quedarse sin memoria",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "En una sesión larga con transmisión en vivo (OBS y TikTok Live Studio) el castillo de Hyrule bajó a 7–17 FPS y el emulador terminó cerrándose: la memoria se agotó. En las tarjetas AMD de más de 10 GB, Satronho ya no deja que la memoria de video se desborde en silencio a la RAM (un cambio de Lichii pensado para tarjetas de 8 GB, que se mantiene para ellas). Así el caché de texturas vuelve a enterarse cuando la tarjeta se llena y libera memoria a tiempo; si aun así una textura no cabe, va a la RAM en vez de quedar vacía."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Usamos dos arreglos de memoria de Lichii publicados hoy: la memoria del juego ya no se saca de la RAM a la fuerza si al PC le sobra (#1581), y la limpieza periódica de páginas vacías lee menos y se espera durante las cargas (#1580). En nuestro registro esa limpieza llegó a tardar 8 segundos."
+        }
+      ]
+    },
+    {
       "tag": "build-46",
       "fecha": "12 de noviembre de 2026",
       "titulo": "Nos quedamos solo con lo que suma",
