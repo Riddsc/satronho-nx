@@ -39,6 +39,7 @@
 #include "yuzu/game/carousel.h"
 #include "yuzu/game/game_grid.h"
 #include "yuzu/game/game_list.h"
+#include "yuzu/satronho/watermark.h"
 #include "yuzu/game/game_tree.h"
 #include "yuzu/game/search_field.h"
 #include "yuzu/main_window.h"
@@ -125,6 +126,18 @@ void GameList::SetupViews() {
     tree_view->SetModel(item_model);
     grid_view->SetModel(item_model);
     carousel_view->SetModel(item_model);
+
+    // Satronho NX: our logo behind the games, in every view.
+    watermark = new Satronho::Watermark(this);
+    watermark->Attach(tree_view);
+    watermark->Attach(grid_view);
+    watermark->Attach(carousel_view);
+}
+
+void GameList::RefreshWatermark() {
+    if (watermark != nullptr) {
+        watermark->Refresh();
+    }
 }
 
 QString GameList::GetLastFilterResultItem() const {

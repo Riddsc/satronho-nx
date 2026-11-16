@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-51",
+      "fecha": "15 de noviembre de 2026",
+      "titulo": "La build más estable de Satronho",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "La build más estable de Satronho hasta hoy, medida en una sesión de casi una hora con transmisión en vivo, pasando dos veces por el castillo de Hyrule y terminando en nuestro recorrido oficial: sin cierres, el castillo entre 38 y 59 FPS (antes llegó a caer a 7), 1.5 tirones por minuto (antes 5.6) y 38.7 FPS en el 10 % más lento, el mejor que hemos medido. La memoria se mantuvo igual de principio a fin y el emulador cerró solo."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Nuestro sello en la pantalla de juegos: el planeta de Satronho con Samy, Troya, Ñoño, Juana y MechaRidds de fondo, detrás de la lista, la cuadrícula y el carrusel. Siempre está; qué tan visible, desde 5 % hasta 100 %, se elige en «Satronho → Logo de fondo». En la vista de lista las filas ya no van alternadas en dos tonos, para que el logo se vea entero."
+        }
+      ]
+    },
+    {
       "tag": "build-50",
       "fecha": "13 de noviembre de 2026",
       "titulo": "Lo que Lichii rompió, lo encontramos y lo corregimos nosotros",

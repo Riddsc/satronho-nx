@@ -17,6 +17,7 @@
 #include "frontend_common/settings_generator.h"
 #include "render/performance_overlay.h"
 #include "yuzu/satronho/meter.h"
+#include "yuzu/satronho/watermark.h"
 #ifdef HAS_RESHADE
 #include "configuration/configure_post_processing.h"
 #include "video_core/post_processing/fx_preset.h"
@@ -496,6 +497,17 @@ MainWindow::MainWindow(bool has_broken_vulkan)
             Satronho::Meter::FillOptionsMenu(meter_menu, [this] {
                 if (perf_overlay != nullptr) {
                     perf_overlay->ApplySettings();
+                }
+                OnSaveConfig();
+            });
+        });
+        // Our logo behind the game list: how visible (5 to 100 %; it is always there).
+        QMenu* watermark_menu = satronho_menu->addMenu(tr("Logo de fondo"));
+        connect(watermark_menu, &QMenu::aboutToShow, this, [this, watermark_menu] {
+            watermark_menu->clear();
+            Satronho::Watermark::FillOptionsMenu(watermark_menu, [this] {
+                if (game_list != nullptr) {
+                    game_list->RefreshWatermark();
                 }
                 OnSaveConfig();
             });

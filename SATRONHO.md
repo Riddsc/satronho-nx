@@ -494,6 +494,11 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Una congelada de 3.4 s por un pipeline de cómputo nuevo (209 programas nuevos). La 50 es la
   candidata para el amigo. Pendiente: tanda de Lichii (247 commits hasta e4919829, con #1870,
   #1803, #1845, #1906) e ideas de Hookshot v2.3 (ASTC opaco a media memoria, ventana de cierre).
+- **Build 51:** código de la 50 + logo de fondo en la lista de juegos (`yuzu/satronho/watermark.*`,
+  filtro de pintado en el viewport de las tres vistas; `dist/satronho/logo_fondo.png` sale de
+  `dist/branding/satronho-nx-fondo.svg`, el logo sin el cuadro). Opacidad 5–100 % (pedido de
+  Riddsc: mínimo 5 %, nunca apagado), por defecto 15; la vista de lista pierde las filas alternadas.
+  Novedades la anuncian como la más estable (datos de la sesión larga de la 50).
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

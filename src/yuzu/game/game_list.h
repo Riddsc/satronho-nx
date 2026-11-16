@@ -39,6 +39,10 @@ enum class StartGameType;
 
 class GameCarousel;
 
+namespace Satronho {
+class Watermark;
+}
+
 class QAbstractItemView;
 namespace Core {
 class System;
@@ -63,6 +67,9 @@ class GameList : public QWidget {
     Q_OBJECT
 
 public:
+    /// Satronho NX: repaints the logo behind the list after its opacity changed.
+    void RefreshWatermark();
+
     explicit GameList(std::shared_ptr<FileSys::VfsFilesystem> vfs_,
                       FileSys::ManualContentProvider* provider_,
                       PlayTime::PlayTimeManager& play_time_manager_, Core::System& system_,
@@ -165,6 +172,7 @@ private:
     GameTree* tree_view = nullptr;
     GameGrid* grid_view = nullptr;
     GameCarousel* carousel_view = nullptr;
+    Satronho::Watermark* watermark = nullptr;
     GameListModel* item_model = nullptr;
     Settings::GameListMode game_list_mode;
 

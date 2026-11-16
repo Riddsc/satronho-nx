@@ -241,6 +241,8 @@ add_executable(yuzu
     satronho/knowledge.h
     satronho/meter.cpp
     satronho/meter.h
+    satronho/watermark.cpp
+    satronho/watermark.h
     satronho/novedades.cpp
     satronho/novedades.h
     satronho/presets.cpp

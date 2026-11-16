@@ -178,6 +178,8 @@ struct Values {
     Setting<u32> satronho_meter_corner{linkage, 0, "satronho_meter_corner", Category::Ui};
     Setting<u32> satronho_meter_x{linkage, 24, "satronho_meter_x", Category::Ui};
     Setting<u32> satronho_meter_y{linkage, 24, "satronho_meter_y", Category::Ui};
+    // Satronho's logo behind the game list (yuzu/satronho/watermark.cpp), in % (5 to 100; always on).
+    Setting<u32> satronho_watermark_opacity{linkage, 15, "satronho_watermark_opacity", Category::Ui};
     Setting<bool> satronho_meter_compact{linkage, false, "satronho_meter_compact", Category::Ui};
     /// Build tag whose "what's new" list was last shown.
     Setting<std::string> satronho_seen_novedades{linkage, {}, "satronho_seen_novedades",

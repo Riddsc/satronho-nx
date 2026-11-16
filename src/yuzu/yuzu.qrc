@@ -15,5 +15,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
         <file alias="guias/troya.png">../../dist/satronho/guias/troya.png</file>
         <file alias="guias/nono.png">../../dist/satronho/guias/nono.png</file>
         <file alias="guias/juana.png">../../dist/satronho/guias/juana.png</file>
+        <file alias="logo_fondo.png">../../dist/satronho/logo_fondo.png</file>
     </qresource>
 </RCC>
