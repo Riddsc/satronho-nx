@@ -486,6 +486,14 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   #1581. Siguiente idea si el castillo vuelve a caer en sesión larga: medir el desborde (heap del
   host vía VK_EXT_memory_budget) y bajar los umbrales del caché de texturas antes, sin tocar el
   driver; mostrarlo también en el medidor.
+- **Sesión larga de la 50 (2026-11-15, log b50; 56 min con el juego abierto: 32 jugando y 15 en
+  pausa; castillo al inicio y a la mitad, recorrido oficial al final):** sin caída ni cierre.
+  50.6 FPS típicos, 38.7 el 10 % más lento, 1.5 cuadros >100 ms por minuto, castillo 38–59 FPS.
+  Coste por operación del back plano toda la sesión (45–48 ns por método; en la 46 subió a 600),
+  `TrimZeroPages` máx. 0.97 s, 15 GB de commit libres al final, cierre solo (gpu_core.reset 11 s).
+  Una congelada de 3.4 s por un pipeline de cómputo nuevo (209 programas nuevos). La 50 es la
+  candidata para el amigo. Pendiente: tanda de Lichii (247 commits hasta e4919829, con #1870,
+  #1803, #1845, #1906) e ideas de Hookshot v2.3 (ASTC opaco a media memoria, ventana de cierre).
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,
