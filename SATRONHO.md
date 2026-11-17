@@ -499,6 +499,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   `dist/branding/satronho-nx-fondo.svg`, el logo sin el cuadro). Opacidad 5–100 % (pedido de
   Riddsc: mínimo 5 %, nunca apagado), por defecto 15; la vista de lista pierde las filas alternadas.
   Novedades la anuncian como la más estable (datos de la sesión larga de la 50).
+- **Sesión larga de la 51 (2026-11-16, log b51):** 10–34 min a 60 FPS (zona liviana o menú),
+  34–55 min jugando a 20–35 FPS con costo por operación plano; commit libre 20 → 7–8 GB;
+  `TrimZeroPages` hasta 4.2 s; min 55: mismo `abort()` que la 46 (Upload de 64 MiB «over the
+  memory budget» en GPUBack). La 50 se salvó por la pausa de 15 min.
+- **Lichii renombró todo yuzu → lichii** (#1550–#1553, 2026-11-13: `src/yuzu` → `src/lichii`,
+  paquetes, librerías). Integrar su tanda completa (327 commits desde 31b7d67e) ya no aplica con el
+  diff de siempre: hay que traducir rutas o portar a mano. Pendiente de decidir con Riddsc.
+- **Build 52:** portados a mano de Lichii #1870 (`fe93d543`, sin `NoteHostPlacement` de #1686),
+  #1908 (`2dcf679e`, fuga de `uploads` en KeplerCompute con lanzamientos nativos de Ocarina:
+  ~768 MiB en 90 min), #1906 (`e4919829`), #1931 (`dbd2e621`), #1963 (`960f2157`), #1997
+  (`0d98e37f`); tests excluidos. #1686 (respuesta del caché de texturas al desborde a RAM) no
+  entra suelto: depende de otros cambios del caché de texturas.
 - En Docked y Handheld el rendimiento de Riddsc es el mismo (límite: procesador); Accurate cuesta
   ~35 % de FPS en Ocarina.
 - El rastreador de tirones va encendido por defecto (`EDEN_NX2_STUTTER_TRACE=0` lo apaga): medido,

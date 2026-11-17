@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-52",
+      "fecha": "16 de noviembre de 2026",
+      "titulo": "Adiós al cierre de la hora de juego",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "En nuestras sesiones largas con transmisión en vivo, Satronho se cerraba solo pasados unos 55 minutos: una petición de memoria de 64 MB para subir datos a la GPU fallaba y el emulador abortaba. Lo vimos dos veces en el registro, en la build 46 y en la 51, siempre en el mismo punto. Es un error que venía de Lichii (su caso #262): elegimos su serie de arreglos (#1870, #1906, #1931, #1963, #1997) y la portamos a mano a nuestro código, porque Lichii renombró todo su proyecto y ya no encaja tal cual. Ahora, si falta memoria, el emulador libera la memoria temporal y vuelve a intentar en vez de cerrarse."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Cerramos una fuga de memoria que crecía mientras se juega Ocarina: cada subida de datos de cómputo a la GPU se quedaba guardada toda la sesión (cientos de MB después de una hora). Explica por qué la RAM libre iba bajando en nuestras sesiones largas. El arreglo es de Lichii (#1908); lo adaptamos a nuestro código."
+        }
+      ]
+    },
+    {
       "tag": "build-51",
       "fecha": "15 de noviembre de 2026",
       "titulo": "La build más estable de Satronho",
