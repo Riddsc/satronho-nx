@@ -472,7 +472,25 @@ RasterizerVulkan::RasterizerVulkan(Core::Frontend::EmuWindow& emu_window_, Tegra
         &scheduler);
 }
 
+namespace {
+std::chrono::steady_clock::time_point g_satronho_teardown_mark;
+} // Anonymous namespace
+
+SatronhoTeardownMark::~SatronhoTeardownMark() {
+    const auto now = std::chrono::steady_clock::now();
+    const double ms = std::chrono::duration<double, std::milli>(now - g_satronho_teardown_mark).count();
+    if (ms >= 100.0) {
+        LOG_INFO(Render_Vulkan, "Satronho shutdown: {} took {:.0f} ms", step, ms);
+    }
+    g_satronho_teardown_mark = now;
+}
+
+void SatronhoTeardownMark::Start() {
+    g_satronho_teardown_mark = std::chrono::steady_clock::now();
+}
+
 RasterizerVulkan::~RasterizerVulkan() {
+    SatronhoTeardownMark::Start();
     VideoCommon::GpuSplit::Get().SetIdleHook(nullptr, nullptr);
     // The channels are gone by now, and submitting invalidates the state tracker's flags.
     state_tracker.ClearChannel();

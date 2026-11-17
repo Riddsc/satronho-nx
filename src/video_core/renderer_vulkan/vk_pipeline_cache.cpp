@@ -860,22 +860,40 @@ size_t KeptPipelines() {
 } // Anonymous namespace
 
 PipelineCache::~PipelineCache() {
+    // Satronho: each step over 100 ms is logged (see SatronhoTeardownMark).
+    auto step_start = std::chrono::steady_clock::now();
+    const auto step = [&step_start](const char* name, size_t count = 0) {
+        const auto now = std::chrono::steady_clock::now();
+        const double ms = std::chrono::duration<double, std::milli>(now - step_start).count();
+        if (ms >= 100.0) {
+            LOG_INFO(Render_Vulkan, "Satronho shutdown: pipeline cache {} ({}) took {:.0f} ms",
+                     name, count, ms);
+        }
+        step_start = now;
+    };
     serialization_stop.request_stop();
     StopBackgroundJobs();
     // The pipelines' builds end before the driver pipeline cache they build into goes.
     shader_jobs->Shutdown();
     serialization_thread.WaitForRequests();
+    step("background jobs");
     SaveUsedPipelines();
     if (use_vulkan_pipeline_cache && !vulkan_pipeline_cache_filename.empty()) {
         SerializeVulkanPipelineCache(vulkan_pipeline_cache_filename, vulkan_pipeline_cache,
                                      CACHE_VERSION);
     }
     SaveComputeDriverCache();
+    step("saves");
     // After the records the serialization thread queued: its writer drains on destruction
     shader_cache_v2 = nullptr;
     cache_v2.reset();
+    step("shader cache v2");
+    const size_t graphics_count = graphics_cache.size();
     graphics_cache.clear();
+    step("graphics pipelines", graphics_count);
+    const size_t evicted_count = evicted_pipelines.size();
     evicted_pipelines.clear();
+    step("evicted pipelines", evicted_count);
     if (pipeline_binaries) {
         pipeline_binaries->LogCounts("at the end of the session");
         pipeline_binaries.reset();

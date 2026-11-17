@@ -55,6 +55,16 @@ class Maxwell3D;
 
 namespace Vulkan {
 
+/// Satronho: logs how long the rasterizer members declared after it took to destroy (over
+/// 100 ms), as "Satronho shutdown: <step> took N ms". gpu_core.reset() took 8-11 s and nothing
+/// said where.
+struct SatronhoTeardownMark {
+    const char* step;
+    ~SatronhoTeardownMark();
+    /// Starts timing at the top of a destructor body.
+    static void Start();
+};
+
 struct FramebufferTextureInfo;
 
 class StateTracker;
@@ -279,6 +289,7 @@ private:
     s32 bound_channel_id = -1;
     Scheduler& scheduler;
 
+    SatronhoTeardownMark teardown_mark_base{"staging, descriptors, blits and render passes"};
     StagingBufferPool staging_pool;
     DescriptorPool descriptor_pool;
     GuestDescriptorQueue guest_descriptor_queue;
@@ -287,16 +298,21 @@ private:
     BlitImageHelper blit_image;
     RenderPassCache render_pass_cache;
 
+    SatronhoTeardownMark teardown_mark_texture{"texture cache"};
     TextureCacheRuntime texture_cache_runtime;
     TextureCache texture_cache;
+    SatronhoTeardownMark teardown_mark_buffer{"buffer cache"};
     BufferCacheRuntime buffer_cache_runtime;
     BufferCache buffer_cache;
+    SatronhoTeardownMark teardown_mark_query{"query cache"};
     QueryCacheRuntime query_cache_runtime;
     QueryCache query_cache;
+    SatronhoTeardownMark teardown_mark_pipeline{"pipeline cache, fences and frame dump"};
     PipelineCache pipeline_cache;
     AccelerateDMA accelerate_dma;
     FenceManager fence_manager;
     FrameDump frame_dump;
+    SatronhoTeardownMark teardown_mark_start{"rasterizer wait and its other members"};
 
     boost::container::static_vector<u32, MAX_IMAGE_VIEWS> image_view_indices;
     std::array<VideoCommon::ImageViewId, MAX_IMAGE_VIEWS> image_view_ids;

@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-53",
+      "fecha": "17 de noviembre de 2026",
+      "titulo": "El ícono del botón, en su sitio",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "En Ocarina, el ícono del botón que acompaña al objeto equipado (por ejemplo, debajo de las habichuelas mágicas, y el de la ocarina) salía como un cuadrito de colores sin sentido. Lo detectamos jugando y en el registro: al traducir ese shader, el compilador no sabía seguir una comprobación de «no es un número» que el juego usa para elegir la textura, y tomaba otra. Le enseñamos a seguirla, así que el ícono debería tomar su textura correcta. Hallazgo y arreglo propios de Satronho NX: Lichii no lo tiene."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Al cerrar un juego, apagar la parte gráfica tarda unos 10 segundos y hasta ahora no sabíamos en qué. Ahora el registro anota cada paso lento del cierre (cachés de texturas, búferes, pipelines, dispositivo de Vulkan) para encontrar el culpable y acortarlo en la próxima build."
+        }
+      ]
+    },
+    {
       "tag": "build-52",
       "fecha": "16 de noviembre de 2026",
       "titulo": "Adiós al cierre de la hora de juego",

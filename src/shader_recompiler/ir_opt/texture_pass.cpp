@@ -694,7 +694,13 @@ bool BuildHandleNode(const IR::Value& value, std::vector<u32>& code, int& budget
     const auto emit = [&](Op op) { code.push_back(static_cast<u32>(op)); };
     if (value.IsImmediate()) {
         emit(Op::Immediate);
-        code.push_back(value.Type() == IR::Type::U1 ? (value.U1() ? 1U : 0U) : value.U32());
+        if (value.Type() == IR::Type::U1) {
+            code.push_back(value.U1() ? 1U : 0U);
+        } else if (value.Type() == IR::Type::F32) {
+            code.push_back(std::bit_cast<u32>(value.F32()));
+        } else {
+            code.push_back(value.U32());
+        }
         return true;
     }
     const IR::Inst* const inst{value.InstRecursive()};
@@ -744,6 +750,7 @@ bool BuildHandleNode(const IR::Value& value, std::vector<u32>& code, int& budget
         };
         switch (source->GetOpcode()) {
         case IR::Opcode::GetCbufU32:
+        case IR::Opcode::GetCbufF32:
         case IR::Opcode::GetCbufU32x2: {
             const IR::Value index{source->Arg(0)};
             const IR::Value offset{source->Arg(1)};
@@ -783,6 +790,7 @@ bool BuildHandleNode(const IR::Value& value, std::vector<u32>& code, int& budget
     case IR::Opcode::VoteAll:
         return build(0);
     case IR::Opcode::GetCbufU32:
+    case IR::Opcode::GetCbufF32:
     case IR::Opcode::LoadStorage32:
         return load_word(inst, 0);
     case IR::Opcode::CompositeExtractU32x2:
@@ -905,6 +913,16 @@ bool BuildHandleNode(const IR::Value& value, std::vector<u32>& code, int& budget
     case IR::Opcode::BitCastU32F32:
     case IR::Opcode::BitCastF32U32:
         return build(0);
+    case IR::Opcode::FPIsNan32:
+        // On the word's bits: exponent all ones and a nonzero mantissa.
+        if (!build(0)) return false;
+        emit(Op::Immediate);
+        code.push_back(0x7fffffffU);
+        emit(Op::And);
+        emit(Op::Immediate);
+        code.push_back(0x7f800000U);
+        emit(Op::UGt);
+        return true;
     case IR::Opcode::UndefU1:
     case IR::Opcode::UndefU32:
         // Read before any write on some path: no value to compute, take zero.

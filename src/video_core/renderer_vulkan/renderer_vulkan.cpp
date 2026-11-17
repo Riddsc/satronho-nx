@@ -245,6 +245,7 @@ try
 }
 
 RendererVulkan::~RendererVulkan() {
+    SatronhoTeardownMark::Start();
     scheduler.RegisterOnSubmit([] {});
     void(device.GetLogical().WaitIdle());
 }

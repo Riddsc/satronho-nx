@@ -523,3 +523,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   lectura asíncrona con una síncrona y anota diferencias).
 - La caché v2, al migrar desde la v54, precarga variantes de cómputo (clave s0) distintas de las que
   pide el juego (s6): la primera visita a cada zona tras migrar arma las nuevas. Se corrige solo.
+- **Sesión de la 52 (2026-11-17, 36 min, Docked/Fast/FSR/SMAA):** 60 FPS hasta el min ~18, luego
+  40–45 en la llanura. Ícono del botón junto al objeto equipado (habichuelas, ocarina) como basura
+  de colores; en el log, 6 avisos `Bindless ... not computable per draw (stopped at FPIsNan32):
+  taking cbuf0+0x540, likely not the texture the shader reads` al cargar (t≈19.6 s). 4 congeladas
+  de 2.7–2.9 s: cómputos (29670974…, c332d879…, 50e0f817…, b2f02400…) que solo se habían armado
+  una vez antes de existir nuestra caché de cómputo (4–6.5 s en pipeline_builds.txt); ya quedan en
+  ella. 3 texturas del dump dañadas (NUP sin cabecera zstd: suelo de la Fuente de las Hadas, Ganon,
+  puerta del Templo del Agua): hay que volver a sacar el dump. Cierre: `Force stopping EmuThread` es
+  el camino normal (a 1 s del pedido); `gpu_core.reset()` 10.6 s, casi todo después de `~Cache`.
+- **Build 53:** `BuildHandleProgram` (texture_pass.cpp) sigue `FPIsNan32` sobre los bits
+  (`(x & 0x7fffffff) > 0x7f800000`), `GetCbufF32` como palabra de cbuf e inmediatos F32. Lichii no
+  lo tiene (revisado hasta 6d752409). Si el ícono sigue mal, el aviso dirá en qué otra operación se
+  detiene. Diagnóstico del cierre: `SatronhoTeardownMark` (vk_rasterizer.h) intercalado entre los
+  miembros de `RasterizerVulkan` y `RendererVulkan`, y pasos de `~PipelineCache`, escriben
+  «Satronho shutdown: <paso> took N ms» (≥100 ms).

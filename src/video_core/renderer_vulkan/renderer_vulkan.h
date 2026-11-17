@@ -146,9 +146,11 @@ private:
 
     vk::SurfaceKHR surface;
 
+    SatronhoTeardownMark teardown_mark_device{"Vulkan device and memory allocator"};
     Device device;
     MemoryAllocator memory_allocator;
     StateTracker state_tracker;
+    SatronhoTeardownMark teardown_mark_present{"scheduler, swapchain and screen blits"};
     Scheduler scheduler;
     Swapchain swapchain;
     PresentManager present_manager;
@@ -156,6 +158,7 @@ private:
     BlitScreen blit_capture;
     BlitScreen blit_applet;
     RasterizerVulkan rasterizer;
+    SatronhoTeardownMark teardown_mark_renderer{"renderer wait for the GPU and frame generation"};
 #ifdef HAS_LSFG
     FrameGen frame_gen;
 #endif
