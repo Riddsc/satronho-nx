@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -53,6 +54,7 @@
 #include "video_core/renderer_vulkan/fixed_pipeline_state.h"
 #include "video_core/renderer_vulkan/maxwell_to_vk.h"
 #include "video_core/renderer_vulkan/mesh_fallback_limits.h"
+#include "video_core/renderer_vulkan/pipeline_build_failure.h"
 #include "video_core/renderer_vulkan/pipeline_eviction_policy.h"
 #include "video_core/renderer_vulkan/pipeline_helper.h"
 #include "video_core/renderer_vulkan/pipeline_shader_emission.h"
@@ -3252,6 +3254,37 @@ ComputePipelineCacheEntry PipelineCache::CreateComputePipeline(
 void PipelineCache::SerializeVulkanPipelineCache(const std::filesystem::path& filename,
                                                  const vk::PipelineCache& pipeline_cache,
                                                  u32 cache_version) {
+    // After a device loss the driver hands back an empty cache. Satronho: writing it replaced
+    // 73 MB of built compute pipelines, and the next boot compiled them all again (~40 min).
+    if (PipelineBuildsLostDevice()) {
+        LOG_WARNING(Render_Vulkan, "Device lost: keeping the driver pipeline cache {} as it is",
+                    Common::FS::PathToUTF8String(filename));
+        return;
+    }
+    size_t cache_size = 0;
+    std::vector<char> cache_data;
+    if (pipeline_cache) {
+        VkResult result = pipeline_cache.Read(&cache_size, nullptr);
+        if (result == VK_SUCCESS) {
+            cache_data.resize(cache_size);
+            result = pipeline_cache.Read(&cache_size, cache_data.data());
+        }
+        if (result != VK_SUCCESS) {
+            LOG_ERROR(Render_Vulkan, "Couldn't read the driver pipeline cache: VkResult {}",
+                      static_cast<int>(result));
+            return;
+        }
+    }
+    // A driver cache only grows while it is in use: one far smaller than the file on disk is
+    // the driver losing it, not new contents.
+    std::error_code size_error;
+    const auto on_disk = std::filesystem::file_size(filename, size_error);
+    if (!size_error && on_disk > (1u << 20) && cache_size < on_disk / 2) {
+        LOG_WARNING(Render_Vulkan,
+                    "Driver pipeline cache shrank from {} to {} bytes: keeping {} as it is",
+                    on_disk, cache_size, Common::FS::PathToUTF8String(filename));
+        return;
+    }
     // Written beside the cache and renamed over it: the emulator stopped mid-write left the cache
     // empty, and every later boot failed to read it.
     auto temporary = filename;
@@ -3267,13 +3300,6 @@ void PipelineCache::SerializeVulkanPipelineCache(const std::filesystem::path& fi
         file.write(VULKAN_CACHE_MAGIC_NUMBER.data(), VULKAN_CACHE_MAGIC_NUMBER.size())
             .write(reinterpret_cast<const char*>(&cache_version), sizeof(cache_version));
 
-        size_t cache_size = 0;
-        std::vector<char> cache_data;
-        if (pipeline_cache) {
-            pipeline_cache.Read(&cache_size, nullptr);
-            cache_data.resize(cache_size);
-            pipeline_cache.Read(&cache_size, cache_data.data());
-        }
         file.write(cache_data.data(), cache_size);
         file.close();
     } catch (const std::ios_base::failure& e) {

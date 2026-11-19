@@ -51,6 +51,8 @@ VK_DEFINE_HANDLE(VmaPool)
             shader_demote_to_helper_invocation)                                                    \
     FEATURE(EXT, SubgroupSizeControl, SUBGROUP_SIZE_CONTROL, subgroup_size_control)                \
     FEATURE(KHR, Maintenance4, MAINTENANCE_4, maintenance4)                                        \
+    FEATURE(EXT, PipelineCreationCacheControl, PIPELINE_CREATION_CACHE_CONTROL,                    \
+            pipeline_creation_cache_control)                                                       \
     FEATURE(KHR, Synchronization2, SYNCHRONIZATION_2, synchronization2)
 
 #define FOR_EACH_VK_FEATURE_1_4(FEATURE)
@@ -1038,6 +1040,11 @@ FN_MAX_LIMIT_LIST
     }
 
     bool HasTimelineSemaphore() const;
+
+    /// Returns true if pipelines can be created only when the driver needs no compilation.
+    bool IsPipelineCreationCacheControlSupported() const {
+        return features.pipeline_creation_cache_control.pipelineCreationCacheControl == VK_TRUE;
+    }
 
     /// Returns true if the device supports VK_KHR_synchronization2.
     bool HasSynchronization2() const {

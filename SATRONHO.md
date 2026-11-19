@@ -538,3 +538,27 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   detiene. Diagnóstico del cierre: `SatronhoTeardownMark` (vk_rasterizer.h) intercalado entre los
   miembros de `RasterizerVulkan` y `RendererVulkan`, y pasos de `~PipelineCache`, escriben
   «Satronho shutdown: <paso> took N ms» (≥100 ms).
+- **Sesión del 2026-11-19 (build 53):** a los 98 s de la carga de shaders, `VK_ERROR_DEVICE_LOST`
+  en todos los pipelines (sin dibujar aún un cuadro; causa no determinada: el log no trae
+  «Device loss occurred!» ni líneas de VK_EXT_device_fault). Medio segundo después se guardó la
+  caché de cómputo AMD: el driver, ya sin dispositivo, la devolvió vacía y **pisó 73 MB con
+  52 bytes**. La sesión siguiente recompiló todo el cómputo a 8–26 s por shader (estimación de
+  ~40 min) y `warm-compute.done` hizo que el precache no lo reintentara. Ojo: los avisos «Patch
+  topology not used with tessellation, using patch list» son pipelines CON teselación a los que se
+  fuerza patch list (correcto según la especificación); no son la causa.
+- **Build 54:** (1) `SerializeVulkanPipelineCache` no escribe tras una pérdida del dispositivo
+  (`PipelineBuildsLostDevice()`, lo marcan `ReportPipelineBuildFailure` y `Device::ReportLoss`)
+  ni si la caché leída es menor que la mitad del archivo (>1 MiB) en disco. (2) Cómputo «primero
+  sin optimizar» en AMD propietario: con `pipelineCreationCacheControl` (activado en
+  FOR_EACH_VK_FEATURE_1_3) se prueba la caché con `FAIL_ON_PIPELINE_COMPILE_REQUIRED`
+  (`vk::Device::CreateComputePipelineIfCached`); si falta, se arma con
+  `DISABLE_OPTIMIZATION` y, la primera vez que se despacha, `OptimizedBuildQueue` (2 hilos
+  `SatronhoOptimize`, prioridad baja) arma la optimizada; el bind usa `optimized_handle` en cuanto
+  existe. Sin medir aún cuánto tarda el driver sin optimizar ni si la prueba de caché acierta en
+  sesiones siguientes: revisar en `pipeline_builds.txt` (END con `ms=` bajos y luego las
+  optimizadas) y la línea «compute shaders missing from the driver cache start unoptimized».
+- **Texturas dañadas del dump de Ocarina:** los 3 `.zs` (suelo de la Fuente de las Hadas, Ganon G_2_1,
+  puerta del Templo del Agua) no existen sanos en el PC: la carpeta `R:\Switch 2\romfs` de
+  Hookshot tiene copias del sustituto (el de la Fuente es idéntico byte a byte al de arena), las
+  builds no llevan datos del juego y los `volcado*` son capturas de cuadros de la GPU. Solo
+  sirve volver a sacar el dump (o esos 3 archivos de otro dump sano).

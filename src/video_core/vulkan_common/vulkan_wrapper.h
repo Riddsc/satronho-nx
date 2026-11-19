@@ -1106,6 +1106,11 @@ public:
     [[nodiscard]] Pipeline CreateComputePipeline(const VkComputePipelineCreateInfo& ci,
                                                  VkPipelineCache cache = {}) const;
 
+    /// With VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT in ci.flags: an empty
+    /// pipeline when the driver would have to compile it (VK_PIPELINE_COMPILE_REQUIRED).
+    [[nodiscard]] Pipeline CreateComputePipelineIfCached(const VkComputePipelineCreateInfo& ci,
+                                                         VkPipelineCache cache) const;
+
     [[nodiscard]] Sampler CreateSampler(const VkSamplerCreateInfo& ci) const;
 
     [[nodiscard]] Framebuffer CreateFramebuffer(const VkFramebufferCreateInfo& ci) const;

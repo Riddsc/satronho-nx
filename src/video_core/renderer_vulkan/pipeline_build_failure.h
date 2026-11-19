@@ -13,4 +13,8 @@ namespace Vulkan {
 /// Switch 2 game's 14 GiB of committed guest memory makes likely on 16 GB hosts (#462).
 void ReportPipelineBuildFailure(VkResult result);
 
+/// Whether a pipeline build has reported VK_ERROR_DEVICE_LOST. Driver pipeline caches read after
+/// that come back empty, and must not replace the ones on disk.
+bool PipelineBuildsLostDevice();
+
 } // namespace Vulkan

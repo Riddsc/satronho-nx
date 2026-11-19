@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-54",
+      "fecha": "19 de noviembre de 2026",
+      "titulo": "Sin esperas eternas de shaders",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "En AMD, los shaders de cómputo que no están en la caché del driver ya no frenan la carga: se arman primero sin optimizar, que es mucho más rápido, para que el juego arranque, y la versión optimizada se prepara en segundo plano con prioridad baja (sin quitarle núcleos al juego) y entra sola en cuanto está lista, guardándose en la caché para la próxima vez. Antes, tras actualizar o perder la caché, el driver tardaba entre 8 y 26 segundos por shader y la carga podía irse a 40 minutos. Idea y trabajo de Satronho NX."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Si el driver de AMD se caía durante la carga, Satronho NX guardaba encima de nuestra caché de shaders de cómputo la copia vacía que devuelve el driver tras la caída (de 73 MB a 52 bytes), y la siguiente carga tenía que compilarlo todo otra vez. Ahora, tras una caída del driver, o si la caché que devuelve es mucho más pequeña que la guardada, la del disco se conserva intacta. Lo encontramos leyendo el registro y el rastro de compilaciones: arreglo propio de Satronho NX sobre nuestra propia caché."
+        }
+      ]
+    },
+    {
       "tag": "build-53",
       "fecha": "17 de noviembre de 2026",
       "titulo": "El ícono del botón, en su sitio",

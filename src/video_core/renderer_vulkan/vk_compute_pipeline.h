@@ -9,6 +9,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <span>
 
@@ -110,9 +111,22 @@ public:
         RunBuild();
     }
 
+    /// Satronho: the background build of an optimized pipeline (OptimizedBuildQueue).
+    struct OptimizeTask {
+        std::mutex mutex;
+        bool cancelled{};
+        std::function<void()> run;
+    };
+
 private:
     /// Builds the pipeline once, on whichever thread gets here first.
     void RunBuild();
+
+    [[nodiscard]] VkPipelineCreateFlags BaseFlags() const;
+    /// With if_cached, an empty pipeline when the driver would have to compile it.
+    [[nodiscard]] vk::Pipeline CreateVkPipeline(VkPipelineCreateFlags flags, bool if_cached) const;
+    /// Queues the optimized build of a pipeline built unoptimized; it is bound once done.
+    void QueueOptimizedBuild();
 
     const Device& device;
     vk::PipelineCache& pipeline_cache;
@@ -137,6 +151,11 @@ private:
     vk::PipelineLayout pipeline_layout;
     vk::DescriptorUpdateTemplate descriptor_update_template;
     vk::Pipeline pipeline;
+    /// Satronho: the optimized build of a pipeline built unoptimized, bound once it exists.
+    std::atomic_bool needs_optimized_build{false};
+    std::shared_ptr<OptimizeTask> optimize_task;
+    vk::Pipeline optimized_pipeline;
+    std::atomic<VkPipeline> optimized_handle{VK_NULL_HANDLE};
 
     std::function<void()> build_task;
     std::atomic_bool build_claimed{false};

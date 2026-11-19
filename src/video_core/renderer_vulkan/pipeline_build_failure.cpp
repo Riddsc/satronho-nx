@@ -8,7 +8,18 @@
 
 namespace Vulkan {
 
+namespace {
+std::atomic_bool device_lost{false};
+}
+
+bool PipelineBuildsLostDevice() {
+    return device_lost.load(std::memory_order_relaxed);
+}
+
 void ReportPipelineBuildFailure(VkResult result) {
+    if (result == VK_ERROR_DEVICE_LOST) {
+        device_lost.store(true, std::memory_order_relaxed);
+    }
     static std::atomic_flag reported;
     if (result != VK_ERROR_OUT_OF_HOST_MEMORY || reported.test_and_set()) {
         return;

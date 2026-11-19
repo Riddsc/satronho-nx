@@ -28,6 +28,7 @@
 #include "common/settings.h"
 #include "common/settings_enums.h"
 #include "video_core/nx2_stutter_trace.h"
+#include "video_core/renderer_vulkan/pipeline_build_failure.h"
 #include "video_core/vulkan_common/nsight_aftermath_tracker.h"
 #include "video_core/vulkan_common/vma.h"
 #include "video_core/vulkan_common/vulkan_device.h"
@@ -1125,6 +1126,7 @@ VkFormat Device::GetSupportedFormat(VkFormat wanted_format, VkFormatFeatureFlags
 
 void Device::ReportLoss() const {
     LOG_CRITICAL(Render_Vulkan, "Device loss occurred!");
+    ReportPipelineBuildFailure(VK_ERROR_DEVICE_LOST);
     ReportDeviceFault();
 
     // Wait for the log to flush and for Nsight Aftermath to dump the results
@@ -1809,6 +1811,13 @@ void Device::RemoveUnsuitableExtensions() {
     RemoveExtensionFeatureIfUnsuitable(extensions.shader_demote_to_helper_invocation,
                                        features.shader_demote_to_helper_invocation,
                                        VK_EXT_SHADER_DEMOTE_TO_HELPER_INVOCATION_EXTENSION_NAME);
+
+    // VK_EXT_pipeline_creation_cache_control
+    extensions.pipeline_creation_cache_control =
+        features.pipeline_creation_cache_control.pipelineCreationCacheControl;
+    RemoveExtensionFeatureIfUnsuitable(extensions.pipeline_creation_cache_control,
+                                       features.pipeline_creation_cache_control,
+                                       VK_EXT_PIPELINE_CREATION_CACHE_CONTROL_EXTENSION_NAME);
 
     // VK_EXT_subgroup_size_control
     extensions.subgroup_size_control =

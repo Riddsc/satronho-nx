@@ -799,6 +799,17 @@ Pipeline Device::CreateComputePipeline(const VkComputePipelineCreateInfo& ci,
     return Pipeline(object, handle, *dld);
 }
 
+Pipeline Device::CreateComputePipelineIfCached(const VkComputePipelineCreateInfo& ci,
+                                               VkPipelineCache cache) const {
+    VkPipeline object{};
+    const VkResult result = dld->vkCreateComputePipelines(handle, cache, 1, &ci, nullptr, &object);
+    if (result == VK_PIPELINE_COMPILE_REQUIRED) {
+        return {};
+    }
+    Check(result);
+    return Pipeline(object, handle, *dld);
+}
+
 Sampler Device::CreateSampler(const VkSamplerCreateInfo& ci) const {
     VkSampler object;
     Check(dld->vkCreateSampler(handle, &ci, nullptr, &object));
