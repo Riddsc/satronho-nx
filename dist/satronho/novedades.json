@@ -1,6 +1,37 @@
 {
   "builds": [
     {
+      "tag": "build-55",
+      "fecha": "19 de noviembre de 2026",
+      "titulo": "La build estable: sin esperas de shaders y cierres que terminan",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "Shaders de cómputo sin esperas en AMD, ahora con un método ya probado: Satronho NX los arma sin el optimizador del driver de AMD, que tardaba de 8 a 26 segundos por shader y podía alargar una carga hasta 40 minutos. Es la misma decisión que tomó Longshot (el port nativo de Ocarina) tras probarla en AMD; nosotros la medimos en nuestros registros, la adaptamos al emulador y la dejamos con interruptor (EDEN_NX2_AMD_NOOPT=0 vuelve al optimizador). Reemplaza el sistema experimental de la build 54, que retiramos por prudencia antes de probarlo a fondo."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Arreglo propio de Satronho NX: si el driver de AMD se cae, la caché de shaders guardada ya no se pisa con la copia vacía que devuelve el driver (así se perdieron 73 MB en una sesión de la build 53), ni con una caché mucho más pequeña que la del disco."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "El cierre colgado tiene por fin solución completa. Era un error de Lichii: a los 10 segundos de pedir el cierre mataba el hilo de emulación a mitad del desmontaje, y la ventana se quedaba congelada o el emulador se caía al salir (en Satronho lo habíamos aliviado subiendo ese tiempo a 30 s desde la build 43). Lichii lo corrigió en #1576 y #1728: ahora se espera mientras el cierre avance, y si de verdad se traba se guarda la configuración y se sale limpio. Integrado y adaptado a nuestro registro de pasos del cierre por Satronho NX."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "La configuración y el tiempo de juego se guardan de forma segura: un cierre forzado ya no puede dejar el archivo de ajustes vacío o a medias (Lichii #1728, integrado por Satronho NX). El registro se vacía cada segundo para no perder las últimas líneas si algo se cuelga (Lichii #1771)."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Pérdida del dispositivo gráfico: antes Lichii lanzaba una excepción que terminaba en un cierre confuso; ahora se anota la causa y el emulador se cierra de forma ordenada (Lichii #1938, integrado por Satronho NX)."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Estabilidad, revisado e integrado por Satronho NX entre más de 500 commits de Lichii: Ocarina ya no pierde el dispositivo en la Ciudadela a 1.5x/2x en AMD (#1890), menos pipelines duplicados en los dibujos mesh de Ocarina (#2012), un búfer de índices que se usaba ya liberado (#2163), invalidación de código del CPU sin carreras (d4acca92), memoria dispersa que podía fallar al escribir (#2041), muestreadores y descriptores con respaldo si el driver se queda sin memoria (#2235, #2236) y caché estática de pipelines escrita sin riesgo de corromperse (#2100). Dejamos fuera a propósito cambios grandes sin relación con Ocarina o que obligarían a recompilar todos los shaders."
+        }
+      ]
+    },
+    {
       "tag": "build-54",
       "fecha": "19 de noviembre de 2026",
       "titulo": "Sin esperas eternas de shaders",

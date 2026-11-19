@@ -562,3 +562,24 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Hookshot tiene copias del sustituto (el de la Fuente es idéntico byte a byte al de arena), las
   builds no llevan datos del juego y los `volcado*` son capturas de cuadros de la GPU. Solo
   sirve volver a sacar el dump (o esos 3 archivos de otro dump sano).
+- **Build 55 (opción 2 + Longshot + Lichii, 2026-11-19):** se retira el optimizador en segundo plano de
+  la 54 (sin probar). En su lugar, `BuildsUnoptimized` arma **todo el cómputo sin optimizar en AMD
+  propietario** (`AmdBuildsUnoptimized`, `EDEN_NX2_AMD_NOOPT=0` lo apaga), como Longshot 1.0.0
+  (`RX_VK_NOOPT`, por defecto en AMD; su compilador tardaba 10–60 s). Solo cómputo: los gráficos
+  siguen optimizados. Se queda la protección de la caché de la 54. Portados a mano de Lichii (sin
+  merge; rutas `src/lichii` → `src/yuzu`): #2041 bfc2359f, #2236 c3a82e87, #2235 d19babc8,
+  #2100 19d87366, #2163 e10fe57b, #1938 21ac7636 (texto «Closing Satronho NX»), d4acca92,
+  #1890 19a247b5 (sin `IsPaddedSquare`), #2012 5865e88f, #1576 0da698bb (progreso del cierre
+  dentro de nuestro `satronho_step` y del `step()` de `~PipelineCache`), #1728 269be4bd, #1771
+  686317da (`Log::Flush` no existe aquí: `ReportLoss` usa `Log::Stop`).
+  **Descartados:** dc386a2e #2135 y la serie de write-backs del caché de texturas (dependen de ella,
+  pensados para Duskbloods), ae4ea4d4 #1911 (reescribe el asignador de VA; fuga vista en FF
+  Resonance), cambios de raíz de tablas NVN2 (#2140, ac09e512, 8932123c: tocan la traducción de
+  shaders → recompilarlo todo), reescritura del FPS Unlock de Ocarina (#1981, 42eb98f3).
+  **Errores de Lichii vistos:** #1486 (llamadas de macros de grilla) causó destellos blancos en OoT
+  (#1651) y lo revirtieron en 55ad0b75: nunca llegó a Satronho. Su cierre mataba el hilo a los 10 s
+  y congelaba la app (#1576). La pérdida del dispositivo terminaba en std::terminate (#1934).
+- Longshot (fork de Hookshot, ahora en git.magicbean.dev/MagicBeanDev/Longshot; el repo de Hookshot
+  ya no está en GitHub): además de NOOPT en AMD, reconstruye los pipelines antes del título si el
+  driver perdió su caché (#1188) y no reconstruye todo si una actualización no cambia shaders
+  (#1418). Su arreglo de la cuadrícula del terreno en AMD ya lo tenemos por Lichii #679.
