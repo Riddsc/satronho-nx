@@ -1163,7 +1163,7 @@ void Device::ReportLoss() const {
         std::this_thread::sleep_for(std::chrono::seconds{15});
     }
     LOG_CRITICAL(Render_Vulkan, "Closing Satronho NX: the GPU driver lost the Vulkan device");
-    Common::Log::Flush();
+    Common::Log::Stop();
 #ifdef _WIN32
     // Skips DLL detach, which runs the GPU driver's teardown on the lost device.
     TerminateProcess(GetCurrentProcess(), EXIT_FAILURE);
