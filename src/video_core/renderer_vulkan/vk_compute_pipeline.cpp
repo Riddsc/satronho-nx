@@ -9,11 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
-#include <deque>
 #include <limits>
-#include <memory>
-#include <string>
-#include <thread>
 #include <vector>
 
 #include <boost/container/small_vector.hpp>
@@ -41,7 +37,6 @@
 #include "video_core/gpu_logging/gpu_logging.h"
 #include "common/logging.h"
 #include "common/settings.h"
-#include "common/thread.h"
 #include "shader_recompiler/exception.h"
 
 namespace Vulkan {
@@ -262,36 +257,63 @@ ComputePipeline::ComputePipeline(const Device& device_, Scheduler& scheduler, vk
     }
 
     auto func{[this, shader_notify, pipeline_statistics] {
-        const VkPipelineCreateFlags flags = BaseFlags();
-        // Satronho: AMD's compiler takes 5-30 s on some compute shaders. One missing from the
-        // driver cache is built unoptimized now and optimized in the background once it runs.
-        const bool unoptimized_first = (flags & VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT) == 0 &&
-                                       !binaries && static_cast<bool>(pipeline_cache) &&
-                                       device.GetDriverID() == VK_DRIVER_ID_AMD_PROPRIETARY &&
-                                       device.IsPipelineCreationCacheControlSupported();
+        const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroup_size_ci{
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
+            .pNext = nullptr,
+            .requiredSubgroupSize = GuestWarpSize,
+        };
+        // Only warp-level ops observe the subgroup size. Forcing 32 on other shaders makes Intel
+        // compile SIMD32, which can spill a register-heavy kernel for minutes (Mario Kart World).
+        // A shader that lost a conditional barrier relies on a whole warp running in step: at a
+        // smaller subgroup size it reads stale shared memory, which shows as banding over the image
+        // in Mario Kart World on Intel's Windows driver.
+        const bool uses_warp_ops = info.removed_conditional_barrier ||
+                                   info.uses_subgroup_vote || info.uses_subgroup_invocation_id ||
+                                   info.uses_subgroup_shuffles || info.uses_subgroup_mask ||
+                                   info.uses_quad_shuffles || info.uses_fswzadd ||
+                                   info.uses_cooperative_matrix;
+        VkPipelineCreateFlags flags{};
+        if (device.IsKhrPipelineExecutablePropertiesEnabled() && Settings::values.renderer_debug.GetValue()) {
+            flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
+        }
+        if (uses_descriptor_buffer) {
+            flags |= VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+        }
+        if (BuildsUnoptimized(device.GetDriverID(), shader_hash)) {
+            flags |= VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
+        }
+        const VkComputePipelineCreateInfo compute_ci{
+            .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = flags,
+            .stage{
+                .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .pNext = device.IsExtSubgroupSizeControlSupported() && uses_warp_ops &&
+                                 device.IsGuestWarpSizeSupported(VK_SHADER_STAGE_COMPUTE_BIT)
+                             ? &subgroup_size_ci
+                             : nullptr,
+                .flags = info.uses_cooperative_matrix
+                             ? VkPipelineShaderStageCreateFlags{
+                                   VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT}
+                             : VkPipelineShaderStageCreateFlags{},
+                .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+                .module = *spv_module,
+                .pName = "main",
+                .pSpecializationInfo = nullptr,
+            },
+            .layout = *pipeline_layout,
+            .basePipelineHandle = 0,
+            .basePipelineIndex = 0,
+        };
         try {
             const std::array<u64, 1> traced{shader_hash};
+            const bool unoptimized = (flags & VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT) != 0;
             const auto trace_begin = std::chrono::steady_clock::now();
-            bool unoptimized = (flags & VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT) != 0;
             TracePipelineBuild("BEGIN", "compute", shader_hash, traced, unoptimized);
-            if (unoptimized_first) {
-                pipeline = CreateVkPipeline(
-                    flags | VK_PIPELINE_CREATE_FAIL_ON_PIPELINE_COMPILE_REQUIRED_BIT, true);
-                if (!pipeline) {
-                    pipeline = CreateVkPipeline(flags | VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT,
-                                                false);
-                    unoptimized = true;
-                    needs_optimized_build.store(true, std::memory_order_release);
-                    static std::atomic_flag announced;
-                    if (!announced.test_and_set()) {
-                        LOG_INFO(Render_Vulkan,
-                                 "Satronho: compute shaders missing from the driver cache start "
-                                 "unoptimized and are optimized in the background");
-                    }
-                }
-            } else {
-                pipeline = CreateVkPipeline(flags, false);
-            }
+            pipeline = binaries ? binaries->CreateComputePipeline(compute_ci, *pipeline_cache,
+                                                                  binary_key)
+                                : device.GetLogical().CreateComputePipeline(compute_ci,
+                                                                            *pipeline_cache);
             TracePipelineBuild("END", "compute", shader_hash, traced, unoptimized,
                                std::chrono::duration<double, std::milli>(
                                    std::chrono::steady_clock::now() - trace_begin)
@@ -319,11 +341,9 @@ ComputePipeline::ComputePipeline(const Device& device_, Scheduler& scheduler, vk
         if (pipeline_statistics) {
             pipeline_statistics->Collect(device, *pipeline);
         }
-        // Nothing reads the module once the pipeline exists, unless the optimized build still
-        // needs it; the driver keeps its SPIR-V while it lives.
-        if (!needs_optimized_build.load(std::memory_order_relaxed)) {
-            spv_module.reset();
-        }
+        // Nothing reads the module once the pipeline exists; the driver keeps its SPIR-V while it
+        // lives.
+        spv_module.reset();
         std::scoped_lock lock{build_mutex};
         is_built = true;
         build_condvar.notify_one();
@@ -377,162 +397,11 @@ ComputePipeline::ComputePipeline(const Device& device_, Scheduler& scheduler, vk
 }
 
 ComputePipeline::~ComputePipeline() {
-    if (optimize_task) {
-        // Waits for an optimized build that is running; one still queued is dropped.
-        std::scoped_lock lock{optimize_task->mutex};
-        optimize_task->cancelled = true;
-        optimize_task->run = nullptr;
-    }
-    optimize_task.reset();
     if (jobs) {
         // Nothing needs a pipeline that goes: a build still queued is dropped.
         jobs->Cancel(job);
         job.Wait();
     }
-}
-
-VkPipelineCreateFlags ComputePipeline::BaseFlags() const {
-    VkPipelineCreateFlags flags{};
-    if (device.IsKhrPipelineExecutablePropertiesEnabled() && Settings::values.renderer_debug.GetValue()) {
-        flags |= VK_PIPELINE_CREATE_CAPTURE_STATISTICS_BIT_KHR;
-    }
-    if (uses_descriptor_buffer) {
-        flags |= VK_PIPELINE_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
-    }
-    if (BuildsUnoptimized(device.GetDriverID(), shader_hash)) {
-        flags |= VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT;
-    }
-    return flags;
-}
-
-vk::Pipeline ComputePipeline::CreateVkPipeline(VkPipelineCreateFlags flags, bool if_cached) const {
-    const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroup_size_ci{
-        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT,
-        .pNext = nullptr,
-        .requiredSubgroupSize = GuestWarpSize,
-    };
-    // Only warp-level ops observe the subgroup size. Forcing 32 on other shaders makes Intel
-    // compile SIMD32, which can spill a register-heavy kernel for minutes (Mario Kart World).
-    // A shader that lost a conditional barrier relies on a whole warp running in step: at a
-    // smaller subgroup size it reads stale shared memory, which shows as banding over the image
-    // in Mario Kart World on Intel's Windows driver.
-    const bool uses_warp_ops = info.removed_conditional_barrier ||
-                               info.uses_subgroup_vote || info.uses_subgroup_invocation_id ||
-                               info.uses_subgroup_shuffles || info.uses_subgroup_mask ||
-                               info.uses_quad_shuffles || info.uses_fswzadd ||
-                               info.uses_cooperative_matrix;
-    const VkComputePipelineCreateInfo compute_ci{
-        .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = flags,
-        .stage{
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-            .pNext = device.IsExtSubgroupSizeControlSupported() && uses_warp_ops &&
-                             device.IsGuestWarpSizeSupported(VK_SHADER_STAGE_COMPUTE_BIT)
-                         ? &subgroup_size_ci
-                         : nullptr,
-            .flags = info.uses_cooperative_matrix
-                         ? VkPipelineShaderStageCreateFlags{
-                               VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT}
-                         : VkPipelineShaderStageCreateFlags{},
-            .stage = VK_SHADER_STAGE_COMPUTE_BIT,
-            .module = *spv_module,
-            .pName = "main",
-            .pSpecializationInfo = nullptr,
-        },
-        .layout = *pipeline_layout,
-        .basePipelineHandle = 0,
-        .basePipelineIndex = 0,
-    };
-    if (if_cached) {
-        return device.GetLogical().CreateComputePipelineIfCached(compute_ci, *pipeline_cache);
-    }
-    return binaries ? binaries->CreateComputePipeline(compute_ci, *pipeline_cache, binary_key)
-                    : device.GetLogical().CreateComputePipeline(compute_ci, *pipeline_cache);
-}
-
-namespace {
-/// Satronho: two low-priority threads build the optimized versions of compute pipelines that
-/// started unoptimized, in the order the game first ran them.
-class OptimizedBuildQueue {
-public:
-    static OptimizedBuildQueue& Instance() {
-        // Never destroyed: its threads may still wait on it while the process exits.
-        static OptimizedBuildQueue* const queue = new OptimizedBuildQueue;
-        return *queue;
-    }
-
-    void Push(std::weak_ptr<ComputePipeline::OptimizeTask> task) {
-        {
-            std::scoped_lock lock{mutex};
-            tasks.push_back(std::move(task));
-        }
-        condvar.notify_one();
-    }
-
-private:
-    OptimizedBuildQueue() {
-        for (int index = 0; index < 2; ++index) {
-            std::thread([this, index] { Run(index); }).detach();
-        }
-    }
-
-    void Run(int index) {
-        const std::string name = fmt::format("SatronhoOptimize{}", index);
-        Common::SetCurrentThreadName(name.c_str());
-        Common::SetCurrentThreadPriority(Common::ThreadPriority::Low);
-        for (;;) {
-            std::weak_ptr<ComputePipeline::OptimizeTask> next;
-            {
-                std::unique_lock lock{mutex};
-                condvar.wait(lock, [this] { return !tasks.empty(); });
-                next = std::move(tasks.front());
-                tasks.pop_front();
-            }
-            const std::shared_ptr<ComputePipeline::OptimizeTask> task = next.lock();
-            if (!task) {
-                continue;
-            }
-            std::scoped_lock lock{task->mutex};
-            if (!task->cancelled && task->run) {
-                auto run = std::move(task->run);
-                task->run = nullptr;
-                run();
-            }
-        }
-    }
-
-    std::mutex mutex;
-    std::condition_variable condvar;
-    std::deque<std::weak_ptr<ComputePipeline::OptimizeTask>> tasks;
-};
-} // Anonymous namespace
-
-void ComputePipeline::QueueOptimizedBuild() {
-    optimize_task = std::make_shared<OptimizeTask>();
-    optimize_task->run = [this] {
-        const std::array<u64, 1> traced{shader_hash};
-        const auto trace_begin = std::chrono::steady_clock::now();
-        TracePipelineBuild("BEGIN", "compute", shader_hash, traced, false);
-        vk::Pipeline built;
-        try {
-            built = CreateVkPipeline(BaseFlags(), false);
-        } catch (const vk::Exception& exception) {
-            LOG_WARNING(Render_Vulkan,
-                        "Optimized build of compute shader {:016X} failed ({}); it stays "
-                        "unoptimized",
-                        shader_hash, exception.what());
-            ReportPipelineBuildFailure(exception.GetResult());
-            return;
-        }
-        TracePipelineBuild("END", "compute", shader_hash, traced, false,
-                           std::chrono::duration<double, std::milli>(
-                               std::chrono::steady_clock::now() - trace_begin)
-                               .count());
-        optimized_pipeline = std::move(built);
-        optimized_handle.store(*optimized_pipeline, std::memory_order_release);
-    };
-    OptimizedBuildQueue::Instance().Push(optimize_task);
 }
 
 void ComputePipeline::RunBuild() {
@@ -908,12 +777,7 @@ bool ComputePipeline::Configure(Tegra::Engines::KeplerCompute& kepler_compute,
         if (!pipeline) {
             return;
         }
-        if (needs_optimized_build.exchange(false, std::memory_order_acq_rel)) {
-            QueueOptimizedBuild();
-        }
-        const VkPipeline optimized = optimized_handle.load(std::memory_order_acquire);
-        cmdbuf.BindPipeline(VK_PIPELINE_BIND_POINT_COMPUTE,
-                            optimized != VK_NULL_HANDLE ? optimized : *pipeline);
+        cmdbuf.BindPipeline(VK_PIPELINE_BIND_POINT_COMPUTE, *pipeline);
         if (!descriptor_set_layout) {
             return;
         }

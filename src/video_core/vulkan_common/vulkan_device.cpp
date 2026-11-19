@@ -1812,13 +1812,6 @@ void Device::RemoveUnsuitableExtensions() {
                                        features.shader_demote_to_helper_invocation,
                                        VK_EXT_SHADER_DEMOTE_TO_HELPER_INVOCATION_EXTENSION_NAME);
 
-    // VK_EXT_pipeline_creation_cache_control
-    extensions.pipeline_creation_cache_control =
-        features.pipeline_creation_cache_control.pipelineCreationCacheControl;
-    RemoveExtensionFeatureIfUnsuitable(extensions.pipeline_creation_cache_control,
-                                       features.pipeline_creation_cache_control,
-                                       VK_EXT_PIPELINE_CREATION_CACHE_CONTROL_EXTENSION_NAME);
-
     // VK_EXT_subgroup_size_control
     extensions.subgroup_size_control =
         features.subgroup_size_control.subgroupSizeControl &&
