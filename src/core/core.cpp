@@ -20,6 +20,7 @@
 #include "common/adpf.h"
 #include "common/settings.h"
 #include "common/settings_enums.h"
+#include "common/shutdown_progress.h"
 #include "common/string_util.h"
 #include "core/arm/exclusive_monitor.h"
 #include "core/core.h"
@@ -588,6 +589,8 @@ struct System::Impl {
         const auto satronho_step = [](const char* step, auto&& run) {
             const auto start = std::chrono::steady_clock::now();
             run();
+            // Each step done tells the frontend the teardown still moves (Lichii #1576)
+            Common::NoteShutdownProgress();
             const auto ms = std::chrono::duration<double, std::milli>(
                                 std::chrono::steady_clock::now() - start)
                                 .count();
