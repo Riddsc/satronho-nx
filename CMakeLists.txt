@@ -316,6 +316,11 @@ endif()
 
 option(YUZU_USE_BUNDLED_OPENSSL "Download bundled OpenSSL build" ${DEFAULT_YUZU_USE_BUNDLED_OPENSSL})
 
+# Satronho NX: std::atomic_ref for the NDK's libc++, which doesn't have it yet.
+if (ANDROID)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:SHELL:-include ${PROJECT_SOURCE_DIR}/src/common/polyfill_atomic_ref.h>")
+endif()
+
 if (ANDROID AND YUZU_DOWNLOAD_ANDROID_VVL)
     AddJsonPackage(vulkan-validation-layers)
 
