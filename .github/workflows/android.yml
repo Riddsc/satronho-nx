@@ -1,0 +1,122 @@
+name: android
+
+# Satronho NX para Android (arm64, Android 13 o más nuevo). En la rama de trabajo «android» solo
+# compila y deja el APK como artefacto para probarlo; llamado desde release-binaries en main, sube
+# el APK al mismo release que la versión de Windows (después de que esta lo cree).
+on:
+  push:
+    branches: [android]
+    paths:
+      - "src/**"
+      - "!src/tests/**"
+      - "CMakeLists.txt"
+      - "CMakeModules/**"
+      - "externals/**"
+      - "cpmfile.json"
+      - ".ci/android/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        default: ""
+      build:
+        type: string
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    name: Android arm64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Código
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+
+      - name: Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Herramientas de Android (NDK y CMake que pide el proyecto)
+        run: |
+          set -e
+          sudo apt-get update -qq && sudo apt-get install -y -qq ninja-build glslang-tools
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          for attempt in 1 2 3; do
+            "$SDKM" "ndk;28.2.13676358" "cmake;3.31.5" > /dev/null && break
+            echo "sdkmanager falló (intento $attempt), reintentando..."; sleep 20
+          done
+
+      - name: Caché de Gradle y de dependencias
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            .cache/cpm
+          key: android-${{ hashFiles('src/android/**/*.kts', 'cpmfile.json', 'src/android/gradle/**') }}
+          restore-keys: android-
+
+      - name: Llave de firma
+        env:
+          KEY: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          if [ -n "$KEY" ] && [ -n "$PASS" ]; then
+            echo "$KEY" | base64 -d > "$RUNNER_TEMP/satronho.jks"
+            echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/satronho.jks" >> "$GITHUB_ENV"
+            echo "ANDROID_KEYSTORE_PASS=$PASS" >> "$GITHUB_ENV"
+            echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS || 'satronho' }}" >> "$GITHUB_ENV"
+            echo "Firma: llave de Satronho NX (secretos del repo)"
+          else
+            echo "::warning::Sin la llave de Satronho NX en los secretos: el APK sale con la firma de depuración del proyecto"
+          fi
+
+      - name: APK
+        env:
+          CPM_SOURCE_CACHE: ${{ github.workspace }}/.cache/cpm
+        run: |
+          chmod +x .ci/android/build.sh
+          .ci/android/build.sh -t standard -b Release
+          ls -la artifacts
+
+      - name: Nombre del APK
+        id: apk
+        run: |
+          APK=$(ls artifacts/*.apk | head -1)
+          N="${{ inputs.build }}"
+          if [ -z "$N" ] || [ "$N" = "0" ]; then N="prueba-${{ github.run_number }}"; fi
+          NAME="satronho-nx-build-$N-android-arm64.apk"
+          cp "$APK" "$NAME"
+          sha256sum "$NAME" | cut -d' ' -f1 > "$NAME.sha256"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          ls -la "$NAME"
+
+      - name: APK de prueba (rama de trabajo)
+        if: inputs.tag == ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.apk.outputs.name }}
+          path: ${{ steps.apk.outputs.name }}
+          retention-days: 14
+
+      - name: Subir al release
+        if: inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ inputs.tag }}" "${{ steps.apk.outputs.name }}" \
+            "${{ steps.apk.outputs.name }}.sha256" --clobber -R "$GITHUB_REPOSITORY"
