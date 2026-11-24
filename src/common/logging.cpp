@@ -4,7 +4,12 @@
 // SPDX-FileCopyrightText: 2014 Citra Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <algorithm>
 #include <atomic>
+#include <cctype>
+#include <ctime>
+#include <filesystem>
+#include <fstream>
 #include <chrono>
 #include <climits>
 #include <cstdlib>
@@ -12,6 +17,7 @@
 #include <mutex>
 #include <regex>
 #include <thread>
+#include <vector>
 
 #if defined(__ANDROID__)
 #include <android/log.h>
@@ -245,6 +251,75 @@ struct ColorConsoleBackend final : public Backend {
 };
 
 #ifndef __OPENORBIS__
+/// Satronho NX: every finished session's log is also kept in "sesiones" beside it, named by when
+/// it ended, its build and the games it booted (2026-11-24_08-05_build-51_0400486024DEC000.txt),
+/// so a session is never lost when the app opens again. The newest 20 are kept.
+void KeepSessionCopy(const std::filesystem::path& log) noexcept {
+    constexpr size_t Keep = 20;
+    std::error_code ec;
+    const auto folder = log.parent_path() / "sesiones";
+    std::filesystem::create_directories(folder, ec);
+    if (ec)
+        return;
+    std::string name = "sesion";
+    const auto written = std::filesystem::last_write_time(log, ec);
+    if (!ec) {
+        // Through "now" on both clocks: clock_cast and file_clock::to_sys aren't everywhere.
+        const auto offset = written - std::filesystem::file_time_type::clock::now();
+        const std::time_t when = std::chrono::system_clock::to_time_t(
+            std::chrono::system_clock::now() +
+            std::chrono::duration_cast<std::chrono::system_clock::duration>(offset));
+        std::tm local{};
+#ifdef _WIN32
+        const bool have_time = localtime_s(&local, &when) == 0;
+#else
+        const bool have_time = localtime_r(&when, &local) != nullptr;
+#endif
+        char text[32];
+        if (have_time && std::strftime(text, sizeof(text), "%Y-%m-%d_%H-%M-%S", &local) != 0)
+            name = text;
+    }
+    // The build is on the first line; the games on their "Booting game" lines.
+    if (std::ifstream in{log, std::ios::binary}; in) {
+        std::string head(size_t{1} << 20, '\0');
+        in.read(head.data(), static_cast<std::streamsize>(head.size()));
+        head.resize(static_cast<size_t>(in.gcount()));
+        static const std::regex build_pattern{R"(\| [A-Za-z0-9_.-]*build-([0-9]+))"};
+        static const std::regex game_pattern{R"(Booting game: ([0-9A-Fa-f]{16}))"};
+        const auto first_line = head.substr(0, head.find('\n'));
+        std::smatch match;
+        if (std::regex_search(first_line, match, build_pattern))
+            name += "_build-" + match[1].str();
+        std::vector<std::string> games;
+        for (auto it = std::sregex_iterator(head.begin(), head.end(), game_pattern);
+             it != std::sregex_iterator() && games.size() < 3; ++it) {
+            std::string id = (*it)[1].str();
+            for (char& c : id)
+                c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+            if (std::find(games.begin(), games.end(), id) == games.end())
+                games.push_back(std::move(id));
+        }
+        for (const auto& id : games)
+            name += "_" + id;
+    }
+    auto copy = folder / (name + ".txt");
+    for (int n = 2; std::filesystem::exists(copy, ec) && n < 100; ++n)
+        copy = folder / fmt::format("{}_{}.txt", name, n);
+    std::filesystem::copy_file(log, copy, std::filesystem::copy_options::skip_existing, ec);
+    // Only our own copies are trimmed, oldest first.
+    std::vector<std::pair<std::filesystem::file_time_type, std::filesystem::path>> copies;
+    for (const auto& entry : std::filesystem::directory_iterator(folder, ec)) {
+        std::error_code entry_ec;
+        if (entry.is_regular_file(entry_ec) && entry.path().extension() == ".txt")
+            copies.emplace_back(entry.last_write_time(entry_ec), entry.path());
+    }
+    if (copies.size() <= Keep)
+        return;
+    std::sort(copies.begin(), copies.end());
+    for (size_t i = 0; i + Keep < copies.size(); ++i)
+        std::filesystem::remove(copies[i].second, ec);
+}
+
 /// @brief Backend that writes to a file passed into the constructor
 struct FileBackend final : public Backend {
     explicit FileBackend(const std::filesystem::path filename) noexcept {
@@ -259,6 +334,8 @@ struct FileBackend final : public Backend {
             auto old_path = path;
             old_path += ".old.txt";
             std::filesystem::rename(path, old_path, ec);
+            if (!ec)
+                KeepSessionCopy(old_path);
             return !ec;
         };
 #ifdef _WIN32
