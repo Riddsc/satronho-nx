@@ -505,6 +505,9 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
     const bool has_shader_warm = ShaderWarmFilesExist(program_id);
     QAction* prepare_shaders = context_menu.addAction(
         has_shader_warm ? tr("Rebuild Shader Precache") : tr("Build Shader Precache"));
+    QAction* precompile_shaders = context_menu.addAction(tr("Precompile All Shaders"));
+    precompile_shaders->setCheckable(true);
+    precompile_shaders->setChecked(ShaderWarmRequested(program_id));
     QAction* delete_shader_warm = nullptr;
     if (has_shader_warm) {
         delete_shader_warm = context_menu.addAction(tr("Delete Shader Precache"));
@@ -612,6 +615,9 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
             [this, program_id]() { emit OpenTransferableShaderCacheRequested(program_id); });
     connect(prepare_shaders, &QAction::triggered, this,
             [this, program_id, path]() { emit PrepareShaderWarmRequested(program_id, path); });
+    connect(precompile_shaders, &QAction::toggled, this, [this, program_id, path](bool checked) {
+        emit PrecompileShadersRequested(program_id, path, checked);
+    });
     if (delete_shader_warm) {
         connect(delete_shader_warm, &QAction::triggered, this,
                 [this, program_id]() { emit DeleteShaderWarmRequested(program_id); });
