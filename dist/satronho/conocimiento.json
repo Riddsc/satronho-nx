@@ -870,6 +870,40 @@
       ]
     },
     {
+      "id": "directo",
+      "guia": "samy",
+      "tema": "Preparar para directo",
+      "pregunta": "¿Qué es «Preparar para directo»?",
+      "frases": [
+        "preparar para directo",
+        "como preparo el juego para el stream",
+        "preparar para stream",
+        "tirones en el directo",
+        "tirones cuando transmito",
+        "antes de transmitir",
+        "voy a hacer stream",
+        "jugar en vivo sin tirones",
+        "obs quita fps"
+      ],
+      "claves": [
+        "directo",
+        "stream",
+        "transmitir",
+        "transmision",
+        "vivo",
+        "obs",
+        "preparar",
+        "kick",
+        "tiktok"
+      ],
+      "respuesta": "Es una función propia de Satronho NX para jugar en vivo sin tirones de shaders. Haz clic derecho en el juego y elige «Preparar para directo»: Satronho saca los shaders del juego y, al abrirlo, la pantalla de carga los arma todos con tu gráfica y te dice cuánto falta. Hazlo antes de abrir OBS, para que no le quite procesador al directo. Si la saltas o cierras el juego, lo armado se guarda (también cada 10 minutos) y la siguiente vez sigue desde ahí. Cuando termina, el menú dice desde cuándo está listo y avisa si una build nueva pide prepararlo otra vez.",
+      "ver": [
+        "precache",
+        "resumen-sesion",
+        "medidor"
+      ]
+    },
+    {
       "id": "astc",
       "guia": "troya",
       "tema": "Gráficos",
@@ -1111,6 +1145,36 @@
         "log",
         "docked-handheld",
         "techo-fps"
+      ]
+    },
+    {
+      "id": "resumen-sesion",
+      "guia": "troya",
+      "tema": "Resumen de la sesión",
+      "pregunta": "¿Qué es el resumen que sale al cerrar el juego?",
+      "frases": [
+        "resumen de la sesion",
+        "resumen al cerrar",
+        "como me fue en la partida",
+        "cuantos tirones tuve",
+        "apagar el resumen",
+        "historial de sesiones",
+        "donde estan los logs viejos",
+        "se borro el log"
+      ],
+      "claves": [
+        "resumen",
+        "sesion",
+        "sesiones",
+        "historial",
+        "tirones",
+        "cerrar"
+      ],
+      "respuesta": "Al cerrar un juego, un guía te cuenta cómo corrió: minutos jugados, FPS típicos, el 10 % más lento, cuántos tirones hubo y cuántos fueron mientras se armaban shaders. Con «Ver el resumen» lo ves completo. Se apaga en el menú Satronho → «Resumen al cerrar el juego». Además, Satronho NX guarda una copia del log de cada sesión en la carpeta log\\sesiones, con la fecha, la build y el juego en el nombre (se quedan las 20 más nuevas), para que ningún log se pierda al volver a abrir el emulador.",
+      "ver": [
+        "log",
+        "medidor",
+        "directo"
       ]
     },
     {

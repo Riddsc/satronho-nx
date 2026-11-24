@@ -72,3 +72,8 @@ por que no llega a 60 fps|techo-fps
 que significan las barras de nucleos|techo-fps
 el emulador no cierra|cierre-colgado
 se cuelga al cerrar el juego|cierre-colgado
+como preparo el juego para el stream|directo
+que es preparar para directo|directo
+tengo tirones en el directo|directo
+como apago el resumen al cerrar|resumen-sesion
+donde estan los logs de sesiones viejas|resumen-sesion

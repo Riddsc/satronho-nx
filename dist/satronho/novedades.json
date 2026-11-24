@@ -1,6 +1,41 @@
 {
   "builds": [
     {
+      "tag": "build-56",
+      "fecha": "24 de noviembre de 2026",
+      "titulo": "Lista para el directo",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "«Preparar para directo», creado por Satronho NX: clic derecho en el juego y Satronho deja todos sus shaders armados antes de que prendas OBS, para que los tirones de shaders no aparezcan en plena transmisión. Saca los shaders del juego, los arma en la pantalla de carga con el tiempo que falta, recuerda qué juegos ya están listos y desde cuándo, y avisa si una build nueva pide prepararlos otra vez. Nace de nuestras propias sesiones en vivo: en el registro del stream del 24 de noviembre vimos cientos de shaders tardando más de un segundo, varios hasta 54 segundos, justo en la parte final del directo. Por debajo usa la precompilación por juego que Lichii publicó (#2331, #2344); Satronho NX la integró, la convirtió en un flujo pensado para streamers y le sumó todo lo demás."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "La preparación ya no se pierde: si la saltas, cierras el juego o algo se cae, lo armado queda guardado y la siguiente vez sigue desde ahí. Además, Satronho NX guarda lo armado cada 10 minutos durante la preparación, una idea que vimos en Longshot y que llevamos al emulador junto con nuestra caché de cómputo para AMD."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Historial de sesiones, propio de Satronho NX: cada log se guarda también en la carpeta log\\sesiones con la fecha, la build y el juego en el nombre (quedan las 20 más nuevas). Antes, abrir el emulador dos veces seguidas borraba el log de la sesión anterior, como pasó con el del stream de esta mañana. El rastro de compilación de shaders (pipeline_builds.txt) ahora marca cada sesión con su fecha y hora, anota el segundo de cada línea y empieza un archivo nuevo al pasar de 64 MB, en vez de crecer sin límite (llegó a 92 MB)."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Resumen de la sesión, propio de Satronho NX: al cerrar el juego, un guía te cuenta cómo corrió (minutos, FPS típicos, el 10 % más lento, tirones y cuántos fueron por shaders), con el detalle a un clic. Queda también en el log. Se apaga en Satronho → «Resumen al cerrar el juego»."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Nuestro medidor ahora dice cuántos shaders faltan por armar y, cuando un tirón llega mientras se arman, lo marca como «tirón por shaders». Así, si se nota en el directo, queda claro que es la preparación de shaders y no un fallo. Los tirones totales muestran cuántos fueron por shaders."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Integrado y adaptado por Satronho NX desde Lichii, eligiendo solo lo que sirve: menos hilos armando pipelines en drivers AMD viejos (#2311); la caché de shaders reutiliza lo que el driver ya armó en la misma sesión y anota cuando se borra (#2349); un shader de cómputo descartado antes de armarse ya no queda contado como pendiente (#1799); y la precompilación por juego con sus bases (#1577, #1619, #1620). Dejamos fuera a propósito todo cambio que toque la forma de traducir los shaders, para que tu caché siga sirviendo."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Con dos ventanas de Satronho NX abiertas, el log de la que ya estaba abierta ya no se mueve ni se pisa (Lichii #2256), y pedir el cierre del juego dos veces seguidas ya no lanza dos cierres a la vez (Lichii #2502). Integrados por Satronho NX; el primero lo vimos en nuestro propio registro del 24 de noviembre."
+        }
+      ]
+    },
+    {
       "tag": "build-55",
       "fecha": "19 de noviembre de 2026",
       "titulo": "La build estable: sin esperas de shaders y cierres que terminan",

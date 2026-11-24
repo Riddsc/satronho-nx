@@ -583,3 +583,25 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   ya no está en GitHub): además de NOOPT en AMD, reconstruye los pipelines antes del título si el
   driver perdió su caché (#1188) y no reconstruye todo si una actualización no cambia shaders
   (#1418). Su arreglo de la cuadrícula del terreno en AMD ya lo tenemos por Lichii #679.
+- **Build 56 (2026-11-24, «Lista para el directo»):** portados a mano de Lichii (rutas `src/lichii` →
+  `src/yuzu`, sin tests): #2311 118a52ab, #1577 390f8e16, #1619 1e5ae836, #1620 84c57209 (base de la
+  precompilación), #2331 df080dd8, #2344 7e7bd04b (sin `CheckLegacyProfileBeforeConfig`, que es de
+  #1253, excluido), #1799 590c1bd3, #1800 0d4e5492, #2349 29327d8d, #2256 8e7348b2, #2502 e7893bea.
+  Conflictos de #2331 en `vk_pipeline_cache.*`: se conservan `ComputeDriverCache`/
+  `QueueComputeDriverCacheSave` y se adopta `QueueVulkanPipelineCacheSave(after_save)`;
+  `SerializeVulkanPipelineCache` devuelve bool (false también si el dispositivo se perdió o la
+  caché encogió). **Regla de Riddsc: nada que toque la traducción de shaders** (descartados #2523,
+  #2301 y similares). Propio: «Preparar para directo» (`yuzu/satronho/directo.*`, menú de la lista,
+  estado en `config/satronho_directo.ini`; marca preparado al terminar la carga si el precache llegó
+  al final o no tenía nada), guardado del precache cada 10 min (idea de Longshot #1940; el caché
+  general solo si `CanReadPipelineCacheDuringBuilds`), historial `log/sesiones` (20 copias, nombre
+  fecha_build_juego, en `logging.cpp` `KeepSessionCopy`), `pipeline_builds.txt` con línea `SESSION`,
+  `t=` por línea y rotación a `.old.txt` pasado 64 MiB, resumen de sesión (`yuzu/satronho/session.*`,
+  ajuste `satronho_session_summary`, línea «Satronho session summary» en el log) y medidor con
+  shaders por armar (`ShaderNotify::ShadersLeft`) y «tirón por shaders».
+- Revisión local sin compilar todo: `clang++ -fsyntax-only` con Qt de apt (`qt6-base-dev`), uic para
+  los `ui_*.h`, y cabeceras clonadas (fmt, SimpleIni, nlohmann/json, frozen, SDL, VMA,
+  Vulkan-Headers); `emission_stamp.h` se simula. Pilla errores de nombres e includes antes del CI.
+- Android: el proyecto heredado está en `src/android` (paquete `dev.eden.eden_emulator`). Plan: un
+  trabajo de CI en una rama de trabajo que solo compila; cuando compile, se conecta a `main` y el
+  APK se sube al mismo release después de Windows, como en Satronho Emulation.
