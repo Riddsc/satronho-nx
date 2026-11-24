@@ -391,7 +391,7 @@ struct FileBackend final : public Backend {
 #ifndef _WIN32
         if (mode == FS::FileAccessMode::Append && held_elsewhere) {
             // Too early for the log itself.
-            fmt::print(stderr, "Every log file in {} is held by another Lichii: this one keeps no "
+            fmt::print(stderr, "Every log file in {} is held by another Satronho NX: this one keeps no "
                                "log file\n",
                        FS::PathToUTF8String(filename.parent_path()));
             enabled = false;
