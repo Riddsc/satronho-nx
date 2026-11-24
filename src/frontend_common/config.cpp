@@ -86,7 +86,6 @@ namespace {
 class GameConfigWriter final : public Config {
 public:
     explicit GameConfigWriter(const std::string& config_name) : Config{ConfigType::PerGameConfig} {
-        FrontendCommon::CheckLegacyProfileBeforeConfig();
         config_loc = GameConfigPath(fmt::format("{}.ini", config_name));
         void(FS::CreateParentDir(config_loc));
         SetUpIni();

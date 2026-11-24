@@ -8,6 +8,8 @@
 #undef VMA_IMPLEMENTATION
 #endif
 
+#include <utility>
+
 #include <QSysInfo>
 #include <boost/algorithm/string/split.hpp>
 #include "common/fs/path_util.h"
@@ -49,9 +51,11 @@
 #include "yuzu/game/game_list.h"
 #include "yuzu/nup_dialogs.h"
 #include "yuzu/shader_warm_dialog.h"
+#include "yuzu/satronho/directo.h"
 #include "yuzu/satronho/dock.h"
 #include "yuzu/satronho/hub.h"
 #include "yuzu/satronho/novedades.h"
+#include "yuzu/satronho/session.h"
 #include "video_core/shader_warm/shader_warm_builder.h"
 #ifdef LICHII_NX_TOOLS
 #include "core/file_sys/registered_cache.h"
@@ -520,6 +524,15 @@ MainWindow::MainWindow(bool has_broken_vulkan)
                 }
                 OnSaveConfig();
             });
+        });
+        // The summary a guide gives when a game closes.
+        QAction* summary = satronho_menu->addAction(tr("Resumen al cerrar el juego"));
+        summary->setCheckable(true);
+        connect(satronho_menu, &QMenu::aboutToShow, summary,
+                [summary] { summary->setChecked(Satronho::Session::Enabled()); });
+        connect(summary, &QAction::toggled, this, [this](bool on) {
+            Satronho::Session::SetEnabled(on);
+            OnSaveConfig();
         });
         add(tr("Guías"), Satronho::Hub::Page::Guias);
         ui->menubar->insertMenu(ui->menu_Help->menuAction(), satronho_menu);
@@ -1648,6 +1661,8 @@ void MainWindow::ConnectWidgetEvents() {
             &MainWindow::OnGameListDeleteShaderWarm);
     connect(game_list, &GameList::PrecompileShadersRequested, this,
             &MainWindow::OnGameListPrecompileShaders);
+    connect(game_list, &GameList::PrepareForStreamRequested, this,
+            &MainWindow::OnSatronhoPrepareStream);
     connect(game_list, &GameList::ExtractNupRequested, this, &MainWindow::OnGameListExtractNup);
     connect(game_list, &GameList::EditNupMetadataRequested, this,
             &MainWindow::OnGameListEditNupMetadata);
@@ -2476,6 +2491,14 @@ void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletPa
 
     connect(QtCommon::emu_thread.get(), &EmuThread::LoadProgress, loading_screen,
             &LoadingScreen::OnLoadProgress, Qt::QueuedConnection);
+    connect(
+        QtCommon::emu_thread.get(), &EmuThread::LoadProgress, this,
+        [](VideoCore::LoadCallbackStage stage, std::size_t value, std::size_t total) {
+            if (stage == VideoCore::LoadCallbackStage::Warm) {
+                Satronho::Directo::NoteWarmProgress(value, total);
+            }
+        },
+        Qt::QueuedConnection);
 
     connect(
         QtCommon::emu_thread.get(), &EmuThread::ShaderCacheReloadStarted, this,
@@ -2545,6 +2568,11 @@ void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletPa
                      .arg(QString::fromStdString(title_name), instruction_set_suffix)
                      .toStdString();
     LOG_INFO(Frontend, "Booting game: {:016X} | {} | {}", title_id, title_name, title_version);
+    satronho_title_id = title_id;
+    satronho_title_name = metadata.first != nullptr
+                              ? QString::fromStdString(metadata.first->GetApplicationName())
+                              : QString::fromStdString(title_name);
+    Satronho::Directo::ResetWarmProgress();
     const auto gpu_vendor = QtCommon::system->GPU().Renderer().GetDeviceVendor();
     UpdateWindowTitle(title_name, title_version, gpu_vendor);
 
@@ -2573,6 +2601,8 @@ bool MainWindow::OnShutdownBegin() {
     if (!emulation_running) {
         return false;
     }
+
+    SatronhoEndSession();
 
     if (ui->action_Fullscreen->isChecked()) {
         HideFullscreen();
@@ -2752,6 +2782,9 @@ void MainWindow::OnEmulationStopped() {
     }
 
     emulation_running = false;
+
+    SatronhoEndSession();
+    SatronhoShowSessionNotes();
 
     game_list->SetReportableProgramId(report_session ? report_session->program_id : 0);
 
@@ -3734,6 +3767,22 @@ bool MainWindow::ConfirmShutdownGame() {
 
 void MainWindow::OnLoadComplete() {
     loading_screen->OnLoadComplete();
+
+    Satronho::Session::Begin(satronho_title_id, satronho_title_name);
+    u64 shaders_left = 0;
+    if (Satronho::Directo::FinishLoad(satronho_title_id, shaders_left)) {
+        satronho_directo_note =
+            tr("<b>%1</b> quedó listo para el directo: sus shaders ya están armados.")
+                .arg(satronho_title_name.toHtmlEscaped());
+        statusBar()->showMessage(
+            tr("Satronho NX: %1 quedó listo para el directo.").arg(satronho_title_name), 15000);
+    } else if (shaders_left != 0) {
+        satronho_directo_note =
+            tr("La preparación de <b>%1</b> se saltó con %2 shaders por armar. Lo armado quedó "
+               "guardado: la próxima vez que lo abras sigue desde ahí.")
+                .arg(satronho_title_name.toHtmlEscaped())
+                .arg(shaders_left);
+    }
 
     // Satronho's own meter in place of Lichii's overlay, over the game's area.
     perf_overlay = new Satronho::Meter(
@@ -4853,6 +4902,85 @@ void MainWindow::OnGameListPrecompileShaders(u64 program_id, const std::string& 
     }
 }
 
+/// Satronho NX, «Preparar para directo»: Precompile All Shaders for the game, its precache file
+/// built now, and the offer to open it so the loading screen builds every shader before a stream.
+void MainWindow::OnSatronhoPrepareStream(u64 program_id, const std::string& game_path) {
+    if (QtCommon::emu_thread != nullptr) {
+        QMessageBox::information(this, tr("Preparar para directo"),
+                                 tr("Cierra el juego primero: la preparación se hace al abrirlo."));
+        return;
+    }
+    const QString name = GameTitleName(game_path);
+    Satronho::Directo::SetPending(program_id, true);
+    LOG_INFO(Frontend, "Satronho directo: preparing {:016X}", program_id);
+    OnGameListPrecompileShaders(program_id, game_path, true);
+    if (shader_warm_dialog == nullptr) {
+        // Not started (a conversion of this game runs, the setting could not be saved): it stays
+        // asked for, and the next start of the game prepares it.
+        return;
+    }
+    const QString path = QString::fromStdString(game_path);
+    connect(shader_warm_dialog, &ShaderWarmDialog::BuildFinished, this,
+            [this, path, name, program_id](bool ok) {
+                if (!ok) {
+                    return;
+                }
+                QMessageBox box(this);
+                box.setWindowTitle(tr("Preparar para directo"));
+                box.setIcon(QMessageBox::Information);
+                box.setText(tr("<b>%1</b>: ya están listos los shaders del juego. Falta armarlos "
+                               "con tu gráfica.")
+                                .arg(name.toHtmlEscaped()));
+                box.setInformativeText(
+                    tr("Al abrir el juego, la pantalla de carga los arma todos y muestra cuánto "
+                       "falta. Hazlo antes de abrir OBS, para que no le quite procesador al "
+                       "directo. Si la saltas o cierras el juego, lo armado se guarda (también "
+                       "cada 10 minutos) y la próxima vez sigue desde ahí."));
+                QPushButton* open =
+                    box.addButton(tr("Abrir y preparar ahora"), QMessageBox::AcceptRole);
+                box.addButton(tr("Más tarde"), QMessageBox::RejectRole);
+                box.exec();
+                if (box.clickedButton() == open && QtCommon::emu_thread == nullptr) {
+                    OnGameListLoadFile(path, program_id);
+                }
+            });
+}
+
+/// Satronho NX: the session's summary is taken while the system still runs (its shader count).
+void MainWindow::SatronhoEndSession() {
+    if (const auto summary = Satronho::Session::End()) {
+        satronho_summary = *summary;
+    }
+}
+
+/// Satronho NX: back on the game list, a guide tells how the stream's preparation went or how the
+/// session ran.
+void MainWindow::SatronhoShowSessionNotes() {
+    const auto summary = std::exchange(satronho_summary, std::nullopt);
+    const QString note = std::exchange(satronho_directo_note, QString());
+    if (guide_dock == nullptr || !guide_dock->Available()) {
+        return;
+    }
+    const bool show_summary = summary && Satronho::Session::Enabled();
+    std::function<void()> open_summary;
+    if (show_summary) {
+        open_summary = [this, full = Satronho::Session::LongText(*summary)] {
+            QMessageBox box(this);
+            box.setWindowTitle(tr("Resumen de la sesión"));
+            box.setTextFormat(Qt::RichText);
+            box.setText(full);
+            box.exec();
+        };
+    }
+    if (!note.isEmpty()) {
+        guide_dock->Tell(Satronho::GuideId::Samy, note,
+                         show_summary ? tr("Ver el resumen") : QString(), open_summary);
+    } else if (show_summary) {
+        guide_dock->Tell(Satronho::GuideId::Troya, Satronho::Session::ShortText(*summary),
+                         tr("Ver el resumen"), open_summary);
+    }
+}
+
 /// With precache_shaders on, or Precompile All Shaders for the game: a title precached before is
 /// precached again only when the driver or its precache file changed (the renderer checks). For
 /// one never precached, Ask asks whether to precache before the game starts. A title whose
@@ -5448,6 +5576,7 @@ void MainWindow::UpdateStatusBar() {
         tas_label->clear();
 
     auto results = QtCommon::system->GetAndResetPerfStats();
+    Satronho::Session::Tick(results.average_game_fps);
     auto& shader_notify = QtCommon::system->GPU().ShaderNotify();
     const int shaders_building = shader_notify.ShadersBuilding();
     shaders_building_now = shaders_building;

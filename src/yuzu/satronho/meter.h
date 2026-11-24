@@ -114,6 +114,7 @@ private:
     std::optional<u64> ram_bytes;
     std::optional<VideoCore::RendererBase::VideoMemoryUsage> video_memory;
     int shaders_building = 0;
+    int shaders_left = 0;
     // How busy each guest core and the emulated GPU's back thread were, in % of a host core.
     std::array<std::optional<double>, 6> core_busy{};
     std::optional<double> gpu_back_busy;
@@ -125,6 +126,8 @@ private:
     int stutters = 0;
     std::optional<Core::FrameTimeHistory::Clock::time_point> counted_until;
     std::optional<Core::FrameTimeHistory::Clock::time_point> last_stutter;
+    int shader_stutters = 0;
+    std::optional<Core::FrameTimeHistory::Clock::time_point> last_shader_stutter;
     std::chrono::steady_clock::time_point shown_at{};
 };
 

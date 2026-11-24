@@ -231,6 +231,8 @@ add_executable(yuzu
 
     user_data_migration.h user_data_migration.cpp
 
+    satronho/directo.cpp
+    satronho/directo.h
     satronho/dock.cpp
     satronho/dock.h
     satronho/guides.cpp
@@ -247,6 +249,8 @@ add_executable(yuzu
     satronho/novedades.h
     satronho/presets.cpp
     satronho/presets.h
+    satronho/session.cpp
+    satronho/session.h
 
     yuzu.qrc
     yuzu.rc

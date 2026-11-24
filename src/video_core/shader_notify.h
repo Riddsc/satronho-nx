@@ -17,6 +17,11 @@ public:
                num_complete.load(std::memory_order::relaxed);
     }
 
+    /// Builds done since the emulator started (Satronho NX: the session summary).
+    [[nodiscard]] int TotalComplete() const noexcept {
+        return num_complete.load(std::memory_order::relaxed);
+    }
+
     void MarkShaderComplete() noexcept {
         ++num_complete;
     }

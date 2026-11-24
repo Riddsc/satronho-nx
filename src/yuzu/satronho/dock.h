@@ -41,6 +41,11 @@ public:
     /// The first start of a newly installed build: a pet tells what it brings.
     void AnnounceNovedades(const QString& build_tag);
 
+    /// A guide tells something now (a stream's preparation, a session's summary), with an
+    /// optional button.
+    void Tell(GuideId guide, const QString& html, const QString& action_text = {},
+              std::function<void()> action = {});
+
 protected:
     bool eventFilter(QObject* object, QEvent* event) override;
 

@@ -26,7 +26,9 @@
 #include "qt_common/config/uisettings.h"
 #include "qt_common/qt_common.h"
 #include "video_core/gpu.h"
+#include "video_core/shader_notify.h"
 #include "yuzu/main_window.h"
+#include "yuzu/satronho/session.h"
 
 namespace Satronho {
 
@@ -290,7 +292,7 @@ bool Meter::eventFilter(QObject* object, QEvent* event) {
 void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::ShaderNotify&) {
     auto& system = *QtCommon::system;
     auto& perf_stats = system.GetPerfStats();
-    perf_stats.SetFrameTimeHistoryEnabled(isVisible());
+    perf_stats.SetFrameTimeHistoryEnabled(isVisible() || Session::WantsFrameTimes());
     if (!isVisible()) {
         return;
     }
@@ -324,6 +326,11 @@ void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::
         if (frame.ms > StutterMs) {
             ++stutters;
             last_stutter = frame.end;
+            // Shaders still being built when the frame ended: a stutter from building them.
+            if (shaders_left > 0) {
+                ++shader_stutters;
+                last_shader_stutter = frame.end;
+            }
         }
     }
     if (!frames.empty()) {
@@ -437,6 +444,7 @@ void Meter::UpdateStats(const Core::PerfStatsResults& results, const VideoCore::
     ram_bytes = ram ? std::optional<u64>{ram} : std::nullopt;
     video_memory = renderer.GetVideoMemoryUsage();
     shaders_building = main_window->ShadersBuildingNow();
+    shaders_left = std::max(system.GPU().ShaderNotify().ShadersLeft(), 0);
 
     Relayout();
     update();
@@ -465,6 +473,9 @@ std::vector<Meter::Cell> Meter::Cells() const {
         const bool recent = last_stutter && Clock::now() - *last_stutter < std::chrono::seconds{10};
         Cell cell{{{Tr("Tirones "), font, Dim},
                    {QString::number(stutters), bold, recent ? Spike : Text}}};
+        if (shader_stutters > 0) {
+            cell.runs.push_back({Tr(" (%1 por shaders)").arg(shader_stutters), font, Muted});
+        }
         const double minutes =
             std::chrono::duration<double>(std::chrono::steady_clock::now() - shown_at).count() /
             60.0;
@@ -475,10 +486,20 @@ std::vector<Meter::Cell> Meter::Cells() const {
         cells.push_back(std::move(cell));
     }
     if (Shows(Shaders)) {
-        cells.push_back({shaders_building > 0
+        // A stutter while shaders build says so, for whoever watches the stream.
+        const bool shader_stutter = last_shader_stutter &&
+                                    Clock::now() - *last_shader_stutter < std::chrono::seconds{5};
+        cells.push_back({shader_stutter && shaders_building > 0
+                            ? std::vector<Run>{{Tr("Armando shaders "), font, Dim},
+                                               {QString::number(std::max(shaders_left, 1)), bold,
+                                                Spike},
+                                               {Tr(" · tirón por shaders"), font, Muted}}
+                        : shaders_building > 0
                              ? std::vector<Run>{{Tr("Shaders "), font, Dim},
-                                                {QString::number(shaders_building), bold, Warn},
-                                                {Tr(" armándose"), font, Muted}}
+                                                {QString::number(shaders_left > 0 ? shaders_left
+                                                                                  : shaders_building),
+                                                 bold, Warn},
+                                                {Tr(" por armar"), font, Muted}}
                              : std::vector<Run>{{Tr("Shaders "), font, Dim},
                                                 {Tr("listos"), font, Muted}}});
     }
@@ -533,7 +554,7 @@ QString Meter::CompactText() const {
         parts << Tr("tirones %1").arg(stutters);
     }
     if (Shows(Shaders) && shaders_building > 0) {
-        parts << Tr("shaders %1").arg(shaders_building);
+        parts << Tr("shaders %1").arg(shaders_left > 0 ? shaders_left : shaders_building);
     }
     if (Shows(Ram) && ram_bytes) {
         parts << QStringLiteral("RAM %1 GB").arg(Gigabytes(*ram_bytes));
@@ -842,8 +863,11 @@ void Meter::Reset() {
     wait_totals.reset();
     wait_share = {};
     stutters = 0;
+    shaders_left = 0;
+    shader_stutters = 0;
     counted_until.reset();
     last_stutter.reset();
+    last_shader_stutter.reset();
     shown_at = std::chrono::steady_clock::now();
 }
 
@@ -926,7 +950,7 @@ void Meter::FillOptionsMenu(QMenu* menu, const std::function<void()>& changed) {
         {Range, QT_TRANSLATE_NOOP("Satronho::Meter", "FPS mínimo, típico y máximo")},
         {Effects, QT_TRANSLATE_NOOP("Satronho::Meter", "Modo y efectos activos")},
         {Stutters, QT_TRANSLATE_NOOP("Satronho::Meter", "Tirones (cuadros de más de 100 ms)")},
-        {Shaders, QT_TRANSLATE_NOOP("Satronho::Meter", "Shaders armándose")},
+        {Shaders, QT_TRANSLATE_NOOP("Satronho::Meter", "Shaders por armar (y tirones por shaders)")},
         {Ram, QT_TRANSLATE_NOOP("Satronho::Meter", "RAM")},
         {VideoMemory, QT_TRANSLATE_NOOP("Satronho::Meter", "Memoria de video (VRAM)")},
         {Cores, QT_TRANSLATE_NOOP("Satronho::Meter", "Núcleos del juego (barras)")},

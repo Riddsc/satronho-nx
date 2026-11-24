@@ -37,6 +37,7 @@
 #include "qt_common/qt_common.h"
 #include "qt_common/util/game.h"
 #include "yuzu/game/carousel.h"
+#include "yuzu/satronho/directo.h"
 #include "yuzu/game/game_grid.h"
 #include "yuzu/game/game_list.h"
 #include "yuzu/satronho/watermark.h"
@@ -505,6 +506,10 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
     const bool has_shader_warm = ShaderWarmFilesExist(program_id);
     QAction* prepare_shaders = context_menu.addAction(
         has_shader_warm ? tr("Rebuild Shader Precache") : tr("Build Shader Precache"));
+    QAction* prepare_stream = context_menu.addAction(Satronho::Directo::MenuText(program_id));
+    prepare_stream->setToolTip(
+        tr("Arma todos los shaders del juego antes de jugar, para que no le quiten procesador al "
+           "juego ni al directo."));
     QAction* precompile_shaders = context_menu.addAction(tr("Precompile All Shaders"));
     precompile_shaders->setCheckable(true);
     precompile_shaders->setChecked(ShaderWarmRequested(program_id));
@@ -592,6 +597,7 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
     open_mod_location->setVisible(program_id != 0);
     open_transferable_shader_cache->setVisible(program_id != 0);
     prepare_shaders->setVisible(program_id != 0);
+    prepare_stream->setVisible(program_id != 0);
     remove_update->setVisible(program_id != 0);
     remove_dlc->setVisible(program_id != 0);
     remove_gl_shader_cache->setVisible(program_id != 0);
@@ -615,6 +621,8 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
             [this, program_id]() { emit OpenTransferableShaderCacheRequested(program_id); });
     connect(prepare_shaders, &QAction::triggered, this,
             [this, program_id, path]() { emit PrepareShaderWarmRequested(program_id, path); });
+    connect(prepare_stream, &QAction::triggered, this,
+            [this, program_id, path]() { emit PrepareForStreamRequested(program_id, path); });
     connect(precompile_shaders, &QAction::toggled, this, [this, program_id, path](bool checked) {
         emit PrecompileShadersRequested(program_id, path, checked);
     });

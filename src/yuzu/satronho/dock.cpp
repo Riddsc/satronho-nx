@@ -275,6 +275,11 @@ void GuideDock::AnnounceNovedades(const QString& build_tag) {
           [this] { open_hub(Hub::Page::Novedades, QString()); }, false);
 }
 
+void GuideDock::Tell(GuideId guide, const QString& html, const QString& action_text,
+                     std::function<void()> action_) {
+    Speak(guide, html, action_text, std::move(action_), false);
+}
+
 void GuideDock::Place() {
     if (isHidden()) {
         return;

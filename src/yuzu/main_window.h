@@ -30,6 +30,7 @@
 #include "qt_common/util/game.h"
 #include "yuzu/compatibility_report.h"
 #include "yuzu/hotkeys.h"
+#include "yuzu/satronho/session.h"
 #include "yuzu/user_data_migration.h"
 
 #ifdef __unix__
@@ -388,6 +389,9 @@ private slots:
     void OnGameListPrepareShaderWarm(u64 program_id, const std::string& game_path);
     void OnGameListDeleteShaderWarm(u64 program_id);
     void OnGameListPrecompileShaders(u64 program_id, const std::string& game_path, bool on);
+    void OnSatronhoPrepareStream(u64 program_id, const std::string& game_path);
+    void SatronhoEndSession();
+    void SatronhoShowSessionNotes();
     void PrepareShaderPrecache(u64 title_id, const std::filesystem::path& game_path);
     void OnGameListExtractNup(const std::string& game_path);
     void OnGameListEditNupMetadata(const std::string& game_path);
@@ -549,6 +553,11 @@ private:
     GRenderWindow* render_window = nullptr;
     GameList* game_list = nullptr;
     Satronho::GuideDock* guide_dock = nullptr;
+    // Satronho NX: the game running (session summary, «Preparar para directo»).
+    u64 satronho_title_id = 0;
+    QString satronho_title_name;
+    QString satronho_directo_note;
+    std::optional<Satronho::Session::Summary> satronho_summary;
     LoadingScreen* loading_screen = nullptr;
     QTimer shutdown_timer;
     QTimer emu_terminate_timer;
