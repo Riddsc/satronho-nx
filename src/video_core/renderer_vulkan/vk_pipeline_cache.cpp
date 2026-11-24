@@ -1980,6 +1980,11 @@ void PipelineCache::PrecacheShaders(u64 title_id, std::stop_token stop_loading,
                 },
                 &batch);
         }
+        // Satronho NX: a long precache (a stream's preparation) saves what it built every ten
+        // minutes, so stopping it, skipping it or the app ending keeps those pipelines.
+        constexpr auto SaveInterval = std::chrono::minutes{10};
+        auto last_save = std::chrono::steady_clock::now();
+        size_t saved_at = 0;
         while (!batch.Idle()) {
             if (stop_loading.stop_requested() || ShaderWarm::TakeSkipWarm()) {
                 // The builds not started are dropped; the running ones end first.
@@ -1989,6 +1994,19 @@ void PipelineCache::PrecacheShaders(u64 title_id, std::stop_token stop_loading,
             }
             if (callback) {
                 callback(VideoCore::LoadCallbackStage::Warm, done, jobs.size());
+            }
+            const auto now = std::chrono::steady_clock::now();
+            if (now - last_save >= SaveInterval && done.load() != saved_at) {
+                last_save = now;
+                saved_at = done.load();
+                // Where reading the cache while builds run crashes the driver, only our compute
+                // cache (AMD proprietary) is saved here; the rest waits for the end.
+                if (device.CanReadPipelineCacheDuringBuilds()) {
+                    QueueVulkanPipelineCacheSave();
+                }
+                QueueComputeDriverCacheSave(true);
+                LOG_INFO(Render_Vulkan, "Satronho precache: progress saved at {} of {}", saved_at,
+                         jobs.size());
             }
             std::this_thread::sleep_for(std::chrono::milliseconds{100});
         }
