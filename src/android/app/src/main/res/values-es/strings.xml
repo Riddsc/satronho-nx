@@ -427,9 +427,9 @@
     <string name="cabinet_formatter">Formateador</string>
 
     <!-- About screen strings -->
-    <string name="gaia_is_not_real">Gaia no es real</string>
+    <string name="gaia_is_not_real">¡MechaRidds, Samy, Troya, Ñoño y Juana te saludan!</string>
     <string name="copied_to_clipboard">Copiado al portapapeles</string>
-    <string name="about_app_description">Un emulador de Switch de código abierto</string>
+    <string name="about_app_description">Un emulador de Switch hecho por Riddsc. Parte de Eden y Lichii, que seleccionamos, optimizamos y llevamos más lejos con funciones propias.</string>
     <string name="contributors">Colaboradores</string>
     <string name="contributors_description">Personas cuyo trabajo es la base de Satronho NX</string>
     <string name="licenses_description">Proyectos que hacen posible Satronho NX para Android</string>
