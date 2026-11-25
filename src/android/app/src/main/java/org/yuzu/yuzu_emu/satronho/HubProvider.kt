@@ -13,9 +13,16 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import androidx.core.content.FileProvider
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FilenameFilter
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.utils.FileUtil
 import org.yuzu.yuzu_emu.utils.GameMetadata
@@ -44,6 +51,8 @@ class HubProvider : ContentProvider() {
                 "info" -> arg?.let { info(it) }
                 "claves" -> arg?.let { keys(it) }
                 "firmware" -> arg?.let { firmware(ctx, it) }
+                "partidas" -> exportSaves(ctx)
+                "restaurar_partidas" -> arg?.let { importSaves(ctx, it) }
                 "ocultar" -> launcher(ctx, false)
                 "mostrar" -> launcher(ctx, true)
                 else -> null
@@ -130,6 +139,59 @@ class HubProvider : ContentProvider() {
             cache.deleteRecursively()
         }
         return out
+    }
+
+    /**
+     * Every save in one .zip, with the save folder's own layout, for the hub's save backup (it goes
+     * inside the hub's .zip, so one backup carries the retro games and the Switch ones).
+     */
+    private fun exportSaves(ctx: Context): Bundle {
+        val root = File(NativeConfig.getSaveDir())
+        val out = Bundle()
+        val files = if (root.isDirectory) root.walkTopDown().filter { it.isFile }.toList() else emptyList()
+        out.putInt("archivos", files.size)
+        if (files.isEmpty()) return out
+        val folder = File(ctx.cacheDir, "respaldos").apply { mkdirs() }
+        val zip = File(folder, "partidas-nx.zip")
+        ZipOutputStream(BufferedOutputStream(FileOutputStream(zip))).use { z ->
+            for (f in files) {
+                z.putNextEntry(ZipEntry(f.relativeTo(root).invariantSeparatorsPath))
+                f.inputStream().use { it.copyTo(z) }
+                z.closeEntry()
+            }
+        }
+        val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.provider", zip)
+        callingPackage?.let { ctx.grantUriPermission(it, uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+        out.putString("zip", uri.toString())
+        return out
+    }
+
+    /** The other way: a .zip made by exportSaves (here or on another phone) goes back in place. */
+    private fun importSaves(ctx: Context, uri: String): Bundle {
+        val root = File(NativeConfig.getSaveDir())
+        var count = 0
+        ctx.contentResolver.openInputStream(Uri.parse(uri))?.use { input ->
+            ZipInputStream(BufferedInputStream(input)).use { z ->
+                var e = z.nextEntry
+                while (e != null) {
+                    val dest = File(root, e.name)
+                    // Nothing outside the save folder.
+                    if (!dest.canonicalPath.startsWith(root.canonicalPath)) {
+                        e = z.nextEntry
+                        continue
+                    }
+                    if (e.isDirectory) dest.mkdirs()
+                    else {
+                        dest.parentFile?.mkdirs()
+                        if (dest.exists()) dest.copyTo(File(dest.path + ".bak"), overwrite = true)
+                        FileOutputStream(dest).use { z.copyTo(it) }
+                        count++
+                    }
+                    e = z.nextEntry
+                }
+            }
+        }
+        return Bundle().apply { putInt("archivos", count) }
     }
 
     private fun launcherComponent(ctx: Context) = ComponentName(ctx.packageName, LAUNCHER_ALIAS)
