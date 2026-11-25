@@ -16,6 +16,15 @@ on:
       - ".ci/android/**"
       - ".github/workflows/android.yml"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release al que subir el APK (vacío: solo artefacto)"
+        type: string
+        default: ""
+      build:
+        description: "Número de build para el nombre del APK"
+        type: string
+        default: "0"
   workflow_call:
     inputs:
       tag:
