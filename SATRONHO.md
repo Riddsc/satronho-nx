@@ -135,7 +135,7 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   (~25 min con caché caliente, ~50 min sin ella).
 - Descargar el asset `satronho-nx-windows-x86_64-pgo.zip` de la release con
   `gh api -H "Accept: application/octet-stream" repos/Riddsc/satronho-nx/releases/assets/<id>`.
-- Entregar descomprimido en `R:\Claude\APK-APPS\Switch Satronho\Satronho NX build-N` (una carpeta
+- Entregar descomprimido en `R:\Claude\APK-APPS\Satronho Switch\Satronho NX build-N` (una carpeta
   por build, junto a las anteriores), y dentro de esa carpeta también el zip tal cual
   (`Satronho NX build-N (PGO).zip`) para que el usuario lo comparta sin bajarlo de GitHub. Los .exe grandes (satronho-nx.exe, eden-cli.exe) no pasan por
   `stagedPath`: enviarlos con SendUserFile y copiar con su `fileUuid`.
@@ -605,3 +605,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - Android: el proyecto heredado está en `src/android` (paquete `dev.eden.eden_emulator`). Plan: un
   trabajo de CI en una rama de trabajo que solo compila; cuando compile, se conecta a `main` y el
   APK se sube al mismo release después de Windows, como en Satronho Emulation.
+- **Carpeta de entrega renombrada:** ahora es `R:\Claude\APK-APPS\Satronho Switch` (antes
+  `Switch Satronho`). Archivos de más de 25 MB (satronho-nx.exe, satronho-cli.exe, vc_redist, el zip,
+  el APK) van por SendUserFile y `fileUuid`.
+- **Android (build 56):** la rama `android` compila el APK (`.github/workflows/android.yml`): paquete
+  `dev.satronho.nx`, nombre e ícono de Satronho NX, Android 13+ (minSdk 33 del sabor mainline).
+  Hizo falta `src/common/polyfill_atomic_ref.h` (el libc++ del NDK no trae `std::atomic_ref`) y
+  `std::max<s64>` en `nx2_gsv.h`. Firmado con la llave de depuración del proyecto mientras no estén
+  los secretos `ANDROID_KEYSTORE_B64`/`ANDROID_KEYSTORE_PASS`/`ANDROID_KEY_ALIAS`. El APK de la 56
+  se subió a mano al release (`gh workflow run android.yml --ref android -f tag=build-56 -f
+  build=56`). Pendiente con visto bueno de Riddsc: unir `android` a `main` y llamar `android.yml`
+  desde `release-binaries` para que cada build salga con los dos archivos. Los artefactos de
+  Actions no se pueden bajar desde el entorno remoto (host bloqueado); los assets del release sí.
+- Pruebas viejas que fallan sin relación con los cambios (Linux): `config_tests` (perfil heredado de
+  Lichii) y `update_checker_tests` (nombres de assets de Lichii). El paso «nxformat.dll» de
+  `build-check` ahora revisa `satronho-nx.exe`.
