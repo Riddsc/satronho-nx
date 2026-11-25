@@ -93,6 +93,14 @@ jobs:
           .ci/android/build.sh -t standard -b Release
           ls -la artifacts
 
+      - name: Lista de todos los errores de compilación (si falló)
+        if: failure()
+        run: |
+          D=$(find src/android/app/.cxx -name build.ninja -path "*arm64-v8a*" -printf '%h\n' | head -1)
+          [ -n "$D" ] || exit 0
+          ninja -C "$D" -k 0 > ninja-all.log 2>&1 || true
+          grep -E "error:" ninja-all.log | sed 's#.*/satronho-nx/##' | sort -u | head -300
+
       - name: Nombre del APK
         id: apk
         run: |
