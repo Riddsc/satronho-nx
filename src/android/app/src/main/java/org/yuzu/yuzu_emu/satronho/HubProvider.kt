@@ -45,26 +45,46 @@ class HubProvider : ContentProvider() {
             return null
         }
         val ctx = context ?: return null
+        // Android deja llegar preguntas antes de que NX termine de arrancar: se espera a que esté listo.
+        if (!HubGate.awaitReady()) return busy("arrancando")
+        // Con un juego abierto no se toca el núcleo (ícono y lanzador sí, no lo usan).
+        if (HubGate.playing && method != "ocultar" && method != "mostrar") return busy("jugando")
         return try {
-            when (method) {
-                "estado" -> status(ctx)
-                "info" -> arg?.let { info(it) }
-                "claves" -> arg?.let { keys(it) }
-                "firmware" -> arg?.let { firmware(ctx, it) }
-                "partidas" -> exportSaves(ctx)
-                "restaurar_partidas" -> arg?.let { importSaves(ctx, it) }
-                "ocultar" -> launcher(ctx, false)
-                "mostrar" -> launcher(ctx, true)
-                else -> null
-            }
+            // Un turno a la vez: nunca al mismo tiempo que NX revisa el juego que va a abrir.
+            // El firmware puede tardar un minuto en instalarse.
+            val wait = if (method == "firmware" || method == "restaurar_partidas") 120_000L else 15_000L
+            HubGate.withCore(wait) {
+                when (method) {
+                    "estado" -> status(ctx)
+                    "info" -> arg?.let { info(it) }
+                    "claves" -> arg?.let { keys(it) }
+                    "firmware" -> arg?.let { firmware(ctx, it) }
+                    "partidas" -> exportSaves(ctx)
+                    "restaurar_partidas" -> arg?.let { importSaves(ctx, it) }
+                    "ocultar" -> launcher(ctx, false)
+                    "mostrar" -> launcher(ctx, true)
+                    else -> null
+                }
+            } ?: busy("ocupado")
         } catch (e: Throwable) {
             Log.error("[Satronho hub] '$method' failed: ${e.message}")
             Bundle().apply { putString("error", e.message ?: e.javaClass.simpleName) }
         }
     }
 
+    /** NX está ocupada (arrancando o con un juego abierto): el hub vuelve a preguntar después. */
+    private fun busy(reason: String) = Bundle().apply {
+        putBoolean("ocupado", true)
+        putString("error", reason)
+    }
+
+    /** Las claves se cargan una vez por proceso, no en cada pregunta (recargarlas las vacía un momento). */
+    private fun ensureKeys() {
+        if (!HubGate.keysLoaded) HubGate.keysLoaded = NativeLibrary.reloadKeys()
+    }
+
     private fun status(ctx: Context): Bundle {
-        NativeLibrary.reloadKeys()
+        ensureKeys()
         val firmware = if (NativeLibrary.isFirmwareAvailable()) NativeLibrary.firmwareVersion() else ""
         val pm = ctx.packageManager
         val info = pm.getPackageInfo(ctx.packageName, 0)
@@ -78,7 +98,7 @@ class HubProvider : ContentProvider() {
     }
 
     private fun info(uri: String): Bundle {
-        NativeLibrary.reloadKeys()
+        ensureKeys()
         val out = Bundle()
         if (!GameMetadata.getIsValid(uri)) {
             out.putBoolean("valido", false)
@@ -107,7 +127,7 @@ class HubProvider : ContentProvider() {
 
     private fun keys(uri: String): Bundle {
         val code = NativeLibrary.installKeys(uri, "keys")
-        NativeLibrary.reloadKeys()
+        HubGate.keysLoaded = NativeLibrary.reloadKeys()
         return Bundle().apply {
             putInt("resultado", code)
             putBoolean("claves", NativeLibrary.areKeysPresent())

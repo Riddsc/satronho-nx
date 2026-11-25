@@ -121,6 +121,8 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.gameLaunched = true
+        // Con un juego abierto, NX no atiende las preguntas del hub que usan el núcleo.
+        org.yuzu.yuzu_emu.satronho.HubGate.playing = true
         ThemeHelper.setTheme(this)
 
         super.onCreate(savedInstanceState)
@@ -260,6 +262,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
     }
 
     override fun onDestroy() {
+        org.yuzu.yuzu_emu.satronho.HubGate.playing = false
         mainHandler.removeCallbacks(romSwapStopTimeoutRunnable)
         super.onDestroy()
         inputManager.unregisterInputDeviceListener(this)

@@ -77,6 +77,9 @@ class YuzuApplication : Application() {
         ControllerNavigationGlobalHook.install(this)
 
         createNotificationChannels()
+
+        // Desde aquí el HubProvider ya puede atender al hub (Satronho Emulation).
+        org.yuzu.yuzu_emu.satronho.HubGate.markReady()
     }
 
     companion object {

@@ -70,6 +70,7 @@ import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.satronho.Captura
 import org.yuzu.yuzu_emu.satronho.Carga
+import org.yuzu.yuzu_emu.satronho.HubGate
 import org.yuzu.yuzu_emu.satronho.Meter
 import org.yuzu.yuzu_emu.satronho.Satronho
 import org.yuzu.yuzu_emu.satronho.SesionActual
@@ -246,7 +247,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             return
         } else if (intentUri != null) {
             intentGame = if (Game.extensions.contains(FileUtil.getExtension(intentUri))) {
-                GameHelper.getGame(requireActivity().intent.data!!, false)
+                gameFromIntent(intentUri)
             } else {
                 null
             }
@@ -261,6 +262,28 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         }
 
         finishGameSetup()
+    }
+
+    /**
+     * El juego que manda otra app (el hub de Satronho Emulation o un explorador de archivos).
+     * Se revisa con el núcleo para sí solo (HubGate) y con las claves ya cargadas: si NX se abrió
+     * directo en el juego, nadie las había cargado todavía. Si la primera revisión falla se
+     * recargan las claves y se intenta una vez más antes de decir «No bootable game present!».
+     */
+    private fun gameFromIntent(uri: Uri): Game? {
+        val check: () -> Game? = {
+            if (!HubGate.keysLoaded) HubGate.keysLoaded = NativeLibrary.reloadKeys()
+            var found = GameHelper.getGame(uri, false)
+            if (found == null) {
+                Log.warning("[EmulationFragment] First check of the intent game failed, retrying with fresh keys")
+                HubGate.keysLoaded = NativeLibrary.reloadKeys()
+                found = GameHelper.getGame(uri, false)
+            }
+            found
+        }
+        // Sin turno a tiempo (el hub instalando un firmware, por ejemplo) se revisa igual, como antes.
+        val result = HubGate.withCore(5_000) { listOf(check()) } ?: listOf(check())
+        return result.first()
     }
 
     /**
