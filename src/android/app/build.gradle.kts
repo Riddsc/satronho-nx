@@ -287,6 +287,8 @@ android {
         named("main") {
             java.srcDir("${edenDir}/externals/generated/sdl/java")
             kotlin.srcDir("${edenDir}/externals/generated/sdl/java")
+            // Satronho NX: novedades, guides' knowledge and pictures, shared with the desktop.
+            assets.srcDir("${edenDir}/dist/satronho")
         }
     }
 }

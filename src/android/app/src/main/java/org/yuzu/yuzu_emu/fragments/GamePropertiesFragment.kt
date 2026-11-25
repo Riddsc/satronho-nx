@@ -30,6 +30,7 @@ import kotlinx.coroutines.withContext
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.satronho.PrepareGame
 import org.yuzu.yuzu_emu.YuzuApplication
 import org.yuzu.yuzu_emu.adapters.GamePropertiesAdapter
 import org.yuzu.yuzu_emu.databinding.FragmentGamePropertiesBinding
@@ -277,6 +278,15 @@ class GamePropertiesFragment : Fragment() {
                         )
                         binding.root.findNavController().navigate(action)
                     }
+                )
+            )
+            add(
+                SubmenuProperty(
+                    R.string.satronho_prepare,
+                    R.string.satronho_prepare_description,
+                    R.drawable.ic_play,
+                    details = { PrepareGame.menuDetails(requireActivity(), args.game) },
+                    action = { PrepareGame.start(requireActivity(), args.game) }
                 )
             )
             add(

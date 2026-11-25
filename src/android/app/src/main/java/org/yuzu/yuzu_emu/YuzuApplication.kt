@@ -60,6 +60,7 @@ class YuzuApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         application = this
+        org.yuzu.yuzu_emu.satronho.Satronho.init(this)
         documentsTree = DocumentsTree()
         DirectoryInitialization.start()
 

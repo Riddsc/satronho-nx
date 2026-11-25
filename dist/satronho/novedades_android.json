@@ -1,0 +1,39 @@
+{
+  "builds": [
+    {
+      "tag": "Android – vista previa 2",
+      "fecha": "25 de noviembre de 2026",
+      "titulo": "Satronho NX de verdad en Android",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX en Android con su propia identidad: nombre, logo, ícono de notificaciones, banner de TV, colores y pantalla «Acerca de» propios, en todos los idiomas. La app parte de Eden y Lichii; Satronho NX la seleccionó, la adaptó y le sumó todo lo de esta lista."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "«Preparar juego», creado por Satronho NX y llevado a Android desde nuestro «Preparar para directo» de PC: saca los shaders del juego por adelantado y los arma en la próxima pantalla de carga. En un teléfono, armar shaders es mucho más lento que en PC, así que aquí ayuda todavía más."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Configuraciones sugeridas según tu teléfono: Satronho detecta la gráfica (Adreno, Mali/Tensor, Xclipse) y la RAM, y ofrece Rendimiento, Equilibrado y Calidad con uno recomendado, aplicados con un toque. Con un perfil pensado especialmente para Mali y Tensor, las gráficas más difíciles."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Los guías llegan a Android: MechaRidds, Samy, Troya, Ñoño y Juana en una burbuja flotante que no estorba, con su propia base de conocimiento para el teléfono. Avisan cuando hay novedades y se pueden apagar."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "El medidor Satronho dentro del juego: FPS, milisegundos por cuadro, tirones y cuántos fueron por shaders, con nuestros colores, en lugar del contador básico."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Historial de sesiones: cada log queda guardado con fecha, build y juego, y se comparte desde la app. Además, novedades dentro de la app (las mismas de PC), logo de fondo en la lista de juegos y un selector rápido de idioma (el del teléfono, Español o English)."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Firma propia de Satronho NX y actualizador apuntando a nuestros releases: desde ahora cada build se instala encima de la anterior."
+        }
+      ]
+    }
+  ]
+}

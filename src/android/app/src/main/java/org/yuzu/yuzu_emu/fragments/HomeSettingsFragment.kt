@@ -30,6 +30,15 @@ import com.google.android.material.transition.MaterialSharedAxis
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.IntSetting
+import org.yuzu.yuzu_emu.utils.NativeConfig
+import org.yuzu.yuzu_emu.satronho.Novedades
+import org.yuzu.yuzu_emu.satronho.Satronho
+import org.yuzu.yuzu_emu.satronho.Sesiones
+import org.yuzu.yuzu_emu.satronho.Sugeridas
 import org.yuzu.yuzu_emu.YuzuApplication
 import org.yuzu.yuzu_emu.adapters.HomeSettingAdapter
 import org.yuzu.yuzu_emu.databinding.FragmentHomeSettingsBinding
@@ -80,6 +89,7 @@ class HomeSettingsFragment : Fragment() {
         binding.toolbarHomeSettings.title = getString(R.string.preferences_settings)
 
         val optionsList: MutableList<HomeSetting> = mutableListOf<HomeSetting>().apply {
+            addSatronhoSettings(this)
             add(
                 HomeSetting(
                     R.string.advanced_settings,
@@ -360,6 +370,107 @@ class HomeSettingsFragment : Fragment() {
         }
 
         setInsets()
+    }
+
+    /** Satronho NX's own entries, first in the list. */
+    private fun addSatronhoSettings(list: MutableList<HomeSetting>) {
+        fun onOff(on: Boolean) =
+            getString(if (on) R.string.satronho_on else R.string.satronho_off)
+
+        list.add(
+            HomeSetting(
+                R.string.satronho_novedades,
+                R.string.satronho_novedades_description,
+                R.drawable.ic_new_label,
+                { Novedades.show(requireActivity()) }
+            )
+        )
+        list.add(
+            HomeSetting(
+                R.string.satronho_suggested,
+                R.string.satronho_suggested_description,
+                R.drawable.ic_graphics,
+                { Sugeridas.show(requireContext()) }
+            )
+        )
+        val guides = MutableStateFlow(onOff(Satronho.guidesEnabled))
+        list.add(
+            HomeSetting(
+                R.string.satronho_guides,
+                R.string.satronho_guides_description,
+                R.drawable.ic_chat,
+                {
+                    Satronho.guidesEnabled = !Satronho.guidesEnabled
+                    guides.value = onOff(Satronho.guidesEnabled)
+                },
+                details = guides
+            )
+        )
+        val meter = MutableStateFlow(onOff(Satronho.meterEnabled))
+        list.add(
+            HomeSetting(
+                R.string.satronho_meter,
+                R.string.satronho_meter_description,
+                R.drawable.ic_play,
+                {
+                    Satronho.meterEnabled = !Satronho.meterEnabled
+                    if (Satronho.meterEnabled) {
+                        BooleanSetting.SHOW_PERFORMANCE_OVERLAY.setBoolean(true)
+                        NativeConfig.saveGlobalConfig()
+                    }
+                    meter.value = onOff(Satronho.meterEnabled)
+                },
+                details = meter
+            )
+        )
+        val logo = MutableStateFlow(onOff(Satronho.backgroundLogo))
+        list.add(
+            HomeSetting(
+                R.string.satronho_background_logo,
+                R.string.satronho_background_logo_description,
+                R.drawable.ic_palette,
+                {
+                    Satronho.backgroundLogo = !Satronho.backgroundLogo
+                    logo.value = onOff(Satronho.backgroundLogo)
+                },
+                details = logo
+            )
+        )
+        list.add(
+            HomeSetting(
+                R.string.satronho_sessions,
+                R.string.satronho_sessions_description,
+                R.drawable.ic_log,
+                { Sesiones.show(requireActivity()) }
+            )
+        )
+        val languages = arrayOf(
+            getString(R.string.app_language_system),
+            "Español",
+            "English"
+        )
+        val languageValues = intArrayOf(0, 2, 1)
+        val current = languageValues.indexOf(IntSetting.APP_LANGUAGE.getInt())
+        list.add(
+            HomeSetting(
+                R.string.satronho_language,
+                R.string.satronho_language_description,
+                R.drawable.ic_chat,
+                {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.satronho_language)
+                        .setSingleChoiceItems(languages, current) { dialog, which ->
+                            IntSetting.APP_LANGUAGE.setInt(languageValues[which])
+                            NativeConfig.saveGlobalConfig()
+                            dialog.dismiss()
+                            requireActivity().recreate()
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                },
+                details = MutableStateFlow(if (current >= 0) languages[current] else "")
+            )
+        )
     }
 
     override fun onStart() {

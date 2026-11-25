@@ -207,6 +207,17 @@ object NativeLibrary {
      */
     external fun getShadersBuilding(): Int
 
+    // Satronho NX: «Preparar juego» (builds the precache file; blocks, call off the main thread),
+    // its progress [done, total], stage, error and cancel; and the meter's stutters [count, worst ms]
+    // since the last call.
+    external fun satronhoPrepareGame(path: String, programId: String): Long
+    external fun satronhoPrepareProgress(): LongArray
+    external fun satronhoPrepareStage(): String
+    external fun satronhoPrepareError(): String
+    external fun satronhoPrepareCancel()
+    external fun satronhoGameRequested(programId: String): Boolean
+    external fun satronhoTakeStutters(): IntArray
+
     /**
      * Returns the current CPU backend.
      */

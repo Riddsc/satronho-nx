@@ -1,0 +1,423 @@
+{
+  "entradas": [
+    {
+      "id": "que-es",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "¿Qué es Satronho NX para Android?",
+      "frases": [
+        "que es satronho",
+        "que es esta app",
+        "de donde sale",
+        "quien hizo esto",
+        "es eden",
+        "es lichii"
+      ],
+      "claves": [
+        "satronho",
+        "emulador",
+        "eden",
+        "lichii",
+        "riddsc"
+      ],
+      "respuesta": "Satronho NX es el emulador de Switch de Riddsc, ahora también en Android. Parte de Eden y Lichii, que seleccionamos y optimizamos, y le sumamos funciones propias: «Preparar juego», configuraciones sugeridas para tu teléfono, el medidor Satronho, el historial de sesiones, las novedades y nosotros, los guías. Pide Android 13 o más nuevo y un procesador ARM64.",
+      "ver": [
+        "guias",
+        "novedades",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "guias",
+      "guia": "mecharidds",
+      "tema": "Los guías",
+      "pregunta": "¿Quiénes son los guías y cómo les pregunto?",
+      "frases": [
+        "quienes son los guias",
+        "como pregunto",
+        "para que sirve la burbuja",
+        "quien es mecharidds",
+        "quien es samy"
+      ],
+      "claves": [
+        "guia",
+        "mecharidds",
+        "samy",
+        "troya",
+        "nono",
+        "juana",
+        "mascota",
+        "preguntar"
+      ],
+      "respuesta": "Somos MechaRidds y sus mascotas Samy, Troya, Ñoño y Juana. Vivimos en la burbuja de la esquina de la lista de juegos: tócala, escribe tu pregunta con tus palabras y te contestamos desde lo que sabemos de Satronho NX, sin internet. Cada uno tiene su tema: Samy las funciones, Troya los gráficos, Ñoño las configuraciones y Juana las actualizaciones.",
+      "ver": [
+        "apagar-guias",
+        "que-es"
+      ]
+    },
+    {
+      "id": "apagar-guias",
+      "guia": "mecharidds",
+      "tema": "Los guías",
+      "pregunta": "¿Cómo apago o vuelvo a prender los guías?",
+      "frases": [
+        "apagar guias",
+        "quitar la burbuja",
+        "esconder la burbuja",
+        "prender guias",
+        "volver a ver la burbuja",
+        "apago la burbuja",
+        "como apago la burbuja"
+      ],
+      "claves": [
+        "apagar",
+        "quitar",
+        "esconder",
+        "prender",
+        "desactivar",
+        "activar",
+        "burbuja",
+        "apago",
+        "quito"
+      ],
+      "respuesta": "En la burbuja, «Apagar guías». Para volver a vernos: Ajustes (el engranaje de la lista) → «Guías», que cambia entre Activado y Desactivado.",
+      "ver": [
+        "guias"
+      ]
+    },
+    {
+      "id": "preparar",
+      "guia": "samy",
+      "tema": "Preparar juego",
+      "pregunta": "¿Qué hace «Preparar juego»?",
+      "frases": [
+        "preparar juego",
+        "tirones",
+        "se traba al principio",
+        "shaders",
+        "antes de jugar",
+        "va a tirones",
+        "se congela un momento",
+        "preparo el juego",
+        "no se trabe",
+        "para que no se trabe"
+      ],
+      "claves": [
+        "preparar",
+        "tiron",
+        "trabar",
+        "congela",
+        "shader",
+        "precompilar",
+        "precache",
+        "preparo",
+        "trabe",
+        "traba"
+      ],
+      "respuesta": "Es una función propia de Satronho NX. Mantén presionado el juego (o abre sus propiedades) y elige «Preparar juego»: Satronho saca ahora los shaders de los archivos del juego, y la próxima vez que lo abras, la pantalla de carga los arma todos con el driver de tu teléfono. Así no se traba cuando un shader aparece por primera vez. En el teléfono importa todavía más que en PC, porque armar shaders es mucho más lento. Si saltas la pantalla de carga, lo armado se guarda (también cada 10 minutos) y la siguiente vez sigue desde ahí.",
+      "ver": [
+        "medidor",
+        "shaders-cache"
+      ]
+    },
+    {
+      "id": "medidor",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué muestra el medidor Satronho?",
+      "frases": [
+        "medidor",
+        "contador de fps",
+        "ver los fps",
+        "que significa tirones",
+        "tiron por shaders",
+        "numeros arriba"
+      ],
+      "claves": [
+        "medidor",
+        "fps",
+        "tirones",
+        "contador",
+        "overlay",
+        "ms"
+      ],
+      "respuesta": "Dentro del juego, arriba, el medidor muestra: FPS (verde si va bien, ámbar si baja, rojo si va muy lento), el tiempo de cada cuadro en milisegundos, los tirones (cuadros de más de 100 ms) y cuántos fueron mientras se armaban shaders, y los shaders que se están armando. Si dice «Tirón por shaders», ese tirón fue por la preparación de shaders, no un fallo. Se apaga o prende en Ajustes → «Medidor Satronho».",
+      "ver": [
+        "preparar",
+        "sesiones"
+      ]
+    },
+    {
+      "id": "sesiones",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Dónde está el historial de sesiones y cómo comparto un log?",
+      "frases": [
+        "compartir log",
+        "mandar el log",
+        "historial de sesiones",
+        "log de ayer",
+        "log viejo",
+        "se borro el log"
+      ],
+      "claves": [
+        "log",
+        "historial",
+        "sesion",
+        "sesiones",
+        "compartir",
+        "registro"
+      ],
+      "respuesta": "Satronho NX guarda una copia del log de cada sesión, con la fecha, la build y el juego en el nombre (se quedan las 20 más nuevas). En Ajustes → «Historial de sesiones» eliges una y la compartes por WhatsApp, correo o donde quieras. Así ningún log se pierde al volver a abrir la app.",
+      "ver": [
+        "medidor"
+      ]
+    },
+    {
+      "id": "sugeridas",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué son las configuraciones sugeridas?",
+      "frases": [
+        "configuraciones sugeridas",
+        "que ajustes pongo",
+        "mejor configuracion",
+        "como configuro",
+        "perfil recomendado"
+      ],
+      "claves": [
+        "sugerida",
+        "configuracion",
+        "ajuste",
+        "perfil",
+        "recomendado",
+        "rendimiento",
+        "equilibrado",
+        "calidad"
+      ],
+      "respuesta": "En Ajustes → «Configuraciones sugeridas», Satronho mira tu teléfono (su gráfica y su RAM) y te ofrece tres perfiles: Rendimiento, Equilibrado y Calidad, con uno marcado como recomendado. Con «Aplicar» cambia la resolución, el filtro y la precisión gráfica, y activa los shaders asíncronos y la caché de shaders. Después puedes cambiar cualquier ajuste a mano.",
+      "ver": [
+        "mali",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "mali",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Por qué mi teléfono con Mali o Tensor va lento?",
+      "frases": [
+        "pixel",
+        "tensor",
+        "mali",
+        "dimensity",
+        "exynos",
+        "mi telefono va lento",
+        "va muy lento",
+        "no corre bien"
+      ],
+      "claves": [
+        "mali",
+        "tensor",
+        "pixel",
+        "dimensity",
+        "exynos",
+        "lento",
+        "gpu",
+        "grafica"
+      ],
+      "respuesta": "Las gráficas Mali (Google Tensor de los Pixel, MediaTek Dimensity, muchos Exynos) son las más difíciles para emular Switch: sus drivers rinden menos y dan más errores que los de las Adreno de Snapdragon. Los juegos livianos de Switch van mejor; los de Switch 2 seguramente irán lentos. Usa el perfil Rendimiento de las configuraciones sugeridas y «Preparar juego».",
+      "ver": [
+        "sugeridas",
+        "drivers"
+      ]
+    },
+    {
+      "id": "drivers",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Puedo instalar otro driver de GPU?",
+      "frases": [
+        "instalar driver",
+        "driver de gpu",
+        "turnip",
+        "cambiar driver"
+      ],
+      "claves": [
+        "driver",
+        "turnip",
+        "adreno",
+        "controlador"
+      ],
+      "respuesta": "Los drivers personalizados (como Turnip) solo funcionan en gráficas Adreno de Snapdragon. Si tu teléfono es Adreno, lo encuentras en Ajustes → «Administrador de drivers de GPU». En Mali, Xclipse o Tensor se usa el driver del sistema.",
+      "ver": [
+        "mali"
+      ]
+    },
+    {
+      "id": "shaders-cache",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Qué es la caché de shaders?",
+      "frases": [
+        "cache de shaders",
+        "borrar cache",
+        "shaders guardados"
+      ],
+      "claves": [
+        "cache",
+        "cach",
+        "shader"
+      ],
+      "respuesta": "Cada shader que el juego arma se guarda en la caché, para que la próxima vez cargue de una vez en lugar de armarse de nuevo. Por eso las primeras veces un juego puede trabarse y después va más fluido. «Preparar juego» adelanta ese trabajo a la pantalla de carga.",
+      "ver": [
+        "preparar"
+      ]
+    },
+    {
+      "id": "resolucion",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué resolución uso?",
+      "frases": [
+        "que resolucion",
+        "subir resolucion",
+        "bajar resolucion",
+        "se ve borroso",
+        "se ve pixelado"
+      ],
+      "claves": [
+        "resolucion",
+        "borroso",
+        "pixelado",
+        "nitido",
+        "escala"
+      ],
+      "respuesta": "En el teléfono conviene empezar bajo: 1/2X o 3/4X en la mayoría, 1X solo en teléfonos potentes. Más resolución se ve más nítido pero pide más a la gráfica. Lo más fácil es elegir un perfil en «Configuraciones sugeridas» y ajustar desde ahí.",
+      "ver": [
+        "sugeridas",
+        "fsr"
+      ]
+    },
+    {
+      "id": "fsr",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué es FSR y el filtro de escalado?",
+      "frases": [
+        "que es fsr",
+        "filtro de escalado",
+        "bilinear",
+        "imagen mas nitida"
+      ],
+      "claves": [
+        "fsr",
+        "filtro",
+        "escalado",
+        "bilinear",
+        "nitidez"
+      ],
+      "respuesta": "El filtro de escalado decide cómo se agranda la imagen a tu pantalla. Bilinear es el más liviano. FSR la hace más nítida a costa de algo de rendimiento: es el del perfil Calidad.",
+      "ver": [
+        "resolucion"
+      ]
+    },
+    {
+      "id": "novedades",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Dónde veo las novedades?",
+      "frases": [
+        "novedades",
+        "que hay de nuevo",
+        "que trae esta version",
+        "que cambio",
+        "changelog"
+      ],
+      "claves": [
+        "novedad",
+        "nuevo",
+        "cambio",
+        "version",
+        "build"
+      ],
+      "respuesta": "Cada build nueva te muestra sus novedades al abrir la app, con etiquetas Nuevo, Mejora y Arreglo. Puedes volver a verlas en Ajustes → «Novedades» o desde la burbuja de los guías. Ahí salen primero las de Android y debajo las últimas de la versión de PC.",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "actualizar",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Cómo actualizo Satronho NX?",
+      "frases": [
+        "como actualizo",
+        "actualizar",
+        "nueva version",
+        "descargar la ultima"
+      ],
+      "claves": [
+        "actualizar",
+        "actualizacion",
+        "descargar",
+        "release",
+        "apk"
+      ],
+      "respuesta": "Al abrir la app, Satronho NX revisa si hay una build nueva en sus releases de GitHub y te ofrece descargarla e instalarla encima, sin perder tus datos. También puedes bajar el APK a mano de los releases del repositorio Riddsc/satronho-nx.",
+      "ver": [
+        "novedades",
+        "firma"
+      ]
+    },
+    {
+      "id": "firma",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Por qué me pide desinstalar para instalar la nueva?",
+      "frases": [
+        "no se instala",
+        "conflicto con el paquete",
+        "pide desinstalar",
+        "no deja actualizar",
+        "no me deja instalar la nueva version",
+        "no deja instalar"
+      ],
+      "claves": [
+        "desinstalar",
+        "instalar",
+        "firma",
+        "conflicto",
+        "paquete"
+      ],
+      "respuesta": "Android solo deja instalar encima una app firmada con la misma llave. Las primeras vistas previas salieron con una llave de prueba; desde que Satronho NX tiene su llave propia, hay que desinstalar esa vista previa una sola vez. Después, cada build se instala encima.",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "idioma",
+      "guia": "juana",
+      "tema": "Actualizaciones",
+      "pregunta": "¿Cómo cambio el idioma de la app?",
+      "frases": [
+        "cambiar idioma",
+        "poner en ingles",
+        "poner en espanol",
+        "idioma",
+        "pongo la app en ingles",
+        "app en ingles",
+        "app en espanol"
+      ],
+      "claves": [
+        "idioma",
+        "ingles",
+        "espanol",
+        "english",
+        "lenguaje"
+      ],
+      "respuesta": "Por defecto la app usa el idioma del teléfono. En Ajustes → «Idioma de la app» eliges entre el del teléfono, Español o English. Los guías y las novedades responden en español.",
+      "ver": []
+    }
+  ]
+}

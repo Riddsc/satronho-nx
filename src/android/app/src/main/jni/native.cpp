@@ -7,14 +7,19 @@
 #define VMA_IMPLEMENTATION
 #include "video_core/vulkan_common/vma.h"
 
+#include <algorithm>
+#include <atomic>
 #include <codecvt>
 #include <cstdio>
 #include <cstring>
 #include <locale>
 #include <map>
+#include <mutex>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <span>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -100,6 +105,8 @@ extern "C" {
 #include "video_core/vulkan_common/vulkan_instance.h"
 #include "video_core/vulkan_common/vulkan_surface.h"
 #include "video_core/shader_notify.h"
+#include "video_core/shader_warm/shader_warm_builder.h"
+#include "core/perf_stats.h"
 #include "network/announce_multiplayer_session.h"
 
 #define jconst [[maybe_unused]] const auto
@@ -2338,4 +2345,130 @@ JNIEXPORT jbyteArray JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_getDefaultAcc
     return result;
 }
 
+// Satronho NX: «Preparar juego» builds a game's precache file and asks for its shaders to be built
+// on the loading screen of its next start (the same as the desktop's «Preparar para directo»).
+namespace SatronhoPrepare {
+std::mutex mutex;
+std::string stage;
+std::string error;
+std::atomic<u64> done{0};
+std::atomic<u64> total{0};
+std::atomic<bool> running{false};
+std::stop_source stop;
+} // namespace SatronhoPrepare
+
+JNIEXPORT jlong JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPrepareGame(
+    JNIEnv* env, jobject obj, jstring j_path, jstring j_program_id) {
+    namespace ShaderWarm = VideoCommon::ShaderWarm;
+    using namespace SatronhoPrepare;
+    if (running.exchange(true)) {
+        return -2;
+    }
+    const std::string path = Common::Android::GetJString(env, j_path);
+    const u64 program_id = std::stoull(Common::Android::GetJString(env, j_program_id));
+    {
+        std::scoped_lock lock{mutex};
+        stage.clear();
+        error.clear();
+        stop = std::stop_source{};
+    }
+    done = 0;
+    total = 0;
+    jlong entries = -1;
+    try {
+        const auto result = ShaderWarm::BuildWarmFiles(
+            EmulationSession::GetInstance().System(), path, program_id,
+            [](const ShaderWarm::Progress& progress) {
+                std::scoped_lock lock{mutex};
+                stage = progress.stage;
+                done = progress.done;
+                total = progress.total;
+            },
+            stop.get_token());
+        if (result.ok && !stop.stop_requested()) {
+            ShaderWarm::SetWarmRequested(ShaderWarm::ComputeWarmPath(program_id), true);
+            entries = static_cast<jlong>(result.compute_programs);
+            LOG_INFO(Frontend, "Satronho prepare: {:016X} ready, {} compute programs", program_id,
+                     result.compute_programs);
+        } else {
+            std::scoped_lock lock{mutex};
+            error = stop.stop_requested() ? std::string{"stopped"} : result.error;
+            LOG_WARNING(Frontend, "Satronho prepare: {:016X} failed: {}", program_id, error);
+        }
+    } catch (const std::exception& e) {
+        std::scoped_lock lock{mutex};
+        error = e.what();
+    } catch (...) {
+        std::scoped_lock lock{mutex};
+        error = "unknown error";
+    }
+    running = false;
+    return entries;
+}
+
+JNIEXPORT jlongArray JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPrepareProgress(
+    JNIEnv* env, jobject obj) {
+    const jlong values[2] = {static_cast<jlong>(SatronhoPrepare::done.load()),
+                             static_cast<jlong>(SatronhoPrepare::total.load())};
+    jlongArray array = env->NewLongArray(2);
+    env->SetLongArrayRegion(array, 0, 2, values);
+    return array;
+}
+
+JNIEXPORT jstring JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPrepareStage(JNIEnv* env,
+                                                                                      jobject obj) {
+    std::scoped_lock lock{SatronhoPrepare::mutex};
+    return Common::Android::ToJString(env, SatronhoPrepare::stage);
+}
+
+JNIEXPORT jstring JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPrepareError(JNIEnv* env,
+                                                                                      jobject obj) {
+    std::scoped_lock lock{SatronhoPrepare::mutex};
+    return Common::Android::ToJString(env, SatronhoPrepare::error);
+}
+
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPrepareCancel(JNIEnv* env,
+                                                                                    jobject obj) {
+    std::scoped_lock lock{SatronhoPrepare::mutex};
+    SatronhoPrepare::stop.request_stop();
+}
+
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoGameRequested(
+    JNIEnv* env, jobject obj, jstring j_program_id) {
+    namespace ShaderWarm = VideoCommon::ShaderWarm;
+    const u64 program_id = std::stoull(Common::Android::GetJString(env, j_program_id));
+    return ShaderWarm::WarmRequested(ShaderWarm::ComputeWarmPath(program_id));
+}
+
+// Satronho NX meter: stutters (frames over 100 ms) since the last call, and the worst frame of them.
+JNIEXPORT jintArray JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoTakeStutters(JNIEnv* env,
+                                                                                        jobject obj) {
+    static std::optional<Core::FrameTimeHistory::Clock::time_point> counted_until;
+    jint values[2] = {0, 0};
+    auto& session = EmulationSession::GetInstance();
+    if (session.IsRunning()) {
+        auto& perf_stats = session.System().GetPerfStats();
+        perf_stats.SetFrameTimeHistoryEnabled(true);
+        const auto frames = perf_stats.GetRecentFrameTimes(std::chrono::seconds{3});
+        for (const auto& frame : frames) {
+            if (counted_until && frame.end <= *counted_until) {
+                continue;
+            }
+            if (frame.ms > 100.0) {
+                ++values[0];
+                values[1] = std::max(values[1], static_cast<jint>(frame.ms));
+            }
+        }
+        if (!frames.empty()) {
+            counted_until = frames.back().end;
+        }
+    } else {
+        counted_until.reset();
+    }
+    jintArray array = env->NewIntArray(2);
+    env->SetIntArrayRegion(array, 0, 2, values);
+    return array;
+}
+
 } // extern "C"
+

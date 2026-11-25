@@ -32,10 +32,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.satronho.GuideBubble
+import org.yuzu.yuzu_emu.satronho.Novedades
+import org.yuzu.yuzu_emu.satronho.Satronho
 import org.yuzu.yuzu_emu.YuzuApplication
 import org.yuzu.yuzu_emu.adapters.GameAdapter
 import org.yuzu.yuzu_emu.databinding.FragmentGamesBinding
 import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
+import org.yuzu.yuzu_emu.features.settings.model.Settings
 import org.yuzu.yuzu_emu.model.AppletInfo
 import org.yuzu.yuzu_emu.model.Game
 import org.yuzu.yuzu_emu.model.GamesViewModel
@@ -64,6 +68,7 @@ class GamesFragment : Fragment() {
     private var committedGameListSubmitGeneration = 0
 
     companion object {
+        private var newsShownThisRun = false
         private const val SEARCH_TEXT = "SearchText"
         private const val PREF_SORT_TYPE = "GamesSortType"
     }
@@ -119,6 +124,16 @@ class GamesFragment : Fragment() {
         )
 
         applyGridGamesBinding()
+
+        // Satronho NX: our logo behind the list, the guides' bubble and the news once per update.
+        Satronho.setVisible(binding.satronhoBackgroundLogo, Satronho.backgroundLogo)
+        GuideBubble.setup(binding.satronhoGuideBubble, requireActivity())
+        val firstLaunch = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            .getBoolean(Settings.PREF_FIRST_APP_LAUNCH, true)
+        if (!firstLaunch && !newsShownThisRun && Novedades.hasUnseen(requireContext())) {
+            newsShownThisRun = true
+            Novedades.show(requireActivity())
+        }
 
         binding.swipeRefresh.apply {
             (binding.swipeRefresh as? SwipeRefreshLayout)?.setOnRefreshListener {

@@ -68,6 +68,8 @@ import kotlinx.coroutines.withContext
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.satronho.Meter
+import org.yuzu.yuzu_emu.satronho.Satronho
 import org.yuzu.yuzu_emu.activities.EmulationActivity
 import org.yuzu.yuzu_emu.databinding.DialogOverlayAdjustBinding
 import org.yuzu.yuzu_emu.databinding.FragmentEmulationBinding
@@ -112,6 +114,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     private var emulationActivity: EmulationActivity? = null
 
     private var perfStatsUpdater: (() -> Unit)? = null
+    private val satronhoMeter = Meter()
     private var socUpdater: (() -> Unit)? = null
 
     val handler = Handler(Looper.getMainLooper())
@@ -1641,7 +1644,16 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                         binding.showStatsOverlayText.setBackgroundResource(0)
                     }
 
-                    binding.showStatsOverlayText.text = sb.toString()
+                    if (Satronho.meterEnabled) {
+                        binding.showStatsOverlayText.text = satronhoMeter.text(
+                            requireContext(),
+                            actualFps,
+                            perfStats[FRAMETIME] * 1000.0,
+                            shadersBuilding
+                        )
+                    } else {
+                        binding.showStatsOverlayText.text = sb.toString()
+                    }
                 }
                 perfStatsUpdateHandler.postDelayed(perfStatsRunnable!!, 800)
             }

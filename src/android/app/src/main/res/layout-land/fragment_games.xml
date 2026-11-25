@@ -201,6 +201,16 @@
             android:layout_height="match_parent"
             >
 
+            <ImageView
+                android:id="@+id/satronho_background_logo"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_centerInParent="true"
+                android:alpha="0.08"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_yuzu"
+                />
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/notice_text"
                 style="@style/TextAppearance.Material3.BodyLarge"
@@ -257,6 +267,17 @@
         app:backgroundTint="?attr/colorPrimary"
         app:iconTint="?attr/colorOnPrimary"
         app:rippleColor="#99FFFFFF"
+        />
+
+    <ImageView
+        android:id="@+id/satronho_guide_bubble"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/add_directory"
+        app:layout_constraintEnd_toEndOf="parent"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
