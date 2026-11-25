@@ -620,3 +620,21 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - Pruebas viejas que fallan sin relación con los cambios (Linux): `config_tests` (perfil heredado de
   Lichii) y `update_checker_tests` (nombres de assets de Lichii). El paso «nxformat.dll» de
   `build-check` ahora revisa `satronho-nx.exe`.
+- **Android, vista previa 2 (rama `android`, 2026-11-25):** identidad propia (textos sin Eden en todos los
+  idiomas; el nombre lo pisaba `resValue("string", "app_name", "Eden…")` en `productFlavors.all`),
+  logo/splash/banner TV/notificación desde `dist/branding`, paleta Satronho en `eden_*` de
+  `yuzu_colors.xml`, «Acerca de» propio. Funciones propias en `org.yuzu.yuzu_emu.satronho`:
+  `Novedades` (lee `novedades_android.json` + `novedades.json`), `GuideBubble` + `Knowledge`
+  (port del matcher de PC sobre `conocimiento_android.json`), `Sugeridas` (Adreno / Mali-Tensor /
+  Xclipse por `Build.SOC_*`), `Meter` (spans en el overlay; tirones por JNI
+  `satronhoTakeStutters`), `PrepareGame` (JNI `satronhoPrepareGame` → `ShaderWarm::BuildWarmFiles`
+  + `SetWarmRequested`), `Sesiones` (comparte `log/sesiones`). Los assets salen de `dist/satronho`
+  (`sourceSets.main.assets`). Las vistas previas van a la pre-release `android-vista-previa`
+  (nunca artefactos); con tag, el asset es `satronho-nx-android-arm64.apk` y el actualizador lo
+  encuentra (`net.cpp`, plataforma `android-arm64`, `SATRONHO_BUILD_TAG`).
+- **Llave de firma Android:** creada el 2026-11-25 (alias `satronho`, SHA-256 A6:2A:08:59…); respaldo en
+  `R:\Claude\APK-APPS\Satronho Switch\Llave Android (respaldo)` con su LEEME. Los secretos de GitHub
+  no se pueden guardar desde el entorno remoto (403): los pega Riddsc en la web.
+- Revisión local de Kotlin: `kotlinc` 1.9.20 (asset del release de JetBrains bajado con curl desde
+  github.com) + `android.jar` API 33 (Sable/android-platforms) + stubs pequeños de material/androidx
+  y de las clases del app; detecta errores de tipos en `org.yuzu.yuzu_emu.satronho` antes del CI.
