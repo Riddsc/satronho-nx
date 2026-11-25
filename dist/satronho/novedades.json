@@ -31,7 +31,7 @@
         },
         {
           "tipo": "mejora",
-          "texto": "De Lichii revisamos 40 cambios y trajimos solo los que nos sirven, sin tocar la traducción de shaders: el caché de buffers libera los que no se usan (bueno para equipos con menos memoria), Vulkan vuelve a enlazar la geometría tras un envío a mitad de dibujo, las lecturas de memoria escrita por la GPU se agrupan, un arreglo de dynarmic para procesadores ARM64 (el del teléfono), la opción de mantener el tamaño de la ventana al abrir un juego, la medición del tiempo de búsqueda de «Preparar» y la máscara de red del juego local. Otros cambios de Lichii dependían de piezas que no usamos o tocaban shaders, y los dejamos fuera."
+          "texto": "De Lichii revisamos 40 cambios y trajimos solo los que nos sirven, sin tocar la traducción de shaders: el caché de buffers libera los que no se usan (bueno para equipos con menos memoria), Vulkan vuelve a enlazar la geometría tras un envío a mitad de dibujo, un arreglo de dynarmic para procesadores ARM64 (el del teléfono), la opción de mantener el tamaño de la ventana al abrir un juego, la medición del tiempo de búsqueda de «Preparar» y la máscara de red del juego local. Otros cambios de Lichii dependían de piezas que no usamos o tocaban shaders, y los dejamos fuera."
         }
       ]
     },

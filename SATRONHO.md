@@ -670,7 +670,7 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   (`prepared_programs_<id>`, `prepare_nothing_<id>`).
 - **Build 57 (preparada en la rama `android`, 2026-11-25):** portados de Lichii (rutas
   `src/lichii` → `src/yuzu`, sin pruebas que no tenemos): #2512, #2504, #2418, #2478, #2524, #2491,
-  #2465, #2539, #2258, #2555, #2551, #2259, #2483. Fuera: los de traducción de shaders (#2542, #2523,
+  #2465, #2539, #2258, #2555, #2551, #2259. Fuera: #2483 (lo revertimos: su filtro usa `Nx2Slots`, que no tenemos), los de traducción de shaders (#2542, #2523,
   #2567, #2577), #2482/#2484 y sus reverts, y los que dependen de piezas que no tenemos (#2517 sparse
   buffers, #2533 HDR, #2466, #2566/#2573 efectos de OoT con su DLSS, #2576 anillo del stream buffer:
   nuestro `GetStreamBuffer` ya revisa la primera región al dar la vuelta, #2549 NUP). PC:
