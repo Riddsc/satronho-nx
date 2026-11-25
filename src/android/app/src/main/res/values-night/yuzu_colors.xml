@@ -229,60 +229,60 @@
     <!-- Eden Theme Colors -->
 
     <!-- Synthwave/Vaporwave Primary Colors -->
-    <color name="eden_primary">#FF0080</color> <!-- Neon magenta -->
-    <color name="eden_primary_variant">#E6006B</color> <!-- Darker magenta -->
-    <color name="eden_secondary">#00FFFF</color> <!-- Electric cyan -->
-    <color name="eden_secondary_variant">#00E6E6</color> <!-- Darker cyan -->
+    <color name="eden_primary">#8B5CF6</color> <!-- Satronho NX -->
+    <color name="eden_primary_variant">#6D3FE0</color> <!-- Satronho NX -->
+    <color name="eden_secondary">#4FD1C5</color> <!-- Satronho NX -->
+    <color name="eden_secondary_variant">#38B2A6</color> <!-- Satronho NX -->
 
     <!-- Background Colors - Deep space black -->
-    <color name="eden_background">#000000</color> <!-- Pure black background -->
-    <color name="eden_surface">#0D0D0D</color> <!-- Card surface -->
-    <color name="eden_surface_variant">#1A1A1A</color> <!-- Elevated surface -->
+    <color name="eden_background">#100E18</color> <!-- Satronho NX -->
+    <color name="eden_surface">#1A1626</color> <!-- Satronho NX -->
+    <color name="eden_surface_variant">#241E36</color> <!-- Satronho NX -->
 
     <!-- Text Colors - High contrast for readability -->
-    <color name="eden_on_background">#FFFFFF</color> <!-- Pure white text -->
-    <color name="eden_on_surface">#FFFFFF</color> <!-- Pure white text -->
-    <color name="eden_on_primary">#FFFFFF</color> <!-- White on neon -->
-    <color name="eden_on_secondary">#000000</color> <!-- Black on cyan -->
+    <color name="eden_on_background">#F2EEFF</color> <!-- Satronho NX -->
+    <color name="eden_on_surface">#F2EEFF</color> <!-- Satronho NX -->
+    <color name="eden_on_primary">#FFFFFF</color> <!-- Satronho NX -->
+    <color name="eden_on_secondary">#0B1A18</color> <!-- Satronho NX -->
 
     <!-- Synthwave Status Colors -->
-    <color name="eden_error">#FF0040</color> <!-- Neon red -->
-    <color name="eden_success">#00FF80</color> <!-- Neon green -->
-    <color name="eden_warning">#FFFF00</color> <!-- Neon yellow -->
-    <color name="eden_info">#0080FF</color> <!-- Electric blue -->
+    <color name="eden_error">#FF5C7A</color> <!-- Satronho NX -->
+    <color name="eden_success">#74D14C</color> <!-- Satronho NX -->
+    <color name="eden_warning">#FFB23E</color> <!-- Satronho NX -->
+    <color name="eden_info">#4FD1C5</color> <!-- Satronho NX -->
 
     <!-- Synthwave Accent Colors -->
-    <color name="eden_accent_purple">#9D00FF</color> <!-- Electric purple -->
-    <color name="eden_accent_blue">#0080FF</color> <!-- Electric blue -->
-    <color name="eden_accent_orange">#FF8000</color> <!-- Neon orange -->
+    <color name="eden_accent_purple">#9B8CFF</color> <!-- Satronho NX -->
+    <color name="eden_accent_blue">#4FD1C5</color> <!-- Satronho NX -->
+    <color name="eden_accent_orange">#FFB23E</color> <!-- Satronho NX -->
 
     <!-- Neon Glow Effects -->
-    <color name="eden_glow_pink">#80FF0080</color> <!-- Magenta glow -->
-    <color name="eden_glow_cyan">#8060D1F6</color> <!-- Cyan glow -->
-    <color name="eden_glow_orange">#80FF8000</color> <!-- Orange glow -->
+    <color name="eden_glow_pink">#808B5CF6</color> <!-- Satronho NX -->
+    <color name="eden_glow_cyan">#804FD1C5</color> <!-- Satronho NX -->
+    <color name="eden_glow_orange">#80FFB23E</color> <!-- Satronho NX -->
 
     <!-- Neon Border Colors -->
-    <color name="eden_border">#7c757f</color> <!-- Subtle border -->
-    <color name="eden_border_light">#948b98</color> <!-- Lighter border -->
-    <color name="eden_border_gradient_start">#FF0080</color> <!-- Neon magenta -->
-    <color name="eden_border_gradient_end">#60D1F6</color> <!-- Electric cyan -->
+    <color name="eden_border">#3A3150</color> <!-- Satronho NX -->
+    <color name="eden_border_light">#544870</color> <!-- Satronho NX -->
+    <color name="eden_border_gradient_start">#8B5CF6</color> <!-- Satronho NX -->
+    <color name="eden_border_gradient_end">#4FD1C5</color> <!-- Satronho NX -->
 
     <!-- Overlay Colors -->
-    <color name="eden_overlay">#CC000000</color>
+    <color name="eden_overlay">#CC0A0812</color> <!-- Satronho NX -->
 
     <!-- Neon Button Colors -->
-    <color name="eden_button_primary_bg">#FF0080</color> <!-- Neon magenta -->
-    <color name="eden_button_secondary_bg">#00000000</color> <!-- Transparent -->
-    <color name="eden_button_secondary_border">#00FFFF</color> <!-- Electric cyan -->
+    <color name="eden_button_primary_bg">#8B5CF6</color> <!-- Satronho NX -->
+    <color name="eden_button_secondary_bg">#00000000</color> <!-- Satronho NX -->
+    <color name="eden_button_secondary_border">#4FD1C5</color> <!-- Satronho NX -->
 
     <!-- Synthwave Card Colors -->
-    <color name="eden_card_background">#0D0D0D</color> <!-- Almost black -->
-    <color name="eden_card_background_elevated">#1A1A1A</color> <!-- Elevated black -->
+    <color name="eden_card_background">#1A1626</color> <!-- Satronho NX -->
+    <color name="eden_card_background_elevated">#241E36</color> <!-- Satronho NX -->
 
     <!-- Transparent versions for gradients -->
-    <color name="eden_transparent">#00000000</color>
-    <color name="eden_primary_transparent">#05FF0080</color>
-    <color name="eden_secondary_transparent">#0500FFFF</color>
+    <color name="eden_transparent">#00000000</color> <!-- Satronho NX -->
+    <color name="eden_primary_transparent">#0D8B5CF6</color> <!-- Satronho NX -->
+    <color name="eden_secondary_transparent">#0D4FD1C5</color> <!-- Satronho NX -->
 
     <!-- Common Colors Across All Themes -->
     <color name="yuzu_transparent_black">#80000000</color>
