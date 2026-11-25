@@ -7,6 +7,10 @@
       "cambios": [
         {
           "tipo": "nuevo",
+          "texto": "Satronho Emulation (Ridds' hub) now plays your Switch games with Satronho NX: it opens them directly, hands NX your keys and firmware, and when you quit you're back in its library. If the hub installed NX for you, NX adds no icon of its own: it opens from the hub."
+        },
+        {
+          "tipo": "nuevo",
           "texto": "Satronho NX for Android now ships in every release, next to the PC version, signed with our key. From this build the app updates itself: when there is a new one, Juana tells you when you open it and it installs on top."
         },
         {

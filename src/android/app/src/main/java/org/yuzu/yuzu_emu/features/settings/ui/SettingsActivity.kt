@@ -151,7 +151,9 @@ class SettingsActivity : AppCompatActivity() {
 
             if (settingsViewModel.shouldRecreateForLanguageChange.value) {
                 settingsViewModel.setShouldRecreateForLanguageChange(false)
+                // With the launcher icon hidden by Satronho Emulation there is no launch intent.
                 val relaunchIntent = packageManager?.getLaunchIntentForPackage(packageName)
+                    ?: android.content.Intent(this, org.yuzu.yuzu_emu.ui.main.MainActivity::class.java)
                 if (relaunchIntent != null) {
                     relaunchIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(relaunchIntent)

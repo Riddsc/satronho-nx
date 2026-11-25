@@ -59,6 +59,14 @@ SPDX-License-Identifier: GPL-3.0-or-later
             android:name="org.yuzu.yuzu_emu.ui.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Yuzu.Splash.Main">
+        </activity>
+
+        <!-- Launcher icon. Satronho Emulation turns it off when it installed NX itself, so NX only
+             opens from the hub (HubProvider "ocultar"/"mostrar"). -->
+        <activity-alias
+            android:name="org.yuzu.yuzu_emu.Lanzador"
+            android:targetActivity="org.yuzu.yuzu_emu.ui.main.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.miui.gamecenter.GAME_BOOSTER_LAUNCH"/>
                 <action android:name="android.intent.action.MAIN" />
@@ -66,7 +74,12 @@ SPDX-License-Identifier: GPL-3.0-or-later
                 <category android:name="android.intent.category.GAME" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <provider
+            android:name="org.yuzu.yuzu_emu.satronho.HubProvider"
+            android:authorities="${applicationId}.hub"
+            android:exported="true" />
 
         <activity
             android:name="org.yuzu.yuzu_emu.features.settings.ui.SettingsActivity"

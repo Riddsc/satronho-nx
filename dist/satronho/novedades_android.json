@@ -7,6 +7,10 @@
       "cambios": [
         {
           "tipo": "nuevo",
+          "texto": "Satronho Emulation (el hub de Ridds) ya juega tus juegos de Switch con Satronho NX: los abre directo, le pasa tus claves y tu firmware, y al salir vuelves a su biblioteca. Si el hub instaló NX por ti, NX no pone ícono propio: se abre desde el hub."
+        },
+        {
+          "tipo": "nuevo",
           "texto": "Satronho NX para Android sale ahora en cada release, junto a la versión de PC, firmado con nuestra llave. Desde esta build la app se actualiza sola: cuando haya una nueva, Juana te avisa al abrirla y se instala encima."
         },
         {
