@@ -654,3 +654,17 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   vacío, `AMDBoost.fx` (`sample` es palabra reservada), y `getGpuModel`/`getSystemDriverInfo` atrapan
   la excepción de Vulkan si Android aún no da superficie (antes cerraba la app). El actualizador
   queda activo (`build.sh -r` en `android.yml`); solo busca si la build tiene tag `build-N`.
+- **Android, vista previa 4 (rama `android`, 2026-11-25):** pantalla de carga propia (la tarjeta
+  `loading_indicator` ahora ocupa la pantalla; `Carga.decorate` pone `logo_fondo.png` y un consejo de
+  `satronho_tips_*`), `FichaJuego` al mantener presionado (tiempo jugado, historial con gráfica,
+  Jugar/Preparar/Respaldar/Propiedades; el respaldo empaca `game.saveDir` en caché y lo comparte por
+  `FileProvider`), `Captura` (PixelCopy del `SurfaceView` + franja, en `Pictures/Satronho NX`),
+  cabecera Satronho en `header_in_game.xml` y entradas «Captura Satronho» / «Compartir log» en
+  `menu_in_game.xml`, splash animado `ic_satronho_splash_animated`, pestaña Estilo (`Estilo`: temas
+  sobre `THEME`/`STATIC_THEME_COLOR`/`BLACK_BACKGROUNDS`; estilos de controles con
+  `Satronho.styleControl` en `InputOverlay.getBitmap`), temperatura de batería en `SesionActual`
+  (aviso desde `HOT_C` = 42 °C), `AjustePorJuego` (dos sesiones < 25 fps → baja un paso la resolución
+  del juego en su config propia) y el widget `ContinuarWidget`. Reparto de las mascotas en
+  `Satronho.pickPet` (burbuja y consejos). Arreglos: el resumen se guarda en `onPause` (Android
+  reanuda la lista antes de destruir el juego) y «Preparar juego» con 0 programas no marca ✓
+  (`prepared_programs_<id>`, `prepare_nothing_<id>`).

@@ -68,6 +68,8 @@ import kotlinx.coroutines.withContext
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.satronho.Captura
+import org.yuzu.yuzu_emu.satronho.Carga
 import org.yuzu.yuzu_emu.satronho.Meter
 import org.yuzu.yuzu_emu.satronho.Satronho
 import org.yuzu.yuzu_emu.satronho.SesionActual
@@ -708,6 +710,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 binding.inGameMenu.requestFocus()
                 emulationViewModel.setDrawerOpen(true)
+                updateSatronhoHeader()
                 updateQuickOverlayMenuEntry(BooleanSetting.SHOW_INPUT_OVERLAY.getBoolean())
                 if (drawerView == binding.inGameMenu) {
                     binding.drawerLayout.closeDrawer(binding.quickSettingsSheet)
@@ -862,6 +865,22 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     true
                 }
 
+                R.id.menu_satronho_capture -> {
+                    binding.drawerLayout.close()
+                    val fps = NativeLibrary.getPerfStats().getOrElse(1) { 0.0 }
+                    // Let the drawer close first so the picture is the game alone.
+                    binding.surfaceEmulation.postDelayed({
+                        Captura.take(requireActivity(), binding.surfaceEmulation, game?.title ?: "", fps)
+                    }, 350)
+                    true
+                }
+
+                R.id.menu_satronho_share_log -> {
+                    binding.drawerLayout.close()
+                    Satronho.shareLatestLog(requireActivity())
+                    true
+                }
+
                 R.id.menu_exit -> {
                     clearPausedFrame()
                     emulationState.stop()
@@ -930,6 +949,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         }
         binding.loadingTitle.isSelected = true
         binding.loadingText.isSelected = true
+        Carga.decorate(
+            binding.satronhoLoadingLogo,
+            binding.satronhoLoadingTipRow,
+            binding.satronhoLoadingGuide,
+            binding.satronhoLoadingTip
+        )
 
         WindowInfoTracker.getOrCreate(requireContext())
             .windowLayoutInfo(requireActivity()).collect(viewLifecycleOwner) {
@@ -960,7 +985,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
 
         emulationViewModel.emulationStarted.collect(viewLifecycleOwner) {
             if (it) {
-                game?.let { started -> SesionActual.begin(started.programId, started.title) }
+                game?.let { started -> SesionActual.begin(requireContext(), started.programId, started.title) }
                 binding.drawerLayout.setDrawerLockMode(IntSetting.LOCK_DRAWER.getInt())
                 ViewUtils.showView(binding.surfaceInputOverlay)
                 ViewUtils.hideView(binding.loadingIndicator)
@@ -1098,6 +1123,19 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 titleView.text = it.title
             }
         }
+    }
+
+    /** The session so far, under the game's name in the menu. */
+    private fun updateSatronhoHeader() {
+        val live = binding.inGameMenu.getHeaderView(0)
+            ?.findViewById<TextView>(R.id.satronho_header_live) ?: return
+        val stats = NativeLibrary.getPerfStats()
+        val fps = stats.getOrElse(1) { 0.0 }
+        live.text = satronhoMeter.text(
+            requireContext(), fps, stats.getOrElse(2) { 0.0 } * 1000.0,
+            NativeLibrary.getShadersBuilding()
+        )
+        live.visibility = View.VISIBLE
     }
 
     private fun withPerGameConfig(create: Boolean, action: () -> Unit) {
@@ -1470,6 +1508,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         }
 
     override fun onPause() {
+        // Before the games list resumes, so its summary is ready when it looks for it.
+        if (requireActivity().isFinishing) {
+            SesionActual.end(requireContext())
+        }
         if (this::emulationState.isInitialized) {
             if (emulationState.isRunning && emulationActivity?.isInPictureInPictureMode != true) {
                 pauseEmulationAndCaptureFrame()

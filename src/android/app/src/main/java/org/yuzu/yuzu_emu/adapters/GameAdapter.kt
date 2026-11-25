@@ -3,6 +3,8 @@
 
 package org.yuzu.yuzu_emu.adapters
 
+import org.yuzu.yuzu_emu.satronho.ContinuarWidget
+import org.yuzu.yuzu_emu.satronho.FichaJuego
 import org.yuzu.yuzu_emu.satronho.PrepareGame
 import org.yuzu.yuzu_emu.satronho.Sellos
 import android.content.DialogInterface
@@ -271,6 +273,13 @@ class GameAdapter(private val activity: AppCompatActivity) :
                             YuzuApplication.appContext,
                             shortcut
                         )
+                        // Satronho NX: this game goes on the «Continuar» widget.
+                        val icon = try {
+                            GameIconUtils.getGameIcon(activity, game)
+                        } catch (e: Exception) {
+                            null
+                        }
+                        ContinuarWidget.remember(YuzuApplication.appContext, game, icon)
                     }
                 }
 
@@ -298,8 +307,11 @@ class GameAdapter(private val activity: AppCompatActivity) :
         }
 
         fun onLongClick(game: Game): Boolean {
-            val action = HomeNavigationDirections.actionGlobalPerGamePropertiesFragment(game)
-            binding.root.findNavController().navigate(action)
+            // Satronho NX: the game's page first; its properties are one tap away.
+            FichaJuego.show(activity, game, { onClick(game) }) {
+                val action = HomeNavigationDirections.actionGlobalPerGamePropertiesFragment(game)
+                binding.root.findNavController().navigate(action)
+            }
             return true
         }
     }

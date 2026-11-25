@@ -107,10 +107,10 @@
         "hitch",
         "lag"
       ],
-      "respuesta": "It is a Satronho NX feature of its own. The first time you open a game, Samy offers to prepare it; later you find it by long-pressing the game (its properties) → Prepare game. Satronho takes the shaders out of the game's files now, and the next time you open it the loading screen builds them all with your phone's driver. That way it doesn't freeze when a shader shows up for the first time. On a phone it matters even more than on PC, because building shaders is much slower. A prepared game has a ✓ on its card.",
+      "respuesta": "It is a Satronho NX feature of its own. The first time you open a game, Samy offers to prepare it; later you find it on the game's page (long-press it) → Prepare game. Satronho takes the shaders out of the game's files now, and the next time you open it the loading screen builds them all with your phone's driver. That way it doesn't freeze when a shader shows up for the first time. On a phone it matters even more than on PC, because building shaders is much slower. A prepared game has a ✓ on its card. If the game keeps no shaders to take out ahead (like Celeste), I tell you and don't give it a ✓: the cache keeps those while you play.",
       "ver": [
+        "ficha",
         "medidor",
-        "sellos",
         "shaders-cache"
       ]
     },
@@ -135,9 +135,10 @@
         "overlay",
         "ms"
       ],
-      "respuesta": "In the game, at the top, the meter shows: FPS (green when fine, amber when it drops, red when it is very slow), each frame's time in milliseconds, the stutters (frames over 100 ms) and how many happened while shaders were being built, and Building shaders N with the ones being built. When shader stutter shows in red, that stutter came from building shaders, not from a bug. Turn it on or off in Settings → Satronho meter.",
+      "respuesta": "In the game, at the top, the meter shows: FPS (green when fine, amber when it drops, red when it is very slow), each frame's time in milliseconds, the stutters (frames over 100 ms) and how many happened while shaders were being built, and Building shaders N with the ones being built. When shader stutter shows in red, that stutter came from building shaders, not from a bug. Turn it on or off in Settings → Satronho meter. At the end goes the phone's temperature.",
       "ver": [
         "preparar",
+        "temperatura",
         "resumen"
       ]
     },
@@ -504,6 +505,174 @@
       "respuesta": "Long-pressing the Satronho NX icon shows the last games you opened, to jump straight in, and Satronho, which opens the Satronho screen. You can drag any of them to your home screen. On Android 13 or newer, with themed icons on, the Satronho planet takes your wallpaper's colors.",
       "ver": [
         "pantalla-satronho"
+      ]
+    },
+    {
+      "id": "ficha",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "What is the game page?",
+      "frases": [
+        "game page",
+        "long press a game",
+        "time played",
+        "how long have i played",
+        "fps chart"
+      ],
+      "claves": [
+        "page",
+        "played",
+        "time",
+        "chart",
+        "hours"
+      ],
+      "respuesta": "Long-pressing a game opens its page: the time you've played it in Satronho NX, how many sessions, the last one's FPS and stutters, a chart of the last sessions' FPS, and buttons to Play, Prepare game, Back up saves and open its properties.",
+      "ver": [
+        "respaldo",
+        "preparar",
+        "sellos"
+      ]
+    },
+    {
+      "id": "respaldo",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "How do I back up my saves?",
+      "frases": [
+        "back up saves",
+        "copy my saves",
+        "move saves to pc",
+        "keep my saves",
+        "don't lose my saves",
+        "restore saves"
+      ],
+      "claves": [
+        "backup",
+        "back",
+        "save",
+        "saves",
+        "copy",
+        "restore"
+      ],
+      "respuesta": "On the game's page (long-press it) → Back up saves: Satronho packs your saves into a .zip and opens the share menu to send it to Drive, WhatsApp or your PC. To restore: page → Game properties → Save data → Import. Do it before uninstalling the app, because uninstalling deletes them.",
+      "ver": [
+        "ficha"
+      ]
+    },
+    {
+      "id": "captura",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "How do I take a Satronho capture?",
+      "frases": [
+        "take a capture",
+        "screenshot",
+        "picture of the game",
+        "share a capture"
+      ],
+      "claves": [
+        "capture",
+        "screenshot",
+        "picture",
+        "image"
+      ],
+      "respuesta": "Open the game menu (swipe from the edge or press back) → Satronho capture. The game's picture is saved with a discreet band showing our planet, Satronho NX, the game and its FPS, in Pictures → Satronho NX, and the share menu opens.",
+      "ver": [
+        "ficha"
+      ]
+    },
+    {
+      "id": "temperatura",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "Why does performance drop when the phone gets hot?",
+      "frases": [
+        "gets hot",
+        "temperature",
+        "heat",
+        "it's hot",
+        "degrees"
+      ],
+      "claves": [
+        "temperature",
+        "heat",
+        "hot",
+        "degree"
+      ],
+      "respuesta": "The meter shows the battery's temperature: teal normal, amber warm and red from 42 °C. That hot, the phone (especially the Pixels' Tensor) slows itself down to cool off and FPS drop. When it happens I tell you in the summary and offer a lighter profile. Taking the case off and not playing while charging helps.",
+      "ver": [
+        "mali",
+        "ajuste-juego"
+      ]
+    },
+    {
+      "id": "ajuste-juego",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "How does Ñoño tune a single game?",
+      "frases": [
+        "tune a game",
+        "settings for one game",
+        "lower resolution for a game",
+        "just this game"
+      ],
+      "claves": [
+        "tune",
+        "game",
+        "resolution",
+        "own"
+      ],
+      "respuesta": "If a game runs below 25 FPS two sessions in a row, in the summary I offer to lower its resolution one step, just for that game (in its own settings), without touching the others. You can undo it in its properties → Per-game settings.",
+      "ver": [
+        "temperatura",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "estilo",
+      "guia": "troya",
+      "tema": "Graphics",
+      "pregunta": "How do I change the theme and the controls' style?",
+      "frases": [
+        "change theme",
+        "dark mode",
+        "pure black",
+        "app color",
+        "transparent controls",
+        "grey controls"
+      ],
+      "claves": [
+        "theme",
+        "style",
+        "color",
+        "black",
+        "controls",
+        "transparent"
+      ],
+      "respuesta": "In Satronho → Style tab: the app theme (Violet, Night in pure black for OLED screens, or Amber), the on-screen controls' style (Satronho violet, Classic grey or Nearly transparent) and how visible the planet behind the games is.",
+      "ver": [
+        "pantalla-satronho"
+      ]
+    },
+    {
+      "id": "widget",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "How do I add the Satronho widget to my home screen?",
+      "frases": [
+        "widget",
+        "home screen",
+        "continue game",
+        "shortcut on home"
+      ],
+      "claves": [
+        "widget",
+        "home",
+        "continue"
+      ],
+      "respuesta": "Long-press an empty spot on your home screen → Widgets → Satronho NX · Continue. It shows your last game, how it went and a button to keep playing.",
+      "ver": [
+        "accesos-directos"
       ]
     }
   ]

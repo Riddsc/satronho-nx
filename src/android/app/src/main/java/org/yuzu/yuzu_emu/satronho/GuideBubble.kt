@@ -21,7 +21,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlin.random.Random
 import org.yuzu.yuzu_emu.R
 
 /**
@@ -38,19 +37,7 @@ object GuideBubble {
             prefs.edit().putBoolean(FIRST_SHOWN_KEY, true).apply()
             return Satronho.speaker("samy")
         }
-        val pets = listOf("samy" to 33, "troya" to 32, "nono" to 18, "juana" to 17)
-            .filter { Satronho.petEnabled(it.first) }
-        if (pets.isEmpty()) {
-            return "mecharidds"
-        }
-        var roll = Random.nextInt(pets.sumOf { it.second })
-        for ((pet, weight) in pets) {
-            if (roll < weight) {
-                return pet
-            }
-            roll -= weight
-        }
-        return pets.last().first
+        return Satronho.pickPet()
     }
 
     private fun avatar(context: Context, guide: String, sizeDp: Int): ImageView {

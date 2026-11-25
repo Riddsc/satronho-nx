@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Satronho NX's splash: the planet appears, its ring settles around it and a little moon goes round. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="240dp"
+            android:height="240dp"
+            android:viewportWidth="240"
+            android:viewportHeight="240">
+            <group
+                android:name="ring_back"
+                android:pivotX="120"
+                android:pivotY="120"
+                android:rotation="-100">
+                <path
+                    android:name="ring_back_path"
+                    android:fillColor="#00000000"
+                    android:strokeAlpha="0"
+                    android:strokeColor="#FF4FD1C5"
+                    android:strokeLineCap="round"
+                    android:strokeWidth="6"
+                    android:pathData="M46,120A74,20 0,0 1,194,120" />
+            </group>
+            <group
+                android:name="planet"
+                android:pivotX="120"
+                android:pivotY="120"
+                android:scaleX="0"
+                android:scaleY="0">
+                <path
+                    android:fillColor="#FF8B5CF6"
+                    android:pathData="M120,82a38,38 0,1 0,0 76a38,38 0,1 0,0 -76z" />
+                <path
+                    android:fillColor="#FF6D44D6"
+                    android:pathData="M120,82a38,38 0,0 1,0 76a22,38 0,0 0,0 -76z" />
+            </group>
+            <group
+                android:name="ring_front"
+                android:pivotX="120"
+                android:pivotY="120"
+                android:rotation="-100">
+                <path
+                    android:name="ring_front_path"
+                    android:fillColor="#00000000"
+                    android:strokeAlpha="0"
+                    android:strokeColor="#FF4FD1C5"
+                    android:strokeLineCap="round"
+                    android:strokeWidth="6"
+                    android:pathData="M46,120A74,20 0,0 0,194,120" />
+            </group>
+            <group
+                android:name="orbit"
+                android:pivotX="120"
+                android:pivotY="120"
+                android:rotation="0">
+                <path
+                    android:fillColor="#FFFFB23E"
+                    android:pathData="M120,44a7,7 0,1 0,0 14a7,7 0,1 0,0 -14z" />
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="planet">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:duration="450"
+                    android:interpolator="@android:anim/overshoot_interpolator"
+                    android:propertyName="scaleX"
+                    android:valueFrom="0"
+                    android:valueTo="1" />
+                <objectAnimator
+                    android:duration="450"
+                    android:interpolator="@android:anim/overshoot_interpolator"
+                    android:propertyName="scaleY"
+                    android:valueFrom="0"
+                    android:valueTo="1" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="ring_back">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="700"
+                android:startOffset="150"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="rotation"
+                android:valueFrom="-100"
+                android:valueTo="-22" />
+        </aapt:attr>
+    </target>
+    <target android:name="ring_back_path">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="400"
+                android:startOffset="150"
+                android:propertyName="strokeAlpha"
+                android:valueFrom="0"
+                android:valueTo="1" />
+        </aapt:attr>
+    </target>
+    <target android:name="ring_front">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="700"
+                android:startOffset="150"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="rotation"
+                android:valueFrom="-100"
+                android:valueTo="-22" />
+        </aapt:attr>
+    </target>
+    <target android:name="ring_front_path">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="400"
+                android:startOffset="150"
+                android:propertyName="strokeAlpha"
+                android:valueFrom="0"
+                android:valueTo="1" />
+        </aapt:attr>
+    </target>
+    <target android:name="orbit">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:duration="1000"
+                android:interpolator="@android:interpolator/fast_out_slow_in"
+                android:propertyName="rotation"
+                android:valueFrom="0"
+                android:valueTo="300" />
+        </aapt:attr>
+    </target>
+</animated-vector>

@@ -65,6 +65,16 @@ class Meter {
                 out.span(" · " + context.getString(R.string.satronho_meter_building_stutter), Satronho.RED)
             }
         }
+        // The battery's temperature: a hot phone slows itself down (Tensor especially).
+        if (session.tempC > 0.0) {
+            out.separator()
+            val color = when {
+                session.tempC >= SesionActual.HOT_C -> Satronho.RED
+                session.tempC >= SesionActual.HOT_C - 4.0 -> Satronho.AMBER
+                else -> Satronho.TEAL
+            }
+            out.span(String.format("%.0f °C", session.tempC), color, true)
+        }
         return out
     }
 }

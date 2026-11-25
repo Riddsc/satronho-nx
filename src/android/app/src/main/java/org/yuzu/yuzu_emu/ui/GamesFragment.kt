@@ -291,6 +291,7 @@ class GamesFragment : Fragment() {
             activity,
             resumen,
             PrepareGame.isPrepared(activity, resumen.programId),
+            game,
             game?.let { { PrepareGame.start(activity, it) } }
         )
     }

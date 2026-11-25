@@ -2013,4 +2013,72 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <string name="satronho_welcome_suggested">Ñoño checks your phone and recommends a profile. One tap and done.</string>
     <string name="satronho_welcome_footer">Whenever you have a question, tap the bubble in the corner. Long-press it to open Satronho.</string>
     <string name="satronho_welcome_start">Let\'s play!</string>
+
+    <!-- Satronho NX: preview 4 -->
+    <string name="satronho_style_tab">Style</string>
+    <string name="satronho_style_theme">App theme</string>
+    <string name="satronho_style_controls">On-screen controls</string>
+    <string name="satronho_theme_violet">Violet</string>
+    <string name="satronho_theme_violet_description">The usual: violet and night blue</string>
+    <string name="satronho_theme_night">Night</string>
+    <string name="satronho_theme_night_description">Pure black: looks great and saves battery on OLED screens</string>
+    <string name="satronho_theme_amber">Amber</string>
+    <string name="satronho_theme_amber_description">Warm, with Samy\'s golden tones</string>
+    <string name="satronho_controls_satronho">Satronho violet</string>
+    <string name="satronho_controls_satronho_description">Our colors</string>
+    <string name="satronho_controls_classic">Classic grey</string>
+    <string name="satronho_controls_classic_description">The usual grey controls</string>
+    <string name="satronho_controls_subtle">Nearly transparent</string>
+    <string name="satronho_controls_subtle_description">To see more of the game</string>
+    <string name="satronho_capture">Satronho capture</string>
+    <string name="satronho_capture_saved">Capture saved in Pictures → Satronho NX</string>
+    <string name="satronho_capture_failed">Couldn\'t take the capture</string>
+    <string name="satronho_card_time">Played</string>
+    <string name="satronho_card_sessions">Sessions</string>
+    <string name="satronho_card_last_fps">Last FPS</string>
+    <string name="satronho_card_chart">Average FPS of the last sessions</string>
+    <string name="satronho_card_no_sessions">No sessions yet: play for a while and you\'ll see how it runs here.</string>
+    <string name="satronho_card_not_prepared">Not prepared</string>
+    <string name="satronho_card_nothing">Builds its shaders while playing</string>
+    <string name="satronho_card_properties">Game properties</string>
+    <string name="satronho_backup_saves">Back up saves</string>
+    <string name="satronho_backup_working">Packing your saves…</string>
+    <string name="satronho_backup_none">This game has no saves yet.</string>
+    <string name="satronho_backup_failed">Couldn\'t pack the saves.</string>
+    <string name="satronho_summary_temperature">Highest temperature</string>
+    <string name="satronho_summary_hot">Ñoño: the phone reached %1$s °C. That hot, it slows itself down to cool off, which is why the FPS dropped. A lighter profile keeps it cooler.</string>
+    <string name="satronho_summary_slow">Ñoño: this game has been slow two sessions in a row. I can lower its resolution just for it, without touching your other games.</string>
+    <string name="satronho_summary_lighter">Lighter profile</string>
+    <string name="satronho_nono_lower">Lower resolution</string>
+    <string name="satronho_nono_tuned">Done: %1$s goes from %2$s to %3$s, only in this game.</string>
+    <string name="satronho_nono_lowest">This game is already at the lowest resolution.</string>
+    <string name="satronho_widget_name">Satronho NX · Continue</string>
+    <string name="satronho_widget_description">Your last game, how it went and a button to keep playing</string>
+    <string name="satronho_widget_continue">Continue</string>
+    <string name="satronho_widget_open">Open</string>
+    <string name="satronho_widget_ready">Ready to continue</string>
+    <string name="satronho_widget_empty">Open a game and it will show up here</string>
+    <string-array name="satronho_tips_samy">
+        <item>Long-press a game to see its page: time played, sessions and save backup.</item>
+        <item>Satronho capture is in the game menu: it saves the picture with our mark, ready to share.</item>
+        <item>If something goes wrong, Share log in the game menu sends me everything I need.</item>
+        <item>Long-press the app icon to jump straight into your last game.</item>
+    </string-array>
+    <string-array name="satronho_tips_troya">
+        <item>The meter shows shader stutter in red when a stutter comes from new shaders, not from a bug.</item>
+        <item>In the Style tab, pick the Night theme: pure black, great on an OLED screen.</item>
+        <item>When you leave the game I tell you how it went: FPS, stutters and temperature.</item>
+    </string-array>
+    <string-array name="satronho_tips_nono">
+        <item>Past 42 °C the phone slows itself down to cool off: that is when FPS drop.</item>
+        <item>If a game is slow two sessions in a row, I offer to lower its resolution, just for that game.</item>
+        <item>Suggested settings are made for your phone: one tap and done.</item>
+    </string-array>
+    <string-array name="satronho_tips_juana">
+        <item>When a new build is out, I tell you when you open the app and install it on top.</item>
+        <item>Satronho → News shows everything each build brings.</item>
+    </string-array>
+    <string-array name="satronho_tips_mecharidds">
+        <item>Tap the bubble in the corner whenever you have a question: we answer without internet.</item>
+    </string-array>
 </resources>

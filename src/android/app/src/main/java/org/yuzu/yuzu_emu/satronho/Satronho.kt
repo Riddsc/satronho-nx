@@ -78,6 +78,23 @@ object Satronho {
         }
     }
 
+    /** A pet on, by how much each one appears; MechaRidds when every pet is off. */
+    fun pickPet(): String {
+        val pets = listOf("samy" to 33, "troya" to 32, "nono" to 25, "juana" to 10)
+            .filter { petEnabled(it.first) }
+        if (pets.isEmpty()) {
+            return "mecharidds"
+        }
+        var roll = kotlin.random.Random.nextInt(pets.sumOf { it.second })
+        for ((pet, weight) in pets) {
+            if (roll < weight) {
+                return pet
+            }
+            roll -= weight
+        }
+        return pets.last().first
+    }
+
     /** Who speaks for [key]: the pet itself, or MechaRidds when that pet is off. */
     fun speaker(key: String): String =
         if (key.isNotEmpty() && petEnabled(key)) key else "mecharidds"
@@ -161,6 +178,28 @@ object Satronho {
         }
         view.alpha = opacity / 100f
         view.visibility = View.VISIBLE
+    }
+
+    const val CONTROLS_SATRONHO = 0
+    const val CONTROLS_CLASSIC = 1
+    const val CONTROLS_SUBTLE = 2
+
+    /** How the on-screen controls look: Satronho violet, classic grey or nearly transparent. */
+    var controlStyle: Int
+        get() = appContext?.let { prefs(it).getInt("control_style", CONTROLS_SATRONHO) } ?: CONTROLS_SATRONHO
+        set(value) {
+            appContext?.let { prefs(it).edit().putInt("control_style", value).apply() }
+        }
+
+    /** Applied to each control's drawable before the overlay draws it. */
+    fun styleControl(drawable: android.graphics.drawable.Drawable) {
+        when (controlStyle) {
+            CONTROLS_CLASSIC -> drawable.colorFilter = android.graphics.ColorMatrixColorFilter(
+                android.graphics.ColorMatrix().apply { setSaturation(0f) }
+            )
+            CONTROLS_SUBTLE -> drawable.alpha = 90
+            else -> {}
+        }
     }
 
     /** The summary card when a game closes. */

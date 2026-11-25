@@ -1,6 +1,53 @@
 {
   "builds": [
     {
+      "tag": "Android – preview 4",
+      "fecha": "November 25, 2026",
+      "titulo": "Your Satronho, your way",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho loading screen: the game's art up front, our planet behind and a tip from one of the guides while it loads."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "A page for each game (long-press it): time played, sessions, a chart of the last sessions' FPS, and Play, Prepare, Back up saves and Properties in one tap."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Save backup: packs a game's saves into a .zip and shares it to Drive, WhatsApp or your PC."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho capture in the game menu: the picture with a band showing our planet, the game and its FPS, saved and ready to share. Share log is in the menu too."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Game menu with a Satronho header and the session live. Animated start: the planet appears, its ring settles and a little moon goes round."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Style tab: Violet, Night (pure black for OLED screens) and Amber themes; on-screen controls in Satronho violet, classic grey or nearly transparent; and how visible the planet behind the games is."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "The phone's temperature in the meter. Past 42 °C, Ñoño tells you in the summary why the FPS dropped and offers a lighter profile."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Ñoño tunes each game: if one is slow two sessions in a row, he offers to lower its resolution just for it, without touching the others."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Continue widget for the home screen: your last game, how it went and a button to keep playing."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "The summary when a game closes now shows up (Android went back to the list before it was ready). Games with no shaders to take out ahead, like Celeste, no longer get a ✓ or another offer to prepare."
+        }
+      ]
+    },
+    {
       "tag": "Android – preview 3",
       "fecha": "November 25, 2026",
       "titulo": "Satronho everywhere",

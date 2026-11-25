@@ -9,6 +9,16 @@
         android:title="@string/emulation_pause" />
 
     <item
+        android:id="@+id/menu_satronho_capture"
+        android:icon="@drawable/ic_satronho"
+        android:title="@string/satronho_capture" />
+
+    <item
+        android:id="@+id/menu_satronho_share_log"
+        android:icon="@drawable/ic_log"
+        android:title="@string/satronho_share_log" />
+
+    <item
         android:id="@+id/menu_quick_overlay"
         android:icon="@drawable/ic_controller"
         android:title="@string/emulation_show_overlay"/>

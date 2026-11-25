@@ -3,7 +3,8 @@
 
     <style name="Theme.Yuzu.Splash.Main" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/eden_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_yuzu_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_satronho_splash_animated</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
         <item name="postSplashScreenTheme">@style/Theme.Yuzu.Main</item>
     </style>
 

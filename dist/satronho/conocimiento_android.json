@@ -123,10 +123,10 @@
         "trabe",
         "traba"
       ],
-      "respuesta": "Es una función propia de Satronho NX. La primera vez que abres un juego, Samy te ofrece prepararlo; después lo encuentras manteniendo presionado el juego (sus propiedades) → «Preparar juego». Satronho saca ahora los shaders de los archivos del juego, y la próxima vez que lo abras, la pantalla de carga los arma todos con el driver de tu teléfono. Así no se traba cuando un shader aparece por primera vez. En el teléfono importa todavía más que en PC, porque armar shaders es mucho más lento. Un juego preparado lleva un ✓ en su tarjeta.",
+      "respuesta": "Es una función propia de Satronho NX. La primera vez que abres un juego, Samy te ofrece prepararlo; después lo encuentras en la ficha del juego (mantenlo presionado) → «Preparar juego». Satronho saca ahora los shaders de los archivos del juego, y la próxima vez que lo abras, la pantalla de carga los arma todos con el driver de tu teléfono. Así no se traba cuando un shader aparece por primera vez. En el teléfono importa todavía más que en PC, porque armar shaders es mucho más lento. Un juego preparado lleva un ✓ en su tarjeta. Si el juego no trae shaders para sacar por adelantado (como Celeste), te lo digo y no le pongo ✓: esos los guarda la caché mientras juegas.",
       "ver": [
+        "ficha",
         "medidor",
-        "sellos",
         "shaders-cache"
       ]
     },
@@ -151,9 +151,10 @@
         "overlay",
         "ms"
       ],
-      "respuesta": "Dentro del juego, arriba, el medidor muestra: FPS (verde si va bien, ámbar si baja, rojo si va muy lento), el tiempo de cada cuadro en milisegundos, los tirones (cuadros de más de 100 ms) y cuántos fueron mientras se armaban shaders, y «Armando shaders N» con los que se están armando. Si aparece «tirón por shaders» en rojo, ese tirón fue por la preparación de shaders, no un fallo. Se apaga o prende en Ajustes → «Medidor Satronho».",
+      "respuesta": "Dentro del juego, arriba, el medidor muestra: FPS (verde si va bien, ámbar si baja, rojo si va muy lento), el tiempo de cada cuadro en milisegundos, los tirones (cuadros de más de 100 ms) y cuántos fueron mientras se armaban shaders, y «Armando shaders N» con los que se están armando. Si aparece «tirón por shaders» en rojo, ese tirón fue por la preparación de shaders, no un fallo. Se apaga o prende en Ajustes → «Medidor Satronho». Al final va la temperatura del teléfono.",
       "ver": [
         "preparar",
+        "temperatura",
         "resumen"
       ]
     },
@@ -505,6 +506,7 @@
       ],
       "respuesta": "Es el sello de Satronho en cada juego: ✓ (verde) quiere decir que ya está preparado, y el número es el promedio de FPS de su última sesión. En la vista de lista también sale cuántos tirones tuvo.",
       "ver": [
+        "ficha",
         "resumen",
         "preparar"
       ]
@@ -531,6 +533,180 @@
       "respuesta": "Manteniendo presionado el ícono de Satronho NX salen los últimos juegos que abriste, para entrar directo, y «Satronho», que abre la pantalla Satronho. Puedes arrastrar cualquiera a la pantalla de inicio. En Android 13 o más nuevo, si activas los íconos temáticos, el planeta de Satronho toma los colores de tu fondo de pantalla.",
       "ver": [
         "pantalla-satronho"
+      ]
+    },
+    {
+      "id": "ficha",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué es la ficha del juego?",
+      "frases": [
+        "ficha del juego",
+        "mantener presionado un juego",
+        "tiempo jugado",
+        "cuanto he jugado",
+        "grafica de fps"
+      ],
+      "claves": [
+        "ficha",
+        "jugado",
+        "tiempo",
+        "grafica",
+        "horas"
+      ],
+      "respuesta": "Manteniendo presionado un juego se abre su ficha: el tiempo que llevas jugándolo en Satronho NX, cuántas sesiones, los FPS y tirones de la última, una gráfica con los FPS de las últimas sesiones, y botones para Jugar, Preparar juego, Respaldar partidas y abrir sus propiedades.",
+      "ver": [
+        "respaldo",
+        "preparar",
+        "sellos"
+      ]
+    },
+    {
+      "id": "respaldo",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo respaldo mis partidas?",
+      "frases": [
+        "respaldar partidas",
+        "copia de mis partidas",
+        "pasar partidas al pc",
+        "guardar mis partidas",
+        "no perder las partidas",
+        "restaurar partidas"
+      ],
+      "claves": [
+        "respaldo",
+        "respaldar",
+        "partida",
+        "guardado",
+        "copia",
+        "restaurar"
+      ],
+      "respuesta": "En la ficha del juego (mantenlo presionado) → «Respaldar partidas»: Satronho empaca tus partidas en un .zip y abre el menú de compartir para mandarlo a Drive, WhatsApp o tu PC. Para restaurar: ficha → «Propiedades del juego» → Datos de guardado → Importar. Hazlo antes de desinstalar la app, porque al desinstalar se borran.",
+      "ver": [
+        "ficha"
+      ]
+    },
+    {
+      "id": "captura",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo hago una Captura Satronho?",
+      "frases": [
+        "tomar captura",
+        "captura de pantalla",
+        "screenshot",
+        "foto del juego",
+        "compartir captura"
+      ],
+      "claves": [
+        "captura",
+        "screenshot",
+        "foto",
+        "imagen"
+      ],
+      "respuesta": "Abre el menú del juego (desliza desde el borde o el botón atrás) → «Captura Satronho». Se guarda la imagen del juego con una franja discreta con nuestro planeta, Satronho NX, el juego y sus FPS, en Imágenes → Satronho NX, y se abre el menú de compartir.",
+      "ver": [
+        "ficha"
+      ]
+    },
+    {
+      "id": "temperatura",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Por qué baja el rendimiento cuando el teléfono se calienta?",
+      "frases": [
+        "se calienta",
+        "temperatura",
+        "calor",
+        "esta caliente",
+        "grados"
+      ],
+      "claves": [
+        "temperatura",
+        "calor",
+        "caliente",
+        "calienta",
+        "grado"
+      ],
+      "respuesta": "El medidor muestra la temperatura de la batería: verde azulado normal, ámbar tibio y rojo desde 42 °C. Con ese calor el teléfono (sobre todo el Tensor de los Pixel) se frena solo para enfriarse y bajan los FPS. Si pasa, te aviso en el resumen y te propongo un perfil más liviano. Ayuda quitar la funda y no jugar cargando.",
+      "ver": [
+        "mali",
+        "ajuste-juego"
+      ]
+    },
+    {
+      "id": "ajuste-juego",
+      "guia": "nono",
+      "tema": "Configuraciones",
+      "pregunta": "¿Cómo ajusta Ñoño un solo juego?",
+      "frases": [
+        "ajustar un juego",
+        "configuracion de un juego",
+        "bajar resolucion a un juego",
+        "solo este juego"
+      ],
+      "claves": [
+        "ajuste",
+        "ajusta",
+        "juego",
+        "resolucion",
+        "propio"
+      ],
+      "respuesta": "Si un juego va por debajo de 25 FPS dos sesiones seguidas, en el resumen te propongo bajarle la resolución un paso, solo a ese juego (en su configuración propia), sin tocar los demás. Se puede deshacer en sus propiedades → Configuración por juego.",
+      "ver": [
+        "temperatura",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "estilo",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Cómo cambio el tema y el estilo de los controles?",
+      "frases": [
+        "cambiar tema",
+        "modo oscuro",
+        "negro puro",
+        "color de la app",
+        "controles transparentes",
+        "controles grises",
+        "cambio el tema",
+        "tema de la app",
+        "cambiar el color"
+      ],
+      "claves": [
+        "tema",
+        "estilo",
+        "color",
+        "negro",
+        "controles",
+        "transparente"
+      ],
+      "respuesta": "En Satronho → pestaña «Estilo»: el tema de la app (Violeta, Noche en negro puro para pantallas OLED, o Ámbar), el estilo de los controles en pantalla (Satronho violeta, Clásico gris o Casi transparente) y qué tan visible quieres el planeta detrás de los juegos.",
+      "ver": [
+        "pantalla-satronho"
+      ]
+    },
+    {
+      "id": "widget",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Cómo pongo el widget de Satronho en el inicio?",
+      "frases": [
+        "widget",
+        "pantalla de inicio",
+        "continuar juego",
+        "acceso en el inicio"
+      ],
+      "claves": [
+        "widget",
+        "inicio",
+        "continuar"
+      ],
+      "respuesta": "Mantén presionado un espacio vacío de tu pantalla de inicio → Widgets → Satronho NX · Continuar. Muestra tu último juego, cómo te fue y un botón para seguir jugando.",
+      "ver": [
+        "accesos-directos"
       ]
     }
   ]

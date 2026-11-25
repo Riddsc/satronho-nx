@@ -1047,6 +1047,8 @@ class InputOverlay(context: Context, attrs: AttributeSet?) :
             )
 
             val canvas = Canvas(scaledBitmap)
+            vectorDrawable.mutate()
+            org.yuzu.yuzu_emu.satronho.Satronho.styleControl(vectorDrawable)
             vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
             vectorDrawable.draw(canvas)
             return scaledBitmap

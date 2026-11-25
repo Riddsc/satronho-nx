@@ -1,6 +1,53 @@
 {
   "builds": [
     {
+      "tag": "Android – vista previa 4",
+      "fecha": "25 de noviembre de 2026",
+      "titulo": "Tu Satronho, a tu manera",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Pantalla de carga Satronho: el arte del juego en grande, nuestro planeta detrás y un consejo de uno de los guías mientras carga."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Ficha de cada juego (mantenlo presionado): tiempo jugado, sesiones, una gráfica con los FPS de las últimas sesiones, y Jugar, Preparar, Respaldar partidas y Propiedades a un toque."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Respaldo de partidas: empaca las partidas de un juego en un .zip y compártelo a Drive, WhatsApp o tu PC."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Captura Satronho en el menú del juego: la imagen con una franja de nuestro planeta, el juego y sus FPS, guardada y lista para compartir. Y «Compartir log» también en el menú."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Menú del juego con cabecera Satronho y cómo va la sesión en vivo. Arranque animado: el planeta aparece, su anillo se acomoda y una lunita da la vuelta."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Pestaña Estilo: temas Violeta, Noche (negro puro para pantallas OLED) y Ámbar; controles en pantalla Satronho violeta, clásico gris o casi transparentes; y la transparencia del planeta de fondo."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Temperatura del teléfono en el medidor. Si pasa de 42 °C, Ñoño te avisa en el resumen por qué bajaron los FPS y te ofrece un perfil más liviano."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Ñoño ajusta cada juego: si uno va lento dos sesiones seguidas, te propone bajarle la resolución solo a él, sin tocar los demás."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Widget «Continuar» para la pantalla de inicio: tu último juego, cómo te fue y un botón para seguir jugando."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "El resumen al cerrar el juego ya aparece (Android volvía a la lista antes de que estuviera listo). Y los juegos sin shaders que sacar por adelantado, como Celeste, ya no se marcan con ✓ ni se vuelven a ofrecer para preparar."
+        }
+      ]
+    },
+    {
       "tag": "Android – vista previa 3",
       "fecha": "25 de noviembre de 2026",
       "titulo": "Satronho por todas partes",

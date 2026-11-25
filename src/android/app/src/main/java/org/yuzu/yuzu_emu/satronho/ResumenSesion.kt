@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.model.Game
 
 /**
  * The summary card when a game closes, as on the desktop: how long, average and low FPS, the
@@ -65,6 +66,7 @@ object ResumenSesion {
         activity: Activity,
         resumen: SesionActual.Resumen,
         prepared: Boolean,
+        game: Game?,
         onPrepare: (() -> Unit)?
     ) {
         val context: Context = activity
@@ -75,8 +77,18 @@ object ResumenSesion {
         }
 
         val shaderProblem = resumen.shaderStutters > 0 &&
-            resumen.shaderStutters * 2 >= resumen.stutters && !prepared && onPrepare != null
-        val speaker = Satronho.speaker(if (shaderProblem) "samy" else "troya")
+            resumen.shaderStutters * 2 >= resumen.stutters && !prepared && onPrepare != null &&
+            !PrepareGame.nothingToPrepare(context, resumen.programId)
+        val hot = resumen.maxTempC >= SesionActual.HOT_C
+        val slow = !shaderProblem && game != null &&
+            AjustePorJuego.shouldSuggest(context, resumen.programId)
+        val speaker = Satronho.speaker(
+            when {
+                shaderProblem -> "samy"
+                hot || slow -> "nono"
+                else -> "troya"
+            }
+        )
         val guide = Satronho.guide(speaker)
 
         val header = LinearLayout(context).apply {
@@ -137,6 +149,11 @@ object ResumenSesion {
             list.addView(row(context, context.getString(R.string.satronho_summary_worst),
                 "${resumen.worstMs} ms", Satronho.PINK))
         }
+        if (resumen.maxTempC > 0.0) {
+            list.addView(row(context, context.getString(R.string.satronho_summary_temperature),
+                String.format("%.0f °C", resumen.maxTempC),
+                if (hot) Satronho.RED else Satronho.TEAL))
+        }
         root.addView(list)
 
         val verdict = when {
@@ -146,8 +163,17 @@ object ResumenSesion {
                 context.getString(R.string.satronho_summary_verdict_shaders)
             else -> context.getString(R.string.satronho_summary_verdict_other)
         }
+        val notes = StringBuilder(verdict)
+        if (hot) {
+            notes.append("\n\n").append(
+                context.getString(R.string.satronho_summary_hot, String.format("%.0f", resumen.maxTempC))
+            )
+        }
+        if (slow) {
+            notes.append("\n\n").append(context.getString(R.string.satronho_summary_slow))
+        }
         root.addView(TextView(context).apply {
-            text = verdict
+            text = notes
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
             setPadding(0, Satronho.dp(context, 12), 0, Satronho.dp(context, 4))
         })
@@ -158,6 +184,17 @@ object ResumenSesion {
             .setNegativeButton(R.string.satronho_share_log) { _, _ -> Satronho.shareLatestLog(activity) }
         if (shaderProblem) {
             builder.setNeutralButton(R.string.satronho_prepare) { _, _ -> onPrepare?.invoke() }
+        } else if (slow && game != null) {
+            builder.setNeutralButton(R.string.satronho_nono_lower) { _, _ ->
+                val changed = AjustePorJuego.lowerResolution(context, game)
+                android.widget.Toast.makeText(
+                    context,
+                    changed ?: context.getString(R.string.satronho_nono_lowest),
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+        } else if (hot) {
+            builder.setNeutralButton(R.string.satronho_summary_lighter) { _, _ -> Sugeridas.show(context) }
         } else {
             builder.setNeutralButton(R.string.satronho_summary_turn_off) { _, _ ->
                 Satronho.summaryEnabled = false

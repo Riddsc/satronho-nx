@@ -32,6 +32,7 @@ object SatronhoScreen {
     const val TAB_SUGGESTED = 1
     const val TAB_ASK = 2
     const val TAB_GUIDES = 3
+    const val TAB_STYLE = 4
 
     fun show(activity: Activity, onClose: (() -> Unit)? = null, tab: Int = -1) {
         val context: Context = activity
@@ -75,7 +76,8 @@ object SatronhoScreen {
             R.string.satronho_novedades,
             R.string.satronho_suggested,
             R.string.satronho_ask_tab,
-            R.string.satronho_guides_tab
+            R.string.satronho_guides_tab,
+            R.string.satronho_style_tab
         ).forEach { tabs.addTab(tabs.newTab().setText(it)) }
         root.addView(tabs)
 
@@ -92,12 +94,14 @@ object SatronhoScreen {
                 onClose?.invoke()
             }
 
+        lateinit var showTabRef: (Int) -> Unit
         fun showTab(index: Int) {
             body.removeAllViews()
             val view = when (index) {
                 TAB_NEWS -> Novedades.buildView(context)
                 TAB_SUGGESTED -> suggestedTab(context)
                 TAB_ASK -> GuideBubble.buildChat(activity, Satronho.speaker("samy"))
+                TAB_STYLE -> Estilo.buildView(activity) { showTabRef(TAB_STYLE) }
                 else -> guidesTab(activity)
             }
             body.addView(view, FrameLayout.LayoutParams(
@@ -105,6 +109,7 @@ object SatronhoScreen {
                 FrameLayout.LayoutParams.MATCH_PARENT
             ))
         }
+        showTabRef = ::showTab
         tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) = showTab(tab.position)
             override fun onTabUnselected(tab: TabLayout.Tab) {}

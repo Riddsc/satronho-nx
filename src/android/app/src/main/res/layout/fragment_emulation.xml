@@ -28,81 +28,128 @@
                 android:focusableInTouchMode="false"
                 android:defaultFocusHighlightEnabled="false" />
 
+            <!-- Satronho NX's loading screen: the game's art, our planet and a guide's tip. -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/loading_indicator"
-                style="?attr/materialCardViewOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:focusable="false"
                 android:defaultFocusHighlightEnabled="false"
                 android:clickable="false"
+                app:cardBackgroundColor="#FF0F0D16"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
                 app:rippleColor="@android:color/transparent">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/loading_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
                     <ImageView
-                        android:id="@+id/loading_image"
-                        android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:adjustViewBounds="true"
-                        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/linearLayout"
-                        tools:src="@drawable/default_icon" />
+                        android:id="@+id/satronho_loading_logo"
+                        android:layout_width="320dp"
+                        android:layout_height="320dp"
+                        android:layout_gravity="center"
+                        android:alpha="0.12"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitCenter" />
 
                     <LinearLayout
-                        android:id="@+id/linearLayout"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/loading_layout"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center_horizontal"
                         android:orientation="vertical"
-                        android:paddingHorizontal="24dp"
-                        android:paddingVertical="36dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/loading_image"
-                        app:layout_constraintTop_toTopOf="parent">
+                        android:paddingHorizontal="32dp">
 
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/loading_title"
-                            style="@style/TextAppearance.Material3.TitleMedium"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="marquee"
-                            android:marqueeRepeatLimit="marquee_forever"
-                            android:requiresFadingEdge="horizontal"
-                            android:singleLine="true"
-                            android:textAlignment="viewStart"
-                            tools:text="@string/games" />
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/loading_image"
+                            android:layout_width="150dp"
+                            android:layout_height="150dp"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Large"
+                            tools:src="@drawable/default_icon" />
 
-                        <com.google.android.material.textview.MaterialTextView
-                            android:id="@+id/loading_text"
-                            style="@style/TextAppearance.Material3.TitleSmall"
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:id="@+id/linearLayout"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:ellipsize="marquee"
-                            android:marqueeRepeatLimit="marquee_forever"
-                            android:requiresFadingEdge="horizontal"
-                            android:singleLine="true"
-                            android:text="@string/loading"
-                            android:textAlignment="viewStart" />
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:paddingTop="16dp">
 
-                        <com.google.android.material.progressindicator.LinearProgressIndicator
-                            android:id="@+id/loading_progress_indicator"
-                            android:layout_width="192dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:indeterminate="true"
-                            app:trackCornerRadius="8dp" />
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/loading_title"
+                                style="@style/TextAppearance.Material3.TitleLarge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="marquee"
+                                android:marqueeRepeatLimit="marquee_forever"
+                                android:requiresFadingEdge="horizontal"
+                                android:singleLine="true"
+                                android:textColor="#FFF2EEFF"
+                                android:textStyle="bold"
+                                tools:text="@string/games" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/loading_text"
+                                style="@style/TextAppearance.Material3.TitleSmall"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="marquee"
+                                android:marqueeRepeatLimit="marquee_forever"
+                                android:requiresFadingEdge="horizontal"
+                                android:singleLine="true"
+                                android:text="@string/loading"
+                                android:textColor="#FF9B8CFF" />
+
+                            <com.google.android.material.progressindicator.LinearProgressIndicator
+                                android:id="@+id/loading_progress_indicator"
+                                android:layout_width="260dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="14dp"
+                                android:indeterminate="true"
+                                app:indicatorColor="#FF8B5CF6"
+                                app:trackColor="#FF2A2140"
+                                app:trackCornerRadius="8dp" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    <LinearLayout
+                        android:id="@+id/satronho_loading_tip_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginHorizontal="24dp"
+                        android:layout_marginBottom="28dp"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/satronho_loading_guide"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/satronho_loading_tip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:maxWidth="520dp"
+                            android:textColor="#FFB9B2CC"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

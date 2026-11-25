@@ -30,8 +30,13 @@ object PrepareGame {
     fun preparedAt(activity: Activity, game: Game): Long =
         Satronho.prefs(activity).getLong(preparedKey(game), 0L)
 
+    /** «Preparar juego» found nothing to take out of this game. */
+    fun nothingToPrepare(context: Context, programId: String): Boolean =
+        Satronho.prefs(context).getBoolean("prepare_nothing_$programId", false)
+
+    /** Prepared with at least one shader program (older previews marked games with none too). */
     fun isPrepared(context: Context, programId: String): Boolean =
-        Satronho.prefs(context).getLong("prepared_$programId", 0L) > 0L
+        Satronho.prefs(context).getLong("prepared_programs_$programId", 0L) > 0L
 
     /**
      * The first time a game that isn't prepared is opened, Samy offers to prepare it first.
@@ -62,7 +67,7 @@ object PrepareGame {
 
     fun menuDetails(activity: Activity, game: Game): String {
         val at = preparedAt(activity, game)
-        return if (at == 0L) {
+        return if (at == 0L || !isPrepared(activity, game.programId)) {
             ""
         } else {
             activity.getString(
@@ -140,9 +145,18 @@ object PrepareGame {
                 if (dialog.isShowing) {
                     dialog.dismiss()
                 }
-                if (programs >= 0) {
+                if (programs > 0) {
                     Satronho.prefs(activity).edit()
-                        .putLong(preparedKey(game), System.currentTimeMillis()).apply()
+                        .putLong(preparedKey(game), System.currentTimeMillis())
+                        .putLong("prepared_programs_${game.programId}", programs).apply()
+                } else if (programs == 0L) {
+                    // Nothing to take out ahead (Celeste builds every shader while playing): no ✓,
+                    // and Samy doesn't offer it again.
+                    Satronho.prefs(activity).edit()
+                        .putBoolean("prepare_asked_${game.programId}", true)
+                        .putBoolean("prepare_nothing_${game.programId}", true)
+                        .remove(preparedKey(game))
+                        .remove("prepared_programs_${game.programId}").apply()
                 }
                 val message = when {
                     programs > 0 -> context.getString(R.string.satronho_prepare_done, programs)

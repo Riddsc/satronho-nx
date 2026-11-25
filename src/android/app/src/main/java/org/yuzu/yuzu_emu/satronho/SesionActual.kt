@@ -27,7 +27,9 @@ object SesionActual {
         val stutters: Int,
         val shaderStutters: Int,
         val worstMs: Int,
-        val endedAt: Long
+        val endedAt: Long,
+        /** The battery's highest temperature in the session, °C (0 when unknown). */
+        val maxTempC: Double = 0.0
     ) {
         fun toJson(): String = JSONObject()
             .put("programId", programId)
@@ -39,7 +41,10 @@ object SesionActual {
             .put("shaderStutters", shaderStutters)
             .put("worstMs", worstMs)
             .put("endedAt", endedAt)
+            .put("maxTempC", maxTempC)
             .toString()
+
+        fun toJsonObject(): JSONObject = JSONObject(toJson())
 
         companion object {
             fun fromJson(text: String?): Resumen? {
@@ -55,7 +60,8 @@ object SesionActual {
                         json.optInt("stutters"),
                         json.optInt("shaderStutters"),
                         json.optInt("worstMs"),
-                        json.optLong("endedAt")
+                        json.optLong("endedAt"),
+                        json.optDouble("maxTempC", 0.0)
                     )
                 } catch (e: Exception) {
                     null
@@ -66,6 +72,12 @@ object SesionActual {
 
     private const val PENDING_KEY = "summary_pending"
     private const val LAST_KEY_PREFIX = "last_session_"
+    private const val HISTORY_KEY_PREFIX = "history_"
+    private const val TOTAL_KEY_PREFIX = "played_seconds_"
+    private const val HISTORY_SIZE = 12
+
+    /** From this battery temperature the phone is likely slowing itself down. */
+    const val HOT_C = 42.0
 
     /** Sessions shorter than this don't leave a summary: opening a game and backing out. */
     private const val MIN_SECONDS = 30L
@@ -92,6 +104,13 @@ object SesionActual {
         private set
     var shadersBuilding = 0
         private set
+    /** The battery's temperature now and the session's highest, °C (0 when unknown). */
+    var tempC = 0.0
+        private set
+    var maxTempC = 0.0
+        private set
+    private var appContext: Context? = null
+    private var sampleCount = 0
 
     private val tick = object : Runnable {
         override fun run() {
@@ -104,7 +123,8 @@ object SesionActual {
     }
 
     /** Called when the game has really started (the loading screen is gone). */
-    fun begin(programId: String, title: String) {
+    fun begin(context: Context, programId: String, title: String) {
+        appContext = context.applicationContext
         if (running && programId == this.programId) {
             return
         }
@@ -121,10 +141,30 @@ object SesionActual {
         lastStutterAt = 0L
         lastShaderStutterAt = 0L
         shadersBuilding = 0
+        tempC = 0.0
+        maxTempC = 0.0
+        sampleCount = 0
+        readTemperature()
         // Drop whatever an earlier game left counted.
         NativeLibrary.satronhoTakeStutters()
         handler.removeCallbacks(tick)
         handler.postDelayed(tick, 1000)
+    }
+
+    private fun readTemperature() {
+        val context = appContext ?: return
+        try {
+            val battery = context.registerReceiver(
+                null, android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED)
+            )
+            val tenths = battery?.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            if (tenths > 0) {
+                tempC = tenths / 10.0
+                maxTempC = maxOf(maxTempC, tempC)
+            }
+        } catch (e: Exception) {
+            // No battery information on this device.
+        }
     }
 
     private fun sample() {
@@ -132,6 +172,9 @@ object SesionActual {
             return
         }
         val now = SystemClock.elapsedRealtime()
+        if (++sampleCount % 5 == 0) {
+            readTemperature()
+        }
         shadersBuilding = NativeLibrary.getShadersBuilding()
         val taken = NativeLibrary.satronhoTakeStutters()
         if (taken.size >= 2 && taken[0] > 0) {
@@ -169,12 +212,19 @@ object SesionActual {
         val low = sorted.take(tenth).average()
         val resumen = Resumen(
             programId, title, seconds, fpsSum / fpsSamples, low, stutters, shaderStutters,
-            worstMs, System.currentTimeMillis()
+            worstMs, System.currentTimeMillis(), maxTempC
         )
-        Satronho.prefs(context).edit()
+        val prefs = Satronho.prefs(context)
+        val history = org.json.JSONArray()
+        history.put(resumen.toJsonObject())
+        history(context, programId).take(HISTORY_SIZE - 1).forEach { history.put(it.toJsonObject()) }
+        prefs.edit()
             .putString(LAST_KEY_PREFIX + programId, resumen.toJson())
             .putString(PENDING_KEY, resumen.toJson())
+            .putString(HISTORY_KEY_PREFIX + programId, history.toString())
+            .putLong(TOTAL_KEY_PREFIX + programId, totalSeconds(context, programId) + seconds)
             .apply()
+        ContinuarWidget.refresh(context)
     }
 
     /** The session waiting to be shown on the games list, once. */
@@ -184,6 +234,22 @@ object SesionActual {
         prefs.edit().remove(PENDING_KEY).apply()
         return pending
     }
+
+    /** The game's last sessions, newest first. */
+    fun history(context: Context, programId: String): List<Resumen> {
+        val text = Satronho.prefs(context).getString(HISTORY_KEY_PREFIX + programId, null)
+            ?: return listOfNotNull(last(context, programId))
+        return try {
+            val array = org.json.JSONArray(text)
+            (0 until array.length()).mapNotNull { Resumen.fromJson(array.optJSONObject(it)?.toString()) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /** Everything played of this game in Satronho NX, seconds. */
+    fun totalSeconds(context: Context, programId: String): Long =
+        Satronho.prefs(context).getLong(TOTAL_KEY_PREFIX + programId, 0L)
 
     fun last(context: Context, programId: String): Resumen? =
         Resumen.fromJson(Satronho.prefs(context).getString(LAST_KEY_PREFIX + programId, null))

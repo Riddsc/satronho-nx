@@ -1325,4 +1325,72 @@
     <string name="satronho_welcome_suggested">Ñoño revisa tu teléfono y te recomienda un perfil. Un toque y listo.</string>
     <string name="satronho_welcome_footer">Cuando tengas dudas, toca la burbuja de la esquina. Si la mantienes presionada, se abre Satronho.</string>
     <string name="satronho_welcome_start">¡A jugar!</string>
+
+    <!-- Satronho NX: vista previa 4 -->
+    <string name="satronho_style_tab">Estilo</string>
+    <string name="satronho_style_theme">Tema de la app</string>
+    <string name="satronho_style_controls">Controles en pantalla</string>
+    <string name="satronho_theme_violet">Violeta</string>
+    <string name="satronho_theme_violet_description">El de siempre: violeta y azul noche</string>
+    <string name="satronho_theme_night">Noche</string>
+    <string name="satronho_theme_night_description">Negro puro: se ve increíble y ahorra batería en pantallas OLED</string>
+    <string name="satronho_theme_amber">Ámbar</string>
+    <string name="satronho_theme_amber_description">Cálido, con los tonos dorados de Samy</string>
+    <string name="satronho_controls_satronho">Satronho violeta</string>
+    <string name="satronho_controls_satronho_description">Nuestros colores</string>
+    <string name="satronho_controls_classic">Clásico gris</string>
+    <string name="satronho_controls_classic_description">Los controles grises de siempre</string>
+    <string name="satronho_controls_subtle">Casi transparente</string>
+    <string name="satronho_controls_subtle_description">Para ver más el juego</string>
+    <string name="satronho_capture">Captura Satronho</string>
+    <string name="satronho_capture_saved">Captura guardada en Imágenes → Satronho NX</string>
+    <string name="satronho_capture_failed">No se pudo tomar la captura</string>
+    <string name="satronho_card_time">Jugado</string>
+    <string name="satronho_card_sessions">Sesiones</string>
+    <string name="satronho_card_last_fps">FPS última</string>
+    <string name="satronho_card_chart">FPS promedio de las últimas sesiones</string>
+    <string name="satronho_card_no_sessions">Todavía no hay sesiones: juega un rato y aquí verás cómo le va.</string>
+    <string name="satronho_card_not_prepared">Sin preparar</string>
+    <string name="satronho_card_nothing">Arma sus shaders al jugar</string>
+    <string name="satronho_card_properties">Propiedades del juego</string>
+    <string name="satronho_backup_saves">Respaldar partidas</string>
+    <string name="satronho_backup_working">Empacando tus partidas…</string>
+    <string name="satronho_backup_none">Este juego todavía no tiene partidas guardadas.</string>
+    <string name="satronho_backup_failed">No se pudieron empacar las partidas.</string>
+    <string name="satronho_summary_temperature">Temperatura máxima</string>
+    <string name="satronho_summary_hot">Ñoño: el teléfono llegó a %1$s °C. Con ese calor se frena solo para enfriarse, y por eso bajan los FPS. Un perfil más liviano lo mantiene más fresco.</string>
+    <string name="satronho_summary_slow">Ñoño: este juego va lento ya dos sesiones seguidas. Puedo bajarle la resolución solo a él, sin tocar tus otros juegos.</string>
+    <string name="satronho_summary_lighter">Perfil más liviano</string>
+    <string name="satronho_nono_lower">Bajar resolución</string>
+    <string name="satronho_nono_tuned">Listo: %1$s pasa de %2$s a %3$s, solo en este juego.</string>
+    <string name="satronho_nono_lowest">Este juego ya está en la resolución más baja.</string>
+    <string name="satronho_widget_name">Satronho NX · Continuar</string>
+    <string name="satronho_widget_description">Tu último juego, cómo te fue y un botón para seguir jugando</string>
+    <string name="satronho_widget_continue">Continuar</string>
+    <string name="satronho_widget_open">Abrir</string>
+    <string name="satronho_widget_ready">Listo para seguir</string>
+    <string name="satronho_widget_empty">Abre un juego y aparecerá aquí</string>
+    <string-array name="satronho_tips_samy">
+        <item>Mantén presionado un juego para ver su ficha: tiempo jugado, sesiones y respaldo de partidas.</item>
+        <item>«Captura Satronho» está en el menú del juego: guarda la imagen con nuestro sello, lista para compartir.</item>
+        <item>Si algo falla, «Compartir log» en el menú del juego me manda todo lo que necesito.</item>
+        <item>Desde el ícono de la app (mantenido) llegas directo a tu último juego.</item>
+    </string-array>
+    <string-array name="satronho_tips_troya">
+        <item>El medidor marca en rojo «tirón por shaders» cuando el tirón es de shaders nuevos, no un fallo.</item>
+        <item>En la pestaña Estilo eliges el tema Noche: negro puro, ideal para la pantalla OLED.</item>
+        <item>Al salir del juego te cuento cómo te fue: FPS, tirones y temperatura.</item>
+    </string-array>
+    <string-array name="satronho_tips_nono">
+        <item>Si el teléfono pasa de 42 °C, se frena solo para enfriarse: ahí bajan los FPS.</item>
+        <item>Si un juego va lento dos sesiones seguidas, te propongo bajarle la resolución solo a él.</item>
+        <item>Las configuraciones sugeridas están pensadas para tu teléfono: un toque y listo.</item>
+    </string-array>
+    <string-array name="satronho_tips_juana">
+        <item>Cuando salga una build nueva, te aviso al abrir la app y la instalo encima.</item>
+        <item>En Satronho → Novedades ves todo lo que trae cada build.</item>
+    </string-array>
+    <string-array name="satronho_tips_mecharidds">
+        <item>Toca la burbuja de la esquina cuando tengas una duda: respondemos sin internet.</item>
+    </string-array>
 </resources>
