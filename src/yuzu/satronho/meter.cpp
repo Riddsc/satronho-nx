@@ -489,19 +489,19 @@ std::vector<Meter::Cell> Meter::Cells() const {
         // A stutter while shaders build says so, for whoever watches the stream.
         const bool shader_stutter = last_shader_stutter &&
                                     Clock::now() - *last_shader_stutter < std::chrono::seconds{5};
-        cells.push_back({shader_stutter && shaders_building > 0
-                            ? std::vector<Run>{{Tr("Armando shaders "), font, Dim},
-                                               {QString::number(std::max(shaders_left, 1)), bold,
-                                                Spike},
-                                               {Tr(" · tirón por shaders"), font, Muted}}
-                        : shaders_building > 0
-                             ? std::vector<Run>{{Tr("Shaders "), font, Dim},
-                                                {QString::number(shaders_left > 0 ? shaders_left
-                                                                                  : shaders_building),
-                                                 bold, Warn},
-                                                {Tr(" por armar"), font, Muted}}
-                             : std::vector<Run>{{Tr("Shaders "), font, Dim},
-                                                {Tr("listos"), font, Muted}}});
+        Cell cell{{{Tr(shader_stutter && shaders_building > 0 ? "Armando shaders " : "Shaders "),
+                    font, Dim}}};
+        if (shaders_building <= 0) {
+            cell.runs.push_back({Tr("listos"), font, Muted});
+        } else if (shader_stutter) {
+            cell.runs.push_back({QString::number(std::max(shaders_left, 1)), bold, Spike});
+            cell.runs.push_back({Tr(" · tirón por shaders"), font, Muted});
+        } else {
+            cell.runs.push_back(
+                {QString::number(shaders_left > 0 ? shaders_left : shaders_building), bold, Warn});
+            cell.runs.push_back({Tr(" por armar"), font, Muted});
+        }
+        cells.push_back(std::move(cell));
     }
     if (Shows(Ram)) {
         Cell cell{{{QStringLiteral("RAM "), font, Dim}}};
