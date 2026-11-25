@@ -215,7 +215,7 @@
     <string name="open_user_folder">Satronho NX フォルダを開く</string>
     <string name="open_user_folder_description">Satronho NX内部のファイルを管理します</string>
     <string name="no_file_manager">ファイルマネージャーが見つかりませんでした</string>
-    <string name="notification_no_directory_link">Edenのディレクトリを開けません</string>
+    <string name="notification_no_directory_link">Satronho NXのディレクトリを開けません</string>
     <string name="notification_no_directory_link_description">ファイルマネージャのサイドパネルでユーザーフォルダを手動で探してください。</string>
     <string name="manage_save_data">セーブデータ</string>
     <string name="manage_save_data_description">セーブデータが見つかりました。操作を選択してください。</string>

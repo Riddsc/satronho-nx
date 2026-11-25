@@ -695,6 +695,8 @@ jobs:
 
           Windows: descomprime el zip completo y ejecuta satronho-nx.exe. Comparte partidas, configuracion y shaders con Lichii y Eden (carpeta eden en AppData).
 
+          Android (arm64, Android 13 o mas nuevo): [satronho-nx-android-arm64.apk](${base}/satronho-nx-android-arm64.apk), firmado con la llave de Satronho NX; llega a este mismo release unos minutos despues que la version de Windows. Ya instalada, la app se actualiza sola.
+
           $({
             row "amd64 / x86_64" "$(link zip satronho-nx-windows-x86_64.zip)" "$(link "PGO zip" satronho-nx-windows-x86_64-pgo.zip)" "Las dos con clang-cl y ThinLTO; la PGO (recomendada) suma el perfil entrenado en Ocarina of Time"
           } | table)
@@ -725,3 +727,14 @@ jobs:
             echo "Release is tagged '$published_tag' and titled '$published_title', expected tag $expected and a title naming build ${GITHUB_RUN_NUMBER}"
             exit 1
           fi
+
+  # El APK de Android, al mismo release (android.yml con el tag de esta build).
+  android:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android.yml
+    with:
+      tag: build-${{ github.run_number }}
+      build: ${{ github.run_number }}
+    secrets: inherit

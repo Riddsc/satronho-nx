@@ -1566,6 +1566,176 @@
       "ver": [
         "log"
       ]
+    },
+    {
+      "id": "modo-directo-auto",
+      "guia": "nono",
+      "tema": "Modo directo automático",
+      "pregunta": "¿Qué es el modo directo automático?",
+      "frases": [
+        "modo directo automatico",
+        "modo directo",
+        "obs abierto",
+        "tiktok live studio abierto",
+        "cuadros perdidos en obs",
+        "el directo se traba",
+        "obs pierde frames",
+        "streamlabs abierto"
+      ],
+      "claves": [
+        "modo",
+        "automatico",
+        "obs",
+        "streamlabs",
+        "encoder",
+        "frames",
+        "perdidos",
+        "codificador"
+      ],
+      "respuesta": "Es una función propia de Satronho NX. Cada cinco segundos Satronho mira si OBS, Streamlabs o TikTok LIVE Studio están abiertos. Si lo están, los shaders que el juego todavía no necesita se arman con la mitad de los hilos, para dejarle procesador al codificador de la transmisión; los que el juego está esperando nunca se frenan. El medidor dice «modo directo» mientras actúa y el resumen de la sesión lo anota. Se apaga en Satronho → «Modo directo automático». Con un juego preparado con «Preparar para directo» casi no se nota ninguna diferencia en el juego.",
+      "ver": [
+        "directo",
+        "medidor",
+        "resumen-sesion"
+      ]
+    },
+    {
+      "id": "ficha-satronho",
+      "guia": "samy",
+      "tema": "Ficha Satronho",
+      "pregunta": "¿Qué es la Ficha Satronho de un juego?",
+      "frases": [
+        "ficha satronho",
+        "ficha del juego",
+        "cuanto he jugado",
+        "tiempo jugado",
+        "horas jugadas",
+        "grafica de fps del juego",
+        "sesiones del juego"
+      ],
+      "claves": [
+        "ficha",
+        "jugado",
+        "horas",
+        "tiempo",
+        "grafica",
+        "sesiones"
+      ],
+      "respuesta": "Clic derecho en un juego → «Ficha Satronho»: el tiempo que llevas jugándolo en Satronho NX, cuántas sesiones, los FPS y tirones de la última, una gráfica con los FPS de las últimas sesiones, y botones para Jugar, Preparar para directo, Respaldar y Restaurar partidas y abrir su carpeta de partidas. En la vista de cuadrícula y carrusel, cada juego lleva el sello: ✓ si está preparado y los FPS de su última sesión.",
+      "ver": [
+        "respaldo-partidas",
+        "directo"
+      ]
+    },
+    {
+      "id": "respaldo-partidas",
+      "guia": "samy",
+      "tema": "Respaldo de partidas",
+      "pregunta": "¿Cómo respaldo mis partidas o las paso al teléfono?",
+      "frases": [
+        "respaldar partidas",
+        "copia de mis partidas",
+        "pasar partidas al telefono",
+        "pasar partidas al celular",
+        "partidas del celular al pc",
+        "restaurar partidas",
+        "no perder mis partidas"
+      ],
+      "claves": [
+        "respaldo",
+        "respaldar",
+        "partidas",
+        "guardado",
+        "restaurar",
+        "telefono",
+        "celular",
+        "android"
+      ],
+      "respuesta": "En la Ficha Satronho del juego → «Respaldar partidas»: se crea un .zip en Documentos\\\\Satronho NX\\\\Respaldos. Ese mismo .zip se importa en la app de Android (propiedades del juego → Datos de guardado → Importar). Al revés: en el teléfono usa «Respaldar partidas» en la ficha del juego (o «Respaldar todas las partidas» en Ajustes), pásate el .zip y aquí usa «Restaurar…» en la Ficha Satronho. Antes de restaurar, Satronho guarda un respaldo de lo que tenías.",
+      "ver": [
+        "ficha-satronho",
+        "android"
+      ]
+    },
+    {
+      "id": "captura-satronho",
+      "guia": "samy",
+      "tema": "Captura Satronho",
+      "pregunta": "¿Cómo hago una Captura Satronho?",
+      "frases": [
+        "captura satronho",
+        "tomar captura",
+        "captura de pantalla con logo",
+        "screenshot con marca",
+        "foto del juego para redes"
+      ],
+      "claves": [
+        "satronho",
+        "franja",
+        "logo",
+        "redes",
+        "marca"
+      ],
+      "respuesta": "Con el juego abierto presiona Ctrl+Shift+P (o Satronho → «Captura Satronho»). Se guarda la imagen del juego con una franja discreta con nuestro planeta, Satronho NX, el juego y sus FPS, en Imágenes\\\\Satronho NX. La captura normal (sin franja) sigue en su atajo de siempre.",
+      "ver": [
+        "ficha-satronho"
+      ]
+    },
+    {
+      "id": "tema-satronho",
+      "guia": "troya",
+      "tema": "Tema Satronho",
+      "pregunta": "¿Cómo cambio el tema de Satronho NX?",
+      "frases": [
+        "cambiar el tema",
+        "tema satronho",
+        "tema oscuro",
+        "negro puro",
+        "color de la ventana",
+        "tema violeta",
+        "tema ambar",
+        "cambio el tema",
+        "como cambio el tema",
+        "tema de la ventana"
+      ],
+      "claves": [
+        "tema",
+        "color",
+        "oscuro",
+        "negro",
+        "violeta",
+        "ambar",
+        "apariencia"
+      ],
+      "respuesta": "En Satronho → «Tema Satronho» eliges Violeta, Noche (negro puro) o Ámbar, los mismos tres de la app de Android. «El de antes» vuelve al tema por defecto. También están en Configuración → General → Tema.",
+      "ver": [
+        "guias"
+      ]
+    },
+    {
+      "id": "android",
+      "guia": "juana",
+      "tema": "Satronho NX en Android",
+      "pregunta": "¿Satronho NX tiene versión para Android?",
+      "frases": [
+        "version para android",
+        "satronho en el celular",
+        "apk de satronho",
+        "satronho para telefono",
+        "descargar para android"
+      ],
+      "claves": [
+        "android",
+        "apk",
+        "celular",
+        "telefono",
+        "movil"
+      ],
+      "respuesta": "Sí. Cada release trae el .zip de PC y el APK de Android (satronho-nx-android-arm64.apk), para Android 13 o más nuevo con procesador ARM64. Lleva lo mismo de Satronho: los guías, las novedades, Preparar juego, el medidor, el resumen de la sesión, la ficha de cada juego y su propio carrusel. Una vez instalado, se actualiza solo desde la app.",
+      "ver": [
+        "actualizar",
+        "respaldo-partidas"
+      ]
     }
   ]
 }

@@ -13,6 +13,8 @@
 #include <QPixmap>
 #include <QPropertyAnimation>
 #include <QPushButton>
+#include <QRandomGenerator>
+#include <QLabel>
 #include <QStyleOption>
 #include "common/container/unordered_map.h"
 #include "core/frontend/framebuffer_layout.h"
@@ -21,6 +23,7 @@
 #include "video_core/rasterizer_interface.h"
 #include "video_core/shader_warm/shader_warm_builder.h"
 #include "yuzu/loading_screen.h"
+#include "yuzu/satronho/guides.h"
 
 // Mingw seems to not have QMovie at all. If QMovie is missing then use a single frame instead of an
 // showing the full animation
@@ -110,6 +113,15 @@ LoadingScreen::LoadingScreen(QWidget* parent)
     });
     qRegisterMetaType<VideoCore::LoadCallbackStage>();
 
+    tip_label = new QLabel(this);
+    tip_label->setWordWrap(true);
+    tip_label->setTextFormat(Qt::RichText);
+    tip_label->setMaximumWidth(640);
+    tip_label->setStyleSheet(QStringLiteral("QLabel { color: #B9B2CC; font-size: 10pt; "
+                                            "background: transparent; }"));
+    tip_label->hide();
+    ui->verticalLayout->addWidget(tip_label, 0, Qt::AlignHCenter | Qt::AlignBottom);
+
     stage_translations = {
         {VideoCore::LoadCallbackStage::Prepare, tr("Loading...")},
         {VideoCore::LoadCallbackStage::Build, tr("Loading Shaders %1 / %2")},
@@ -151,7 +163,55 @@ void LoadingScreen::Prepare(Loader::AppLoader& loader) {
     }
 
     slow_shader_compile_start = false;
+    ShowSatronhoTip();
     OnLoadProgress(VideoCore::LoadCallbackStage::Prepare, 0, 0);
+}
+
+void LoadingScreen::ShowSatronhoTip() {
+    if (!Satronho::GuidesEnabled()) {
+        tip_label->hide();
+        return;
+    }
+    const Satronho::GuideId id = Satronho::PickPet();
+    QStringList tips;
+    switch (id) {
+    case Satronho::GuideId::Samy:
+        tips = {tr("Clic derecho en un juego → «Ficha Satronho»: tiempo jugado, sesiones y respaldo "
+                   "de partidas."),
+                tr("«Preparar para directo» arma todos los shaders del juego en esta pantalla, "
+                   "antes de jugar."),
+                tr("«Captura Satronho» (Ctrl+Shift+P) guarda la imagen con nuestro sello, lista "
+                   "para tus redes.")};
+        break;
+    case Satronho::GuideId::Troya:
+        tips = {tr("El medidor dice «tirón por shaders» cuando un tirón es de un shader nuevo, no un "
+                   "fallo."),
+                tr("Satronho → Tema Satronho: Violeta, Noche en negro puro o Ámbar."),
+                tr("Al cerrar el juego te cuento cómo te fue: FPS, tirones y si hubo modo directo.")};
+        break;
+    case Satronho::GuideId::Nono:
+        tips = {tr("Con OBS o TikTok LIVE Studio abiertos, el modo directo deja CPU para la "
+                   "transmisión."),
+                tr("Las configuraciones sugeridas están pensadas para tu gráfica: un clic y listo.")};
+        break;
+    case Satronho::GuideId::Juana:
+        tips = {tr("Cuando sale una build nueva te aviso, y la de Android sale en el mismo release."),
+                tr("En Satronho → Novedades ves todo lo que trae cada build.")};
+        break;
+    default:
+        tips = {tr("¿Dudas? Satronho → Pregúntale a los guías: respondemos sin internet.")};
+        break;
+    }
+    const QString tip = tips.at(static_cast<int>(QRandomGenerator::global()->bounded(
+        static_cast<quint32>(tips.size()))));
+    const Satronho::Guide& guide = Satronho::GetGuide(id);
+    tip_label->setText(
+        QStringLiteral("<table><tr><td valign=\"middle\"><img src=\"%1\" width=\"44\" "
+                       "height=\"44\"></td><td valign=\"middle\" style=\"padding-left:10px\">"
+                       "<b style=\"color:%2\">%3:</b> %4</td></tr></table>")
+            .arg(Satronho::AvatarPath(id), guide.color.name(), guide.name.toHtmlEscaped(),
+                 tip.toHtmlEscaped()));
+    tip_label->show();
 }
 
 void LoadingScreen::OnLoadComplete() {

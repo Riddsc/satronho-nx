@@ -668,3 +668,23 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   `Satronho.pickPet` (burbuja y consejos). Arreglos: el resumen se guarda en `onPause` (Android
   reanuda la lista antes de destruir el juego) y «Preparar juego» con 0 programas no marca ✓
   (`prepared_programs_<id>`, `prepare_nothing_<id>`).
+- **Build 57 (preparada en la rama `android`, 2026-11-25):** portados de Lichii (rutas
+  `src/lichii` → `src/yuzu`, sin pruebas que no tenemos): #2512, #2504, #2418, #2478, #2524, #2491,
+  #2465, #2539, #2258, #2555, #2551, #2259, #2483. Fuera: los de traducción de shaders (#2542, #2523,
+  #2567, #2577), #2482/#2484 y sus reverts, y los que dependen de piezas que no tenemos (#2517 sparse
+  buffers, #2533 HDR, #2466, #2566/#2573 efectos de OoT con su DLSS, #2576 anillo del stream buffer:
+  nuestro `GetStreamBuffer` ya revisa la primera región al dar la vuelta, #2549 NUP). PC:
+  **modo directo automático** (`Directo::UpdateStreamMode` cada 5 s desde `MainWindow`; detecta
+  obs64/obs32/Streamlabs/TikTok LIVE Studio; `VideoCommon::SetShaderJobStreamLimit` limita a la mitad
+  de cada grupo de hilos los trabajos de shader que no son NeedNow; medidor «modo directo», el
+  resumen lo anota y el log dice `Satronho stream mode: on/off`; ajuste `satronho_stream_auto`),
+  **Ficha Satronho** (`satronho/juegos.*`: historial por juego en `satronho_juegos.ini`, sello en
+  `GameCard::paint`, respaldo con `tar -a` de Windows a Documentos\Satronho NX\Respaldos, restaurar
+  desde .zip de PC o Android: la carpeta del program id en la raíz), **Captura Satronho**
+  (Ctrl+Shift+P, `satronho/captura.*`, `GRenderWindow::CaptureScreenshot` acepta un `stamp`),
+  **temas Satronho** (`satronho/estilo.*`, paletas sobre Fusion; `UISettings::themes` pasa a 9) y el
+  consejo de un guía en la pantalla de carga (`Satronho::PickPet`). Android: carrusel Satronho
+  (`satronho_carousel_*` en `layout/fragment_games.xml`, `GamesFragment.updateSatronhoCarousel`),
+  «Respaldar todas las partidas» (`FichaJuego.backupAll`, un .zip con una carpeta por program id),
+  `satronho_gpu.log`. `release-binaries.yml` llama a `android.yml` con el tag de la build, así cada
+  release lleva el APK.

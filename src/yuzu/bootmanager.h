@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <utility>
 
@@ -116,7 +117,9 @@ public:
 
     bool IsLoadingComplete() const;
 
-    void CaptureScreenshot(const QString& screenshot_path);
+    /// `stamp`, when given, draws on the picture before it is saved (Captura Satronho).
+    void CaptureScreenshot(const QString& screenshot_path,
+                           std::function<void(QImage&)> stamp = {});
 
     /**
      * Instructs the window to re-launch the application using the specified program_index.

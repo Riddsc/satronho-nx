@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-57",
+      "fecha": "25 de noviembre de 2026",
+      "titulo": "En los releases, junto a PC",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX para Android sale ahora en cada release, junto a la versión de PC, firmado con nuestra llave. Desde esta build la app se actualiza sola: cuando haya una nueva, Juana te avisa al abrirla y se instala encima."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Carrusel Satronho: el arte del juego del centro se ve difuminado de fondo y arriba salen su nombre, si está preparado, sus FPS, el tiempo jugado y los botones Jugar y Ficha."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Respaldar todas las partidas (Ajustes): las de todos tus juegos en un .zip. Ese .zip, igual que el de cada juego, se restaura en Satronho NX de PC (Ficha Satronho → Restaurar…), y el del PC se importa aquí."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "El log de la GPU también se llama ya satronho_gpu.log, y el aviso de la carpeta de datos dice Satronho NX."
+        }
+      ]
+    },
+    {
       "tag": "Android – vista previa 4",
       "fecha": "25 de noviembre de 2026",
       "titulo": "Tu Satronho, a tu manera",

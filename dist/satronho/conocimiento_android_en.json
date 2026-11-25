@@ -544,7 +544,10 @@
         "move saves to pc",
         "keep my saves",
         "don't lose my saves",
-        "restore saves"
+        "restore saves",
+        "move saves to the pc",
+        "saves from the pc to the phone",
+        "back up every save"
       ],
       "claves": [
         "backup",
@@ -552,9 +555,12 @@
         "save",
         "saves",
         "copy",
-        "restore"
+        "restore",
+        "pc",
+        "computer",
+        "every"
       ],
-      "respuesta": "On the game's page (long-press it) → Back up saves: Satronho packs your saves into a .zip and opens the share menu to send it to Drive, WhatsApp or your PC. To restore: page → Game properties → Save data → Import. Do it before uninstalling the app, because uninstalling deletes them.",
+      "respuesta": "On the game's page (long-press it) → Back up saves, or Settings → Back up every save for all your games at once: Satronho packs the saves into a .zip and opens the share menu (Drive, WhatsApp, your PC). That .zip also works in Satronho NX on PC: the game's Ficha Satronho → Restaurar…. The other way round, the PC's .zip imports here in the game's properties → Save data → Import. Do it before uninstalling the app, because uninstalling deletes them.",
       "ver": [
         "ficha"
       ]
@@ -673,6 +679,31 @@
       "respuesta": "Long-press an empty spot on your home screen → Widgets → Satronho NX · Continue. It shows your last game, how it went and a button to keep playing.",
       "ver": [
         "accesos-directos"
+      ]
+    },
+    {
+      "id": "carrusel",
+      "guia": "troya",
+      "tema": "Graphics",
+      "pregunta": "What does the carousel view have?",
+      "frases": [
+        "carousel view",
+        "carousel",
+        "change the games view",
+        "game background",
+        "list view"
+      ],
+      "claves": [
+        "carousel",
+        "view",
+        "background",
+        "list",
+        "grid"
+      ],
+      "respuesta": "With the view button (top, next to the filter) you pick grid, list or carousel. In Satronho's carousel, the centered game's art shows blurred in the background, and above it go its name, whether it is prepared, its last session's FPS, the time played and the Play and Page buttons. The carousel is used with the phone upright.",
+      "ver": [
+        "ficha",
+        "sellos"
       ]
     }
   ]

@@ -390,6 +390,8 @@ private slots:
     void OnGameListDeleteShaderWarm(u64 program_id);
     void OnGameListPrecompileShaders(u64 program_id, const std::string& game_path, bool on);
     void OnSatronhoPrepareStream(u64 program_id, const std::string& game_path);
+    void OnSatronhoFicha(u64 program_id, const std::string& game_path);
+    void OnSatronhoCapture();
     void SatronhoEndSession();
     void SatronhoShowSessionNotes();
     void PrepareShaderPrecache(u64 title_id, const std::filesystem::path& game_path);
@@ -693,4 +695,6 @@ protected:
     void dropEvent(QDropEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
+    /// The last second's game FPS, for Captura Satronho.
+    double satronho_last_fps = 0.0;
 };

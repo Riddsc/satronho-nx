@@ -17,6 +17,8 @@
 #include "qt_common/qt_common.h"
 #include "video_core/gpu.h"
 #include "video_core/shader_notify.h"
+#include "yuzu/satronho/directo.h"
+#include "yuzu/satronho/juegos.h"
 
 namespace Satronho::Session {
 
@@ -40,6 +42,7 @@ struct State {
     int stutters{};
     int shader_stutters{};
     int shaders_at_begin{};
+    bool stream_mode{};
 };
 
 State& Current() {
@@ -97,6 +100,7 @@ void Tick(double fps) {
     if (!std::isnan(fps) && fps > 0.0) {
         state.fps.push_back(static_cast<float>(fps));
     }
+    state.stream_mode = state.stream_mode || Satronho::Directo::StreamModeOn();
     if (!Enabled()) {
         return;
     }
@@ -137,15 +141,18 @@ std::optional<Summary> End() {
         .slow_fps = Percentile(state.fps, 0.1),
         .stutters = state.stutters,
         .shader_stutters = state.shader_stutters,
+        .stream_mode = state.stream_mode,
     };
     if (const auto* notify = Notify()) {
         summary.shaders_built = std::max(notify->TotalComplete() - state.shaders_at_begin, 0);
     }
     LOG_INFO(Frontend,
              "Satronho session summary: {:016X} {:.1f} min, {:.1f} typical fps, {:.1f} slowest "
-             "10%, {} stutters over 100 ms ({} while shaders built), {} shaders built",
+             "10%, {} stutters over 100 ms ({} while shaders built), {} shaders built{}",
              summary.program_id, summary.minutes, summary.typical_fps, summary.slow_fps,
-             summary.stutters, summary.shader_stutters, summary.shaders_built);
+             summary.stutters, summary.shader_stutters, summary.shaders_built,
+             summary.stream_mode ? ", stream mode" : "");
+    Juegos::AddSession(summary);
     if (summary.minutes < 1.0) {
         return std::nullopt;
     }
@@ -166,6 +173,9 @@ QString ShortText(const Summary& summary) {
     } else {
         text += Tr(" %1 tirones.").arg(summary.stutters);
     }
+    if (summary.stream_mode) {
+        text += Tr(" Con modo directo.");
+    }
     return text;
 }
 
@@ -181,6 +191,9 @@ QString LongText(const Summary& summary) {
     row(Tr("Tirones (más de 100 ms)"), QString::number(summary.stutters));
     row(Tr("…mientras se armaban shaders"), QString::number(summary.shader_stutters));
     row(Tr("Shaders armados"), QString::number(summary.shaders_built));
+    if (summary.stream_mode) {
+        row(Tr("Modo directo"), Tr("activo en esta sesión"));
+    }
     text += QStringLiteral("</table>");
     text += Tr("<p>Los FPS cuentan todo el tiempo con el juego abierto, menús y pausas incluidos. "
                "Si muchos tirones salen mientras se armaban shaders, «Preparar para directo» "

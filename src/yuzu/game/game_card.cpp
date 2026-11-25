@@ -5,6 +5,8 @@
 #include <QPainterPath>
 #include "game_card.h"
 #include "qt_common/config/uisettings.h"
+#include "qt_common/game_list/game_list_p.h"
+#include "yuzu/satronho/juegos.h"
 
 GameCard::GameCard(QObject* parent) : QStyledItemDelegate{parent} {
     setObjectName("GameCard");
@@ -62,6 +64,27 @@ void GameCard::paint(QPainter* painter, const QStyleOptionViewItem& option,
     } else {
         iconRect = {cardRect.left() + cardMargin, cardRect.top() + cardMargin,
                     static_cast<int>(icon_size), static_cast<int>(icon_size)};
+    }
+
+    // Satronho NX's mark: ✓ when prepared, and the last session's FPS.
+    const u64 program_id = index.data(GameListItemPath::ProgramIdRole).toULongLong();
+    const QString badge = Satronho::Juegos::Badge(program_id);
+    if (!badge.isEmpty() && iconRect.width() >= 64) {
+        QFont badge_font = option.font;
+        badge_font.setBold(true);
+        badge_font.setPixelSize(std::max(10, static_cast<int>(icon_size) / 14));
+        const QFontMetrics metrics(badge_font);
+        const int pad = 5;
+        const QSize size(metrics.horizontalAdvance(badge) + pad * 2, metrics.height() + 2);
+        const QRect pill(iconRect.right() - size.width() - 5, iconRect.top() + 5, size.width(),
+                         size.height());
+        const bool prepared = badge.startsWith(QStringLiteral("✓"));
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(prepared ? QColor(0x14, 0x3D, 0x2A, 230) : QColor(0x2A, 0x1F, 0x4D, 230));
+        painter->drawRoundedRect(pill, size.height() / 2.0, size.height() / 2.0);
+        painter->setPen(prepared ? QColor(0x4A, 0xDE, 0x80) : QColor(0xDC, 0xD4, 0xFF));
+        painter->setFont(badge_font);
+        painter->drawText(pill, Qt::AlignCenter, badge);
     }
 
     if (UISettings::values.show_game_name.GetValue()) {

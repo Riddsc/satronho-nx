@@ -139,6 +139,12 @@ struct ShaderJobConfig {
 /// An eighth of physical memory, at least 512 MiB.
 u64 DefaultShaderJobBudget();
 
+/// Satronho NX stream mode: while a streaming app (OBS, TikTok Live Studio) is open, shader jobs
+/// the game isn't waiting for (Soon, Background) use at most half of each pool, leaving CPU for
+/// the encoder. NeedNow jobs, the ones a frame waits on, are never held back.
+void SetShaderJobStreamLimit(bool limited);
+bool ShaderJobStreamLimit();
+
 /// Runs shader jobs on two pools, CPU workers for the CPU stage and driver workers for the driver
 /// stage, each taking the highest priority stage first. In-flight bytes are the estimates of the
 /// stages now running. A Soon or Background stage starts only while they stay within the budget,
@@ -203,6 +209,9 @@ private:
     bool stopping{};
     /// A worker waits for in-flight bytes to drop.
     bool budget_held{};
+    /// Stages that aren't NeedNow running now, per pool (CPU, driver), and the stream mode cap.
+    std::array<size_t, 2> relaxed_running{};
+    std::array<size_t, 2> stream_cap{};
     ShaderJobStats stats;
     std::vector<std::thread> threads;
 };

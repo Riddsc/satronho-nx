@@ -46,6 +46,9 @@ void SetGuideEnabled(GuideId id, bool enabled);
 /// The guide that speaks for `id`: itself when on, MechaRidds otherwise.
 GuideId Speaker(GuideId id);
 
+/// A pet that is on, by how much each one appears; MechaRidds when every pet is off.
+GuideId PickPet();
+
 /// The guide's round avatar at `size` pixels.
 QPixmap Avatar(GuideId id, int size);
 

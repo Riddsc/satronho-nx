@@ -71,7 +71,7 @@ static constexpr Theme default_theme{
 #endif
 };
 
-using Themes = std::array<std::pair<const char*, const char*>, 6>;
+using Themes = std::array<std::pair<const char*, const char*>, 9>;
 extern const Themes themes;
 
 struct GameDir {
@@ -184,6 +184,7 @@ struct Values {
     Setting<bool> satronho_meter_compact{linkage, false, "satronho_meter_compact", Category::Ui};
     /// Satronho's session summary when a game closes (yuzu/satronho/session.cpp).
     Setting<bool> satronho_session_summary{linkage, true, "satronho_session_summary", Category::Ui};
+    Setting<bool> satronho_stream_auto{linkage, true, "satronho_stream_auto", Category::Ui};
     /// Build tag whose "what's new" list was last shown.
     Setting<std::string> satronho_seen_novedades{linkage, {}, "satronho_seen_novedades",
                                                  Category::Ui};

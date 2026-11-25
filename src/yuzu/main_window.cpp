@@ -8,6 +8,7 @@
 #undef VMA_IMPLEMENTATION
 #endif
 
+#include <array>
 #include <utility>
 
 #include <QSysInfo>
@@ -51,7 +52,10 @@
 #include "yuzu/game/game_list.h"
 #include "yuzu/nup_dialogs.h"
 #include "yuzu/shader_warm_dialog.h"
+#include "yuzu/satronho/captura.h"
 #include "yuzu/satronho/directo.h"
+#include "yuzu/satronho/estilo.h"
+#include "yuzu/satronho/juegos.h"
 #include "yuzu/satronho/dock.h"
 #include "yuzu/satronho/hub.h"
 #include "yuzu/satronho/novedades.h"
@@ -525,6 +529,34 @@ MainWindow::MainWindow(bool has_broken_vulkan)
                 OnSaveConfig();
             });
         });
+        // Captura Satronho: the picture with our band, in Pictures/Satronho NX.
+        QAction* capture = satronho_menu->addAction(tr("Captura Satronho"));
+        capture->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P));
+        capture->setShortcutContext(Qt::ApplicationShortcut);
+        addAction(capture);
+        connect(capture, &QAction::triggered, this, &MainWindow::OnSatronhoCapture);
+        // Our themes, the same three as on Android, a click away.
+        QMenu* theme_menu = satronho_menu->addMenu(tr("Tema Satronho"));
+        connect(theme_menu, &QMenu::aboutToShow, this, [this, theme_menu] {
+            theme_menu->clear();
+            const QString now = QString::fromStdString(UISettings::values.theme);
+            const std::array<std::pair<QString, QString>, 4> choices{{
+                {tr("Violeta"), QStringLiteral("satronho_violeta")},
+                {tr("Noche (negro puro)"), QStringLiteral("satronho_noche")},
+                {tr("Ámbar"), QStringLiteral("satronho_ambar")},
+                {tr("El de antes (Default)"), QStringLiteral("default")},
+            }};
+            for (const auto& [name, key] : choices) {
+                QAction* action = theme_menu->addAction(name);
+                action->setCheckable(true);
+                action->setChecked(now == key);
+                connect(action, &QAction::triggered, this, [this, key] {
+                    UISettings::values.theme = key.toStdString();
+                    UpdateUITheme();
+                    OnSaveConfig();
+                });
+            }
+        });
         // The summary a guide gives when a game closes.
         QAction* summary = satronho_menu->addAction(tr("Resumen al cerrar el juego"));
         summary->setCheckable(true);
@@ -534,8 +566,37 @@ MainWindow::MainWindow(bool has_broken_vulkan)
             Satronho::Session::SetEnabled(on);
             OnSaveConfig();
         });
+        // Automatic stream mode: OBS or TikTok LIVE Studio open → shaders leave room for them.
+        QAction* stream_auto = satronho_menu->addAction(tr("Modo directo automático"));
+        stream_auto->setCheckable(true);
+        stream_auto->setToolTip(
+            tr("Con OBS o TikTok LIVE Studio abiertos, los shaders que el juego no está esperando "
+               "usan la mitad de los hilos y le dejan CPU a la transmisión."));
+        connect(satronho_menu, &QMenu::aboutToShow, stream_auto,
+                [stream_auto] { stream_auto->setChecked(Satronho::Directo::StreamAutoEnabled()); });
+        connect(stream_auto, &QAction::toggled, this, [this](bool on) {
+            Satronho::Directo::SetStreamAutoEnabled(on);
+            Satronho::Directo::UpdateStreamMode();
+            OnSaveConfig();
+        });
         add(tr("Guías"), Satronho::Hub::Page::Guias);
         ui->menubar->insertMenu(ui->menu_Help->menuAction(), satronho_menu);
+
+        // Looks for a streaming app every five seconds; the status bar says when it changes.
+        auto* stream_timer = new QTimer(this);
+        connect(stream_timer, &QTimer::timeout, this, [this] {
+            if (!Satronho::Directo::UpdateStreamMode()) {
+                return;
+            }
+            statusBar()->showMessage(
+                Satronho::Directo::StreamModeOn()
+                    ? tr("Modo directo activo (%1): los shaders le dejan CPU a la transmisión")
+                          .arg(Satronho::Directo::StreamModeApp())
+                    : tr("Modo directo desactivado"),
+                6000);
+        });
+        stream_timer->start(5000);
+        Satronho::Directo::UpdateStreamMode();
     }
 
     QtCommon::SetupHID();
@@ -1664,6 +1725,7 @@ void MainWindow::ConnectWidgetEvents() {
             &MainWindow::OnGameListPrecompileShaders);
     connect(game_list, &GameList::PrepareForStreamRequested, this,
             &MainWindow::OnSatronhoPrepareStream);
+    connect(game_list, &GameList::FichaRequested, this, &MainWindow::OnSatronhoFicha);
     connect(game_list, &GameList::ExtractNupRequested, this, &MainWindow::OnGameListExtractNup);
     connect(game_list, &GameList::EditNupMetadataRequested, this,
             &MainWindow::OnGameListEditNupMetadata);
@@ -4911,6 +4973,68 @@ void MainWindow::OnGameListPrecompileShaders(u64 program_id, const std::string& 
 
 /// Satronho NX, «Preparar para directo»: Precompile All Shaders for the game, its precache file
 /// built now, and the offer to open it so the loading screen builds every shader before a stream.
+void MainWindow::OnSatronhoFicha(u64 program_id, const std::string& game_path) {
+    // The game's art and its save folder, as «Open Save Data Location» finds it.
+    QPixmap icon;
+    u64 user_save_size{};
+    u64 device_save_size{};
+    {
+        const FileSys::PatchManager pm{program_id, QtCommon::system->GetFileSystemController(),
+                                       QtCommon::system->GetContentProvider()};
+        const auto [control, icon_file] = pm.GetControlMetadata();
+        if (icon_file != nullptr) {
+            const auto bytes = icon_file->ReadAllBytes();
+            icon.loadFromData(bytes.data(), static_cast<u32>(bytes.size()));
+        }
+        if (control != nullptr) {
+            user_save_size = control->GetDefaultNormalSaveSize();
+            device_save_size = control->GetDeviceSaveDataSize();
+        }
+        if (icon.isNull() || control == nullptr) {
+            const auto file = Core::GetGameFileFromPath(QtCommon::vfs, game_path);
+            if (const auto loader = Loader::GetLoader(*QtCommon::system, file)) {
+                if (icon.isNull()) {
+                    std::vector<u8> bytes;
+                    if (loader->ReadIcon(bytes) == Loader::ResultStatus::Success) {
+                        icon.loadFromData(bytes.data(), static_cast<u32>(bytes.size()));
+                    }
+                }
+                if (control == nullptr) {
+                    FileSys::NACP nacp{};
+                    loader->ReadControlData(nacp);
+                    user_save_size = nacp.GetDefaultNormalSaveSize();
+                    device_save_size = nacp.GetDeviceSaveDataSize();
+                }
+            }
+        }
+    }
+    const bool use_device_save{device_save_size > 0 && user_save_size == 0};
+    const auto save_root = Common::FS::GetEdenPath(Common::FS::EdenPath::SaveDir);
+    auto vfs_save_dir = QtCommon::vfs->OpenDirectory(Common::FS::PathToUTF8String(save_root),
+                                                     FileSys::OpenMode::Read);
+    u128 save_user_id{};
+    if (!use_device_save) {
+        if (const auto user_id = GetProfileID()) {
+            save_user_id = user_id->AsU128();
+        }
+    }
+    const auto save_dir = Common::FS::ConcatPathSafe(
+        save_root, FileSys::SaveDataFactory::GetFullPath(
+                       {}, vfs_save_dir, FileSys::SaveDataSpaceId::User,
+                       FileSys::SaveDataType::Account, program_id, save_user_id, 0));
+
+    Satronho::Juegos::Actions actions;
+    actions.play = [this, game_path] {
+        BootGameFromList(QString::fromStdString(game_path), StartGameType::Normal);
+    };
+    actions.prepare = [this, program_id, game_path] { OnSatronhoPrepareStream(program_id, game_path); };
+    actions.open_saves = [this, program_id, game_path] {
+        OnGameListOpenFolder(program_id, GameListOpenTarget::SaveData, game_path);
+    };
+    Satronho::Juegos::ShowPage(this, program_id, GameTitleName(game_path), icon, save_dir,
+                               actions);
+}
+
 void MainWindow::OnSatronhoPrepareStream(u64 program_id, const std::string& game_path) {
     if (QtCommon::emu_thread != nullptr) {
         QMessageBox::information(this, tr("Preparar para directo"),
@@ -5401,6 +5525,28 @@ void MainWindow::OnCaptureScreenshot() {
     render_window->CaptureScreenshot(filename);
 }
 
+void MainWindow::OnSatronhoCapture() {
+    if (QtCommon::emu_thread == nullptr || !QtCommon::emu_thread->IsRunning()) {
+        return;
+    }
+    const QString path = Satronho::Captura::NextPath();
+    const u64 program_id = QtCommon::system->GetApplicationProcessProgramID();
+    QString game;
+    {
+        const FileSys::PatchManager pm{program_id, QtCommon::system->GetFileSystemController(),
+                                       QtCommon::system->GetContentProvider()};
+        if (const auto control = pm.GetControlMetadata().first) {
+            game = QString::fromStdString(control->GetApplicationName());
+        }
+    }
+    render_window->CaptureScreenshot(
+        path, [game, fps = satronho_last_fps](QImage& picture) {
+            Satronho::Captura::Stamp(picture, game, fps);
+        });
+    statusBar()->showMessage(tr("Captura Satronho guardada en %1").arg(QDir::toNativeSeparators(path)),
+                             6000);
+}
+
 void MainWindow::KeepNextendoSessionAlive() {
     if (!Common::Nextendo::OnlinePlayActive() || nextendo_session_watcher.isRunning()) {
         return;
@@ -5584,6 +5730,7 @@ void MainWindow::UpdateStatusBar() {
 
     auto results = QtCommon::system->GetAndResetPerfStats();
     Satronho::Session::Tick(results.average_game_fps);
+    satronho_last_fps = results.average_game_fps;
     auto& shader_notify = QtCommon::system->GPU().ShaderNotify();
     const int shaders_building = shader_notify.ShadersBuilding();
     shaders_building_now = shaders_building;
@@ -6259,6 +6406,21 @@ void MainWindow::UpdateUITheme() {
 
     if (current_theme.isEmpty())
         current_theme = default_theme;
+
+    // Satronho NX's themes are palettes over Fusion, with the dark theme's white icons.
+    if (Satronho::Estilo::Apply(current_theme)) {
+        QIcon::setThemeName(QStringLiteral("qdarkstyle"));
+#ifndef _WIN32
+        QIcon::setThemeSearchPaths(QStringList(QStringLiteral(":/icons")));
+#endif
+        qApp->setStyleSheet({});
+        setStyleSheet({});
+#ifdef _WIN32
+        RemoveTitlebarFilter();
+        ApplyGlobalDarkTitlebar(true);
+#endif
+        return;
+    }
 
 #ifdef _WIN32
     QIcon::setThemeName(current_theme);

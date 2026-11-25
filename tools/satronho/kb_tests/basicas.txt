@@ -77,3 +77,11 @@ que es preparar para directo|directo
 tengo tirones en el directo|directo
 como apago el resumen al cerrar|resumen-sesion
 donde estan los logs de sesiones viejas|resumen-sesion
+obs pierde frames cuando juego|modo-directo-auto
+que hace el modo directo automatico|modo-directo-auto
+cuantas horas llevo jugando|ficha-satronho
+como paso mis partidas al celular|respaldo-partidas
+como restauro mis partidas|respaldo-partidas
+como tomo una captura con el logo|captura-satronho
+como cambio el tema|tema-satronho
+hay version para android|android

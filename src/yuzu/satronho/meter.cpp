@@ -28,6 +28,7 @@
 #include "video_core/gpu.h"
 #include "video_core/shader_notify.h"
 #include "yuzu/main_window.h"
+#include "yuzu/satronho/directo.h"
 #include "yuzu/satronho/session.h"
 
 namespace Satronho {
@@ -500,6 +501,10 @@ std::vector<Meter::Cell> Meter::Cells() const {
             cell.runs.push_back(
                 {QString::number(shaders_left > 0 ? shaders_left : shaders_building), bold, Warn});
             cell.runs.push_back({Tr(" por armar"), font, Muted});
+        }
+        // Stream mode is holding back the shaders the game isn't waiting for: say so.
+        if (Satronho::Directo::StreamModeOn()) {
+            cell.runs.push_back({Tr(" · modo directo"), bold, Text});
         }
         cells.push_back(std::move(cell));
     }

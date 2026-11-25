@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-57",
+      "fecha": "November 25, 2026",
+      "titulo": "In the releases, next to PC",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX for Android now ships in every release, next to the PC version, signed with our key. From this build the app updates itself: when there is a new one, Juana tells you when you open it and it installs on top."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho carousel: the centered game's art shows blurred in the background, and above it go its name, whether it is prepared, its FPS, the time played and the Play and Page buttons."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Back up every save (Settings): all your games' saves in one .zip. That .zip, like each game's, restores in Satronho NX on PC (Ficha Satronho → Restaurar…), and the PC's imports here."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "The GPU log is now named satronho_gpu.log too, and the data folder notice says Satronho NX."
+        }
+      ]
+    },
+    {
       "tag": "Android – preview 4",
       "fecha": "November 25, 2026",
       "titulo": "Your Satronho, your way",

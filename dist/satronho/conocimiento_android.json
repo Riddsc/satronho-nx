@@ -572,7 +572,10 @@
         "pasar partidas al pc",
         "guardar mis partidas",
         "no perder las partidas",
-        "restaurar partidas"
+        "restaurar partidas",
+        "pasar partidas al pc",
+        "partidas del pc al celular",
+        "respaldar todas las partidas"
       ],
       "claves": [
         "respaldo",
@@ -580,9 +583,12 @@
         "partida",
         "guardado",
         "copia",
-        "restaurar"
+        "restaurar",
+        "pc",
+        "computador",
+        "todas"
       ],
-      "respuesta": "En la ficha del juego (mantenlo presionado) → «Respaldar partidas»: Satronho empaca tus partidas en un .zip y abre el menú de compartir para mandarlo a Drive, WhatsApp o tu PC. Para restaurar: ficha → «Propiedades del juego» → Datos de guardado → Importar. Hazlo antes de desinstalar la app, porque al desinstalar se borran.",
+      "respuesta": "En la ficha del juego (mantenlo presionado) → «Respaldar partidas», o en Ajustes → «Respaldar todas las partidas» para todos tus juegos de una vez: Satronho empaca las partidas en un .zip y abre el menú de compartir (Drive, WhatsApp, tu PC). Ese .zip sirve también en Satronho NX de PC: Ficha Satronho del juego → «Restaurar…». Al revés, el .zip que hace el PC se importa aquí en las propiedades del juego → Datos de guardado → Importar. Hazlo antes de desinstalar la app, porque al desinstalar se borran.",
       "ver": [
         "ficha"
       ]
@@ -707,6 +713,31 @@
       "respuesta": "Mantén presionado un espacio vacío de tu pantalla de inicio → Widgets → Satronho NX · Continuar. Muestra tu último juego, cómo te fue y un botón para seguir jugando.",
       "ver": [
         "accesos-directos"
+      ]
+    },
+    {
+      "id": "carrusel",
+      "guia": "troya",
+      "tema": "Gráficos",
+      "pregunta": "¿Qué tiene la vista carrusel?",
+      "frases": [
+        "vista carrusel",
+        "carrusel",
+        "cambiar la vista de juegos",
+        "fondo del juego",
+        "vista de lista"
+      ],
+      "claves": [
+        "carrusel",
+        "vista",
+        "fondo",
+        "lista",
+        "cuadricula"
+      ],
+      "respuesta": "Con el botón de vista (arriba, junto al filtro) eliges cuadrícula, lista o carrusel. En el carrusel de Satronho, el arte del juego del centro se ve difuminado de fondo, y arriba salen su nombre, si está preparado, sus FPS de la última sesión, el tiempo jugado y los botones Jugar y Ficha. El carrusel se usa con el teléfono vertical.",
+      "ver": [
+        "ficha",
+        "sellos"
       ]
     }
   ]

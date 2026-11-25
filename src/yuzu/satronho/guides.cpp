@@ -9,6 +9,11 @@
 #include "qt_common/config/uisettings.h"
 #include "yuzu/satronho/guides.h"
 
+#include <array>
+#include <utility>
+
+#include <QRandomGenerator>
+
 namespace Satronho {
 namespace {
 
@@ -145,6 +150,33 @@ QWidget* MakeGuideBanner(GuideId id, const QString& text, QWidget* parent) {
         layout->addWidget(label, 1);
     }
     return banner;
+}
+
+GuideId PickPet() {
+    static constexpr std::array<std::pair<GuideId, int>, 4> pets{{
+        {GuideId::Samy, 33},
+        {GuideId::Troya, 32},
+        {GuideId::Nono, 25},
+        {GuideId::Juana, 10},
+    }};
+    int total = 0;
+    for (const auto& [id, weight] : pets) {
+        total += GuideEnabled(id) ? weight : 0;
+    }
+    if (total == 0) {
+        return GuideId::MechaRidds;
+    }
+    int roll = static_cast<int>(QRandomGenerator::global()->bounded(total));
+    for (const auto& [id, weight] : pets) {
+        if (!GuideEnabled(id)) {
+            continue;
+        }
+        if (roll < weight) {
+            return id;
+        }
+        roll -= weight;
+    }
+    return GuideId::MechaRidds;
 }
 
 } // namespace Satronho

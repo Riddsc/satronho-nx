@@ -797,7 +797,8 @@ void GRenderWindow::ReleaseRenderTarget() {
     main_context.reset();
 }
 
-void GRenderWindow::CaptureScreenshot(const QString& screenshot_path) {
+void GRenderWindow::CaptureScreenshot(const QString& screenshot_path,
+                                      std::function<void(QImage&)> stamp) {
     auto& renderer = QtCommon::system->Renderer();
 
     if (renderer.IsScreenshotPending()) {
@@ -824,11 +825,14 @@ void GRenderWindow::CaptureScreenshot(const QString& screenshot_path) {
         [=, this](bool invert_y) {
             const std::string std_screenshot_path = screenshot_path.toStdString();
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-            if (screenshot_image.flipped(invert_y ? Qt::Vertical : (Qt::Orientations)0)
-                    .save(screenshot_path)) {
+            QImage picture = screenshot_image.flipped(invert_y ? Qt::Vertical : (Qt::Orientations)0);
 #else
-            if (screenshot_image.mirrored(false, invert_y).save(screenshot_path)) {
+            QImage picture = screenshot_image.mirrored(false, invert_y);
 #endif
+            if (stamp) {
+                stamp(picture);
+            }
+            if (picture.save(screenshot_path)) {
                 LOG_INFO(Frontend, "Screenshot saved to \"{}\"", std_screenshot_path);
             } else {
                 LOG_ERROR(Frontend, "Failed to save screenshot to \"{}\"", std_screenshot_path);

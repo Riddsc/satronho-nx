@@ -230,6 +230,62 @@ object FichaJuego {
     }
 
     /**
+     * Every game's saves in one .zip, each in its program id folder: the game's properties →
+     * Save data → Import (or the desktop's Ficha Satronho → Restaurar) takes its own folder from it.
+     */
+    fun backupAll(activity: Activity, games: List<Game>) {
+        val withSaves = games.filter { !it.isHomebrew && File(it.saveDir).isDirectory }
+            .distinctBy { it.programId }
+        if (withSaves.isEmpty()) {
+            Toast.makeText(activity, R.string.satronho_backup_none_all, Toast.LENGTH_LONG).show()
+            return
+        }
+        Toast.makeText(activity, R.string.satronho_backup_working, Toast.LENGTH_SHORT).show()
+        val handler = Handler(Looper.getMainLooper())
+        Thread {
+            val folder = File(activity.cacheDir, "respaldos").apply { mkdirs() }
+            folder.listFiles()?.forEach { it.delete() }
+            val stamp = java.text.SimpleDateFormat("yyyy-MM-dd_HH-mm", java.util.Locale.US)
+                .format(java.util.Date())
+            val zip = File(folder, "Satronho NX - partidas $stamp.zip")
+            val ok = try {
+                java.util.zip.ZipOutputStream(BufferedOutputStream(FileOutputStream(zip))).use { out ->
+                    withSaves.forEach { game ->
+                        val root = File(game.saveDir)
+                        root.walkTopDown().filter { it.isFile }.forEach { file ->
+                            val relative = file.relativeTo(root).invariantSeparatorsPath
+                            out.putNextEntry(java.util.zip.ZipEntry("${game.programIdHex}/$relative"))
+                            file.inputStream().use { it.copyTo(out) }
+                            out.closeEntry()
+                        }
+                    }
+                }
+                true
+            } catch (e: Exception) {
+                false
+            }
+            handler.post {
+                if (!ok || !zip.exists()) {
+                    Toast.makeText(activity, R.string.satronho_backup_failed, Toast.LENGTH_LONG).show()
+                    return@post
+                }
+                share(activity, zip)
+            }
+        }.start()
+    }
+
+    private fun share(activity: Activity, zip: File) {
+        val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.provider", zip)
+        val intent = Intent(Intent.ACTION_SEND)
+            .setType("application/zip")
+            .putExtra(Intent.EXTRA_STREAM, uri)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        activity.startActivity(
+            Intent.createChooser(intent, activity.getString(R.string.satronho_backup_saves))
+        )
+    }
+
+    /**
      * Packs the game's saves into a .zip and opens Android's share menu (Drive, WhatsApp, the PC).
      * Restoring is in the game's properties → Save data → Import.
      */
@@ -261,16 +317,7 @@ object FichaJuego {
                     Toast.makeText(activity, R.string.satronho_backup_failed, Toast.LENGTH_LONG).show()
                     return@post
                 }
-                val uri = FileProvider.getUriForFile(
-                    activity, "${activity.packageName}.provider", zip
-                )
-                val intent = Intent(Intent.ACTION_SEND)
-                    .setType("application/zip")
-                    .putExtra(Intent.EXTRA_STREAM, uri)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                activity.startActivity(
-                    Intent.createChooser(intent, activity.getString(R.string.satronho_backup_saves))
-                )
+                share(activity, zip)
             }
         }.start()
     }

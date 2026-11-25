@@ -37,6 +37,7 @@ import org.yuzu.yuzu_emu.features.settings.model.IntSetting
 import org.yuzu.yuzu_emu.utils.NativeConfig
 import org.yuzu.yuzu_emu.satronho.Novedades
 import org.yuzu.yuzu_emu.satronho.Satronho
+import org.yuzu.yuzu_emu.satronho.FichaJuego
 import org.yuzu.yuzu_emu.satronho.SatronhoScreen
 import org.yuzu.yuzu_emu.satronho.Sesiones
 import org.yuzu.yuzu_emu.satronho.Sugeridas
@@ -486,6 +487,19 @@ class HomeSettingsFragment : Fragment() {
         )
         list.add(
             HomeSetting(
+                R.string.satronho_backup_all,
+                R.string.satronho_backup_all_description,
+                R.drawable.ic_export,
+                {
+                    FichaJuego.backupAll(
+                        requireActivity(),
+                        org.yuzu.yuzu_emu.utils.GameHelper.cachedGameList.toList()
+                    )
+                }
+            )
+        )
+        list.add(
+            HomeSetting(
                 R.string.satronho_sessions,
                 R.string.satronho_sessions_description,
                 R.drawable.ic_log,
@@ -665,14 +679,14 @@ class HomeSettingsFragment : Fragment() {
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_gpu.log"
+                "${DocumentProvider.ROOT_ID}/log/satronho_gpu.log"
             )
         )!!
         val oldLog = DocumentFile.fromSingleUri(
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_gpu.log.old.txt"
+                "${DocumentProvider.ROOT_ID}/log/satronho_gpu.log.old.txt"
             )
         )!!
 

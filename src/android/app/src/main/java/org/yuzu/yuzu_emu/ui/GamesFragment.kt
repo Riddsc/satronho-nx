@@ -33,6 +33,7 @@ import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.satronho.Bienvenida
+import org.yuzu.yuzu_emu.utils.GameIconUtils
 import org.yuzu.yuzu_emu.satronho.GuideBubble
 import org.yuzu.yuzu_emu.satronho.PrepareGame
 import org.yuzu.yuzu_emu.satronho.ResumenSesion
@@ -133,6 +134,13 @@ class GamesFragment : Fragment() {
         // Satronho NX: our logo behind the list, the guides' bubble and the news once per update.
         Satronho.applyBackgroundLogo(binding.satronhoBackgroundLogo)
         GuideBubble.setup(binding.satronhoGuideBubble, requireActivity())
+        (binding.gridGames as? RecyclerView)?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    updateSatronhoCarousel()
+                }
+            }
+        })
         SatronhoShortcuts.publish(requireContext())
         val firstLaunch = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getBoolean(Settings.PREF_FIRST_APP_LAUNCH, true)
@@ -303,6 +311,73 @@ class GamesFragment : Fragment() {
             (binding.gridGames as? CarouselRecyclerView)?.setupCarousel(true)
             (binding.gridGames as? CarouselRecyclerView)?.restoreScrollState(gamesViewModel.lastScrollPosition)
         }
+        binding.gridGames.postDelayed({ if (_binding != null) updateSatronhoCarousel() }, 300)
+    }
+
+    /**
+     * Satronho NX's carousel: the centered game's art blurred behind the list, and above it its
+     * name, its mark (prepared, last FPS, time played) and Play / page buttons.
+     */
+    private fun updateSatronhoCarousel() {
+        if (_binding == null) {
+            return
+        }
+        val info = binding.satronhoCarouselInfo ?: return
+        val backdrop = binding.satronhoCarouselBackdrop
+        val carousel = binding.gridGames as? CarouselRecyclerView
+        val adapter = (binding.gridGames as? RecyclerView)?.adapter as? GameAdapter
+        val isCarousel = getCurrentViewType() == GameAdapter.VIEW_TYPE_CAROUSEL &&
+            resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE
+        val position = carousel?.getClosestChildPosition() ?: -1
+        val game = adapter?.currentList?.getOrNull(position)
+        if (!isCarousel || game == null) {
+            info.visibility = View.GONE
+            backdrop?.visibility = View.GONE
+            Satronho.applyBackgroundLogo(binding.satronhoBackgroundLogo)
+            return
+        }
+        val context = requireContext()
+        binding.satronhoBackgroundLogo.visibility = View.GONE
+        binding.satronhoCarouselTitle?.apply {
+            text = game.title
+            setTextColor(Satronho.LILAC)
+        }
+        val parts = ArrayList<String>()
+        if (PrepareGame.isPrepared(context, game.programId)) {
+            parts.add("✓ " + getString(R.string.satronho_card_prepared))
+        }
+        SesionActual.last(context, game.programId)?.let { parts.add(ResumenSesion.cardLine(context, it)) }
+        val played = SesionActual.totalSeconds(context, game.programId)
+        if (played > 0) {
+            parts.add(ResumenSesion.duration(context, played))
+        }
+        binding.satronhoCarouselLine?.apply {
+            text = if (parts.isEmpty()) game.developer else parts.joinToString("  ·  ")
+            setTextColor(Satronho.DIM)
+        }
+        binding.satronhoCarouselPlay?.setOnClickListener {
+            carousel?.findViewHolderForAdapterPosition(position)?.itemView
+                ?.findViewById<View>(R.id.card_game_carousel)?.performClick()
+        }
+        binding.satronhoCarouselPage?.setOnClickListener {
+            carousel?.findViewHolderForAdapterPosition(position)?.itemView
+                ?.findViewById<View>(R.id.card_game_carousel)?.performLongClick()
+        }
+        info.visibility = View.VISIBLE
+        backdrop?.let { view ->
+            if (view.tag != game.programId) {
+                view.tag = game.programId
+                GameIconUtils.loadGameIcon(game, view)
+                view.setRenderEffect(
+                    android.graphics.RenderEffect.createBlurEffect(
+                        60f, 60f, android.graphics.Shader.TileMode.CLAMP
+                    )
+                )
+                view.alpha = 0f
+                view.animate().alpha(0.35f).setDuration(250).start()
+            }
+            view.visibility = View.VISIBLE
+        }
     }
 
     private var lastSearchText: String = ""
@@ -338,6 +413,7 @@ class GamesFragment : Fragment() {
                 committedGameListSubmitGeneration = submitGeneration
             }
             schedulePostReloadListSettle()
+            binding.gridGames.post { updateSatronhoCarousel() }
         }
     }
 

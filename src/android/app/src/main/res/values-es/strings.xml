@@ -333,7 +333,7 @@
     <string name="open_user_folder_description">Administrar los archivos internos de Satronho NX</string>
     <string name="app_settings_description">Modificar el comportamiento y la apariencia de la aplicación.</string>
     <string name="no_file_manager">Explorador de archivos no encontrado</string>
-    <string name="notification_no_directory_link">No se pudo abrir la carpeta Eden</string>
+    <string name="notification_no_directory_link">No se pudo abrir la carpeta Satronho NX</string>
     <string name="notification_no_directory_link_description">Por favor, busque la carpeta user con el panel lateral del explorador de archivos de forma manual.</string>
     <string name="manage_save_data">Administrar datos de guardado</string>
     <string name="manage_save_data_description">Guardar los datos encontrados. Por favor, seleccione una opción de abajo.</string>
@@ -1393,4 +1393,8 @@
     <string-array name="satronho_tips_mecharidds">
         <item>Toca la burbuja de la esquina cuando tengas una duda: respondemos sin internet.</item>
     </string-array>
+    <string name="satronho_carousel_page">Ficha</string>
+    <string name="satronho_backup_all">Respaldar todas las partidas</string>
+    <string name="satronho_backup_all_description">Las partidas de todos tus juegos en un .zip, para Drive, WhatsApp o tu PC</string>
+    <string name="satronho_backup_none_all">Todavía no hay partidas guardadas que respaldar.</string>
 </resources>

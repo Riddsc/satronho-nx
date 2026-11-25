@@ -55,10 +55,18 @@ void GPULogger::Initialize(LogLevel level, DriverType driver) {
     [[maybe_unused]] const bool crashes_dir_created = CreateDir(crashes_dir);
 
     // Open GPU log file
+#ifdef __ANDROID__
+    const auto gpu_log_path = log_dir / "satronho_gpu.log";
+#else
     const auto gpu_log_path = log_dir / "eden_gpu.log";
+#endif
 
     // Rotate old log
+#ifdef __ANDROID__
+    const auto old_log_path = log_dir / "satronho_gpu.log.old.txt";
+#else
     const auto old_log_path = log_dir / "eden_gpu.log.old.txt";
+#endif
     RemoveFile(old_log_path);
     [[maybe_unused]] const bool log_renamed = RenameFile(gpu_log_path, old_log_path);
 

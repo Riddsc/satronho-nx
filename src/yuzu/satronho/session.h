@@ -21,6 +21,7 @@ struct Summary {
     int stutters{};           ///< Frames over 100 ms
     int shader_stutters{};    ///< Of those, the ones while shaders were being built
     int shaders_built{};      ///< Shader builds during the session
+    bool stream_mode{};       ///< Stream mode was on at some point of the session
 };
 
 /// Whether the session summary is on (Satronho menu; on by default).

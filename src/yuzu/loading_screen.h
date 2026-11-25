@@ -33,6 +33,7 @@ class QByteArray;
 class QGraphicsOpacityEffect;
 class QMovie;
 class QPropertyAnimation;
+class QLabel;
 class QPushButton;
 
 class LoadingScreen : public QWidget {
@@ -68,6 +69,8 @@ signals:
     void Hidden();
 
 private:
+    void ShowSatronhoTip();
+
 #ifndef YUZU_QT_MOVIE_MISSING
     std::unique_ptr<QMovie> animation;
     std::unique_ptr<QBuffer> backing_buf;
@@ -79,6 +82,8 @@ private:
 
     QGraphicsOpacityEffect* opacity_effect = nullptr;
     QPushButton* skip_button = nullptr;
+    /// Satronho NX: one guide's tip while the game loads.
+    QLabel* tip_label = nullptr;
     std::unique_ptr<QPropertyAnimation> fadeout_animation;
 
     // Definitions for the differences in text and styling for each stage

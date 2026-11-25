@@ -205,6 +205,17 @@
             android:layout_height="match_parent"
             >
 
+            <!-- Satronho carousel: the centered game's art, blurred, behind everything. -->
+            <ImageView
+                android:id="@+id/satronho_carousel_backdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.35"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                />
+
             <ImageView
                 android:id="@+id/satronho_background_logo"
                 android:layout_width="260dp"
@@ -238,6 +249,61 @@
                 android:paddingHorizontal="4dp"
                 android:paddingVertical="4dp"
                 />
+
+            <!-- Satronho carousel: the centered game's name, its mark and two buttons. -->
+            <LinearLayout
+                android:id="@+id/satronho_carousel_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="4dp"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/satronho_carousel_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/satronho_carousel_line"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/satronho_carousel_play"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/satronho_play_now"
+                        app:icon="@drawable/ic_play" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/satronho_carousel_page"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/satronho_carousel_page" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
 
         </RelativeLayout>

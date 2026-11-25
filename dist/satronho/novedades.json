@@ -1,6 +1,41 @@
 {
   "builds": [
     {
+      "tag": "build-57",
+      "fecha": "25 de noviembre de 2026",
+      "titulo": "PC y Android, juntos",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX llega a Android en el mismo release: cada build trae el .zip de PC y el APK (Android 13 o más nuevo, arm64), firmado con la llave propia de Satronho NX. Es la misma app que veníamos puliendo en las vistas previas, con nuestra identidad de principio a fin: guías, novedades, Preparar juego, medidor, resumen de la sesión, ficha de cada juego, carrusel Satronho, captura con sello, temas y widget. Una vez instalada, se actualiza sola desde la app."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Modo directo automático, creado por Satronho NX: cada cinco segundos Satronho mira si OBS, Streamlabs o TikTok LIVE Studio están abiertos y, si lo están, los shaders que el juego todavía no necesita se arman con la mitad de los hilos para dejarle procesador a la transmisión. Los shaders que el juego está esperando nunca se frenan. El medidor dice «modo directo» mientras actúa y el resumen de la sesión lo anota. Es el punto que dejamos pendiente en la build 56; se apaga en Satronho → «Modo directo automático»."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Ficha Satronho de cada juego (clic derecho): tiempo jugado en Satronho NX, sesiones, una gráfica con los FPS de las últimas, y Jugar, Preparar para directo, Respaldar y Restaurar partidas. En las vistas de cuadrícula y carrusel, cada juego lleva nuestro sello: ✓ si está preparado y los FPS de su última sesión. Nacieron en la app de Android y ahora están también en PC."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Partidas entre PC y teléfono, propio de Satronho NX: «Respaldar partidas» crea un .zip en Documentos\\Satronho NX\\Respaldos que la app de Android importa tal cual, y el .zip del teléfono se restaura aquí con «Restaurar…». Antes de restaurar, Satronho guarda un respaldo de lo que había."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Captura Satronho (Ctrl+Shift+P): la imagen del juego con una franja discreta con nuestro planeta, el juego y sus FPS, en Imágenes\\Satronho NX, lista para tus redes. La captura normal sigue igual."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Temas Satronho: Violeta, Noche (negro puro) y Ámbar, los mismos de la app de Android, en Satronho → «Tema Satronho» o en Configuración. Y la pantalla de carga ahora trae el consejo de uno de los guías mientras el juego abre."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "De Lichii revisamos 40 cambios y trajimos solo los que nos sirven, sin tocar la traducción de shaders: el caché de buffers libera los que no se usan (bueno para equipos con menos memoria), Vulkan vuelve a enlazar la geometría tras un envío a mitad de dibujo, las lecturas de memoria escrita por la GPU se agrupan, un arreglo de dynarmic para procesadores ARM64 (el del teléfono), la opción de mantener el tamaño de la ventana al abrir un juego, la medición del tiempo de búsqueda de «Preparar» y la máscara de red del juego local. Otros cambios de Lichii dependían de piezas que no usamos o tocaban shaders, y los dejamos fuera."
+        }
+      ]
+    },
+    {
       "tag": "build-56",
       "fecha": "24 de noviembre de 2026",
       "titulo": "Lista para el directo",

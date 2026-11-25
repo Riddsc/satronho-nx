@@ -231,12 +231,18 @@ add_executable(yuzu
 
     user_data_migration.h user_data_migration.cpp
 
+    satronho/captura.cpp
+    satronho/captura.h
     satronho/directo.cpp
     satronho/directo.h
+    satronho/estilo.cpp
+    satronho/estilo.h
     satronho/dock.cpp
     satronho/dock.h
     satronho/guides.cpp
     satronho/guides.h
+    satronho/juegos.cpp
+    satronho/juegos.h
     satronho/hub.cpp
     satronho/hub.h
     satronho/knowledge.cpp

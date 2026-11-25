@@ -493,6 +493,8 @@ void GameList::SetReportableProgramId(u64 program_id) {
 
 void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::string& path) {
     // TODO(crueter): Refactor this and make it less bad
+    QAction* ficha = context_menu.addAction(tr("Ficha Satronho"));
+    ficha->setToolTip(tr("Tiempo jugado, sesiones, gráfica de FPS y respaldo de partidas."));
     QAction* favorite = context_menu.addAction(tr("Favorite"));
     context_menu.addSeparator();
     QAction* start_game = context_menu.addAction(tr("Start Game"));
@@ -598,6 +600,7 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
     open_transferable_shader_cache->setVisible(program_id != 0);
     prepare_shaders->setVisible(program_id != 0);
     prepare_stream->setVisible(program_id != 0);
+    ficha->setVisible(program_id != 0);
     remove_update->setVisible(program_id != 0);
     remove_dlc->setVisible(program_id != 0);
     remove_gl_shader_cache->setVisible(program_id != 0);
@@ -623,6 +626,8 @@ void GameList::AddGamePopup(QMenu& context_menu, u64 program_id, const std::stri
             [this, program_id, path]() { emit PrepareShaderWarmRequested(program_id, path); });
     connect(prepare_stream, &QAction::triggered, this,
             [this, program_id, path]() { emit PrepareForStreamRequested(program_id, path); });
+    connect(ficha, &QAction::triggered, this,
+            [this, program_id, path]() { emit FichaRequested(program_id, path); });
     connect(precompile_shaders, &QAction::toggled, this, [this, program_id, path](bool checked) {
         emit PrecompileShadersRequested(program_id, path, checked);
     });

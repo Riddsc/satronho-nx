@@ -39,6 +39,7 @@ struct ShaderJobState {
     std::chrono::steady_clock::time_point stage_begin;
     std::optional<std::chrono::steady_clock::time_point> stalled_since;
     bool started{};
+    int relaxed_pool{-1}; ///< Counted in relaxed_running[pool] while its stage runs
 };
 
 namespace {
@@ -155,6 +156,8 @@ ShaderJobScheduler::ShaderJobScheduler(const ShaderJobConfig& config)
     : budget{config.memory_budget != 0 ? config.memory_budget : DefaultShaderJobBudget()},
       background_aging{config.background_aging} {
     stats.budget_bytes = budget;
+    stream_cap = {std::max<size_t>(std::max<size_t>(config.cpu_threads, 1) / 2, 1),
+                  std::max<size_t>(std::max<size_t>(config.driver_threads, 1) / 2, 1)};
     const auto start{[this](std::string name, bool driver) {
         threads.emplace_back([this, name = std::move(name), driver] {
             Common::SetCurrentThreadName(name.c_str());
@@ -357,6 +360,12 @@ ShaderJobScheduler::JobPtr ShaderJobScheduler::Pick(bool driver, Clock::time_poi
     }
     ShaderJobState& job{*entries->front()};
     const u64 bytes{driver ? job.work.driver_bytes : job.work.cpu_bytes};
+    if (job.priority.load() != ShaderJobPriority::NeedNow && ShaderJobStreamLimit() &&
+        relaxed_running[driver ? 1 : 0] >= stream_cap[driver ? 1 : 0]) {
+        // Stream mode: woken like a budget stall, when a stage ends.
+        budget_held = true;
+        return nullptr;
+    }
     if (job.priority.load() != ShaderJobPriority::NeedNow && stats.in_flight_bytes != 0 &&
         stats.in_flight_bytes + bytes > budget) {
         if (!job.stalled_since) {
@@ -384,6 +393,10 @@ void ShaderJobScheduler::StartStage(ShaderJobState& job, bool driver, Clock::tim
     if (job.stalled_since) {
         stats.budget_stall_ns += Nanoseconds(now - *job.stalled_since);
         job.stalled_since.reset();
+    }
+    if (job.priority.load() != ShaderJobPriority::NeedNow) {
+        job.relaxed_pool = driver ? 1 : 0;
+        ++relaxed_running[job.relaxed_pool];
     }
     job.held_bytes = driver ? job.work.driver_bytes : job.work.cpu_bytes;
     stats.in_flight_bytes += job.held_bytes;
@@ -523,12 +536,30 @@ void ParallelFor(ShaderJobScheduler& scheduler, size_t count,
 }
 
 void ShaderJobScheduler::ReleaseBytes(ShaderJobState& job) {
+    if (job.relaxed_pool >= 0) {
+        --relaxed_running[job.relaxed_pool];
+        job.relaxed_pool = -1;
+        budget_held = true;
+        WakeHeldWorkers();
+    }
     if (job.held_bytes == 0) {
         return;
     }
     stats.in_flight_bytes -= job.held_bytes;
     job.held_bytes = 0;
     WakeHeldWorkers();
+}
+
+namespace {
+std::atomic<bool> g_stream_limit{};
+} // Anonymous namespace
+
+void SetShaderJobStreamLimit(bool limited) {
+    g_stream_limit.store(limited, std::memory_order_relaxed);
+}
+
+bool ShaderJobStreamLimit() {
+    return g_stream_limit.load(std::memory_order_relaxed);
 }
 
 void ShaderJobScheduler::WakeHeldWorkers() {
