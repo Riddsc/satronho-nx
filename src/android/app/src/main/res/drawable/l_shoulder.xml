@@ -7,17 +7,17 @@
         <aapt:attr name="android:fillColor">
             <gradient android:endX="244.91" android:endY="49.29"
                 android:startX="0" android:startY="49.29" android:type="linear">
-                <item android:color="#FFC3C4C5" android:offset="0"/>
-                <item android:color="#FFC4C5C5" android:offset="0.05"/>
-                <item android:color="#FFC7C7C7" android:offset="0.47"/>
-                <item android:color="#F7C4C4C4" android:offset="0.54"/>
-                <item android:color="#E5BABABA" android:offset="0.65"/>
-                <item android:color="#C6ABABAB" android:offset="0.77"/>
-                <item android:color="#9E969696" android:offset="0.91"/>
-                <item android:color="#7F878787" android:offset="1"/>
+                <item android:color="#FFAEA7CE" android:offset="0"/>
+                <item android:color="#FFAFA7CE" android:offset="0.05"/>
+                <item android:color="#FFB1A9D0" android:offset="0.47"/>
+                <item android:color="#F7AEA7CE" android:offset="0.54"/>
+                <item android:color="#E5A69FC5" android:offset="0.65"/>
+                <item android:color="#C69B93B9" android:offset="0.77"/>
+                <item android:color="#9E8A83A7" android:offset="0.91"/>
+                <item android:color="#7F7F789B" android:offset="1"/>
             </gradient>
         </aapt:attr>
     </path>
-    <path android:fillAlpha="0.75" android:fillColor="#FF000000"
+    <path android:fillAlpha="0.75" android:fillColor="#FF16102A"
         android:pathData="M106.15,20h7.57V72.24h25v6.35h-32.6Z" android:strokeAlpha="0.75"/>
 </vector>

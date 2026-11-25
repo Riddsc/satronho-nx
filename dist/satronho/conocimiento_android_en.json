@@ -1,0 +1,510 @@
+{
+  "entradas": [
+    {
+      "id": "que-es",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "What is Satronho NX for Android?",
+      "frases": [
+        "what is satronho",
+        "what is this app",
+        "where does it come from",
+        "who made this",
+        "is it eden",
+        "is it lichii"
+      ],
+      "claves": [
+        "satronho",
+        "emulator",
+        "eden",
+        "lichii",
+        "riddsc"
+      ],
+      "respuesta": "Satronho NX is Riddsc's Switch emulator, now on Android too. It starts from Eden and Lichii, which we picked and optimized, and adds features of its own: Prepare game, suggested settings for your phone, the Satronho meter, the session summary and history, the news, and us, the guides. It needs Android 13 or newer and an ARM64 processor.",
+      "ver": [
+        "guias",
+        "novedades",
+        "sugeridas"
+      ]
+    },
+    {
+      "id": "guias",
+      "guia": "mecharidds",
+      "tema": "The guides",
+      "pregunta": "Who are the guides and how do I ask them?",
+      "frases": [
+        "who are the guides",
+        "how do i ask",
+        "what is the bubble for",
+        "who is mecharidds",
+        "who is samy"
+      ],
+      "claves": [
+        "guide",
+        "mecharidds",
+        "samy",
+        "troya",
+        "nono",
+        "juana",
+        "pet",
+        "ask"
+      ],
+      "respuesta": "We are MechaRidds and his pets Samy, Troya, Ñoño and Juana. We live in the bubble in the corner of the games list: tap it, write your question in your own words and we answer from what we know about Satronho NX, no internet needed. Each of us has a topic: Samy the features, Troya graphics and your sessions, Ñoño the settings and Juana the updates. Satronho → Guides introduces all five of us.",
+      "ver": [
+        "apagar-guias",
+        "pantalla-satronho",
+        "que-es"
+      ]
+    },
+    {
+      "id": "apagar-guias",
+      "guia": "mecharidds",
+      "tema": "The guides",
+      "pregunta": "How do I turn the guides off or back on?",
+      "frases": [
+        "turn off guides",
+        "hide the bubble",
+        "remove the bubble",
+        "turn on guides",
+        "bring back the bubble",
+        "turn off a pet"
+      ],
+      "claves": [
+        "off",
+        "hide",
+        "remove",
+        "on",
+        "disable",
+        "enable",
+        "bubble"
+      ],
+      "respuesta": "In the bubble, Turn off guides turns all of us off. To see us again: Settings → Guides. To turn off just one pet, go to Satronho → Guides tab and switch it off; MechaRidds answers for it.",
+      "ver": [
+        "guias"
+      ]
+    },
+    {
+      "id": "preparar",
+      "guia": "samy",
+      "tema": "Prepare game",
+      "pregunta": "What does Prepare game do?",
+      "frases": [
+        "prepare game",
+        "stutters",
+        "it freezes at first",
+        "shaders",
+        "before playing",
+        "it stutters",
+        "prepare the game"
+      ],
+      "claves": [
+        "prepare",
+        "stutter",
+        "freeze",
+        "shader",
+        "precompile",
+        "precache",
+        "hitch",
+        "lag"
+      ],
+      "respuesta": "It is a Satronho NX feature of its own. The first time you open a game, Samy offers to prepare it; later you find it by long-pressing the game (its properties) → Prepare game. Satronho takes the shaders out of the game's files now, and the next time you open it the loading screen builds them all with your phone's driver. That way it doesn't freeze when a shader shows up for the first time. On a phone it matters even more than on PC, because building shaders is much slower. A prepared game has a ✓ on its card.",
+      "ver": [
+        "medidor",
+        "sellos",
+        "shaders-cache"
+      ]
+    },
+    {
+      "id": "medidor",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "What does the Satronho meter show?",
+      "frases": [
+        "meter",
+        "fps counter",
+        "see the fps",
+        "what do stutters mean",
+        "shader stutter",
+        "numbers at the top"
+      ],
+      "claves": [
+        "meter",
+        "fps",
+        "stutter",
+        "counter",
+        "overlay",
+        "ms"
+      ],
+      "respuesta": "In the game, at the top, the meter shows: FPS (green when fine, amber when it drops, red when it is very slow), each frame's time in milliseconds, the stutters (frames over 100 ms) and how many happened while shaders were being built, and Building shaders N with the ones being built. When shader stutter shows in red, that stutter came from building shaders, not from a bug. Turn it on or off in Settings → Satronho meter.",
+      "ver": [
+        "preparar",
+        "resumen"
+      ]
+    },
+    {
+      "id": "sesiones",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "Where is the session history and how do I share a log?",
+      "frases": [
+        "share log",
+        "send the log",
+        "session history",
+        "yesterday's log",
+        "old log",
+        "log was deleted"
+      ],
+      "claves": [
+        "log",
+        "history",
+        "session",
+        "share",
+        "record"
+      ],
+      "respuesta": "Satronho NX keeps a copy of every session's log, with the date, the build and the game in its name (the 20 newest stay). In Settings → Session history you pick one and share it. To send the newest one right away, use Share log on the Satronho screen or in the summary when a game closes: Android's share menu opens (WhatsApp, Drive, email).",
+      "ver": [
+        "resumen",
+        "medidor"
+      ]
+    },
+    {
+      "id": "sugeridas",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "What are the suggested settings?",
+      "frases": [
+        "suggested settings",
+        "which settings",
+        "best settings",
+        "how do i configure",
+        "recommended profile"
+      ],
+      "claves": [
+        "suggested",
+        "settings",
+        "setting",
+        "profile",
+        "recommended",
+        "performance",
+        "balanced",
+        "quality"
+      ],
+      "respuesta": "In Settings → Suggested settings (or the Satronho screen), Satronho looks at your phone (its GPU and RAM) and offers three profiles: Performance, Balanced and Quality, one marked as recommended. Apply changes the resolution, the filter and the graphics accuracy, and turns on asynchronous shaders and the shader cache. You can change any setting by hand afterwards.",
+      "ver": [
+        "mali",
+        "resolucion"
+      ]
+    },
+    {
+      "id": "mali",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "Why is my Mali or Tensor phone slow?",
+      "frases": [
+        "pixel",
+        "tensor",
+        "mali",
+        "dimensity",
+        "exynos",
+        "my phone is slow",
+        "very slow",
+        "runs badly"
+      ],
+      "claves": [
+        "mali",
+        "tensor",
+        "pixel",
+        "dimensity",
+        "exynos",
+        "slow",
+        "gpu",
+        "graphics"
+      ],
+      "respuesta": "Mali GPUs (Google Tensor in Pixels, MediaTek Dimensity, many Exynos) are the hardest for Switch emulation: their drivers perform worse and have more bugs than Snapdragon's Adreno. Lighter Switch games run better; Switch 2 games will most likely be slow. Use the Performance profile from the suggested settings and Prepare game.",
+      "ver": [
+        "sugeridas",
+        "drivers"
+      ]
+    },
+    {
+      "id": "drivers",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "Can I install another GPU driver?",
+      "frases": [
+        "install driver",
+        "gpu driver",
+        "turnip",
+        "change driver"
+      ],
+      "claves": [
+        "driver",
+        "turnip",
+        "adreno"
+      ],
+      "respuesta": "Custom drivers (like Turnip) only work on Snapdragon's Adreno GPUs. If your phone has an Adreno, you find it in Settings → GPU driver manager. Mali, Xclipse and Tensor use the system driver.",
+      "ver": [
+        "mali"
+      ]
+    },
+    {
+      "id": "shaders-cache",
+      "guia": "nono",
+      "tema": "Settings",
+      "pregunta": "What is the shader cache?",
+      "frases": [
+        "shader cache",
+        "clear cache",
+        "saved shaders"
+      ],
+      "claves": [
+        "cache",
+        "shader"
+      ],
+      "respuesta": "Every shader the game builds is saved in the cache, so next time it loads at once instead of being built again. That is why a game may stutter the first times and then run smoother. Prepare game moves that work to the loading screen.",
+      "ver": [
+        "preparar"
+      ]
+    },
+    {
+      "id": "resolucion",
+      "guia": "troya",
+      "tema": "Graphics",
+      "pregunta": "Which resolution should I use?",
+      "frases": [
+        "which resolution",
+        "raise resolution",
+        "lower resolution",
+        "looks blurry",
+        "looks pixelated"
+      ],
+      "claves": [
+        "resolution",
+        "blurry",
+        "pixelated",
+        "sharp",
+        "scale"
+      ],
+      "respuesta": "On a phone it is best to start low: 1/2X or 3/4X on most, 1X only on powerful phones. Higher resolution looks sharper but asks more of the GPU. The easiest is to pick a profile in Suggested settings and adjust from there.",
+      "ver": [
+        "sugeridas",
+        "fsr"
+      ]
+    },
+    {
+      "id": "fsr",
+      "guia": "troya",
+      "tema": "Graphics",
+      "pregunta": "What are FSR and the scaling filter?",
+      "frases": [
+        "what is fsr",
+        "scaling filter",
+        "bilinear",
+        "sharper image"
+      ],
+      "claves": [
+        "fsr",
+        "filter",
+        "scaling",
+        "bilinear",
+        "sharpness"
+      ],
+      "respuesta": "The scaling filter decides how the image is enlarged to your screen. Bilinear is the lightest. FSR makes it sharper at some performance cost: it is the one in the Quality profile.",
+      "ver": [
+        "resolucion"
+      ]
+    },
+    {
+      "id": "novedades",
+      "guia": "juana",
+      "tema": "Updates",
+      "pregunta": "Where do I see what's new?",
+      "frases": [
+        "news",
+        "what's new",
+        "what does this version bring",
+        "what changed",
+        "changelog"
+      ],
+      "claves": [
+        "news",
+        "new",
+        "change",
+        "version",
+        "build"
+      ],
+      "respuesta": "Every new build shows its news when you open the app, tagged New, Improvement and Fix. You can see them again on the Satronho screen (News tab), in Settings → News or from the bubble.",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "actualizar",
+      "guia": "juana",
+      "tema": "Updates",
+      "pregunta": "How do I update Satronho NX?",
+      "frases": [
+        "how do i update",
+        "update",
+        "new version",
+        "download the latest"
+      ],
+      "claves": [
+        "update",
+        "download",
+        "release",
+        "apk"
+      ],
+      "respuesta": "When you open the app, Satronho NX checks its GitHub releases for a new build and offers to download and install it on top, keeping your data and games. You can turn it off in the app settings (Check for updates). You can also download the APK by hand from the releases of the Riddsc/satronho-nx repository.",
+      "ver": [
+        "novedades",
+        "firma"
+      ]
+    },
+    {
+      "id": "firma",
+      "guia": "juana",
+      "tema": "Updates",
+      "pregunta": "Why does it ask me to uninstall to install the new one?",
+      "frases": [
+        "won't install",
+        "package conflict",
+        "asks to uninstall",
+        "can't update",
+        "can't install the new version"
+      ],
+      "claves": [
+        "uninstall",
+        "install",
+        "signature",
+        "conflict",
+        "package"
+      ],
+      "respuesta": "Android only installs an app on top when it is signed with the same key. The first previews came out with a test key; since Satronho NX has its own key, that preview has to be uninstalled once. After that, every build installs on top.",
+      "ver": [
+        "actualizar"
+      ]
+    },
+    {
+      "id": "idioma",
+      "guia": "juana",
+      "tema": "Updates",
+      "pregunta": "How do I change the app's language?",
+      "frases": [
+        "change language",
+        "set to english",
+        "set to spanish",
+        "language",
+        "app in english",
+        "app in spanish"
+      ],
+      "claves": [
+        "language",
+        "english",
+        "spanish",
+        "espanol"
+      ],
+      "respuesta": "By default the app uses your phone's language. In Settings → App language you pick the phone's, Español or English. The guides and the Android news answer in the app's language.",
+      "ver": []
+    },
+    {
+      "id": "pantalla-satronho",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "What is the Satronho screen?",
+      "frases": [
+        "satronho screen",
+        "open satronho",
+        "where is everything",
+        "satronho window",
+        "tabs"
+      ],
+      "claves": [
+        "screen",
+        "tab",
+        "window",
+        "satronho",
+        "open"
+      ],
+      "respuesta": "It is Satronho NX's hub, like the desktop's Satronho window: News, Suggested settings, Ask the guides and Guides, in tabs. Open it from Settings → Satronho (first in the list), by long-pressing the guides' bubble, or by long-pressing the app icon → Satronho.",
+      "ver": [
+        "guias",
+        "accesos-directos"
+      ]
+    },
+    {
+      "id": "resumen",
+      "guia": "troya",
+      "tema": "Features",
+      "pregunta": "What is the summary when a game closes?",
+      "frases": [
+        "session summary",
+        "how did it go",
+        "when i exit the game",
+        "card when closing",
+        "average fps"
+      ],
+      "claves": [
+        "summary",
+        "session",
+        "average",
+        "close",
+        "exit"
+      ],
+      "respuesta": "When you leave a game after playing at least half a minute, Troya shows how long you played, the average FPS and in the slowest moments, the stutters and how many came from shaders, and the longest one. If almost all came from shaders and the game isn't prepared, Samy offers to prepare it. You can share the log from there too. Turn it off with Don't show again or in Settings → Summary when a game closes.",
+      "ver": [
+        "sellos",
+        "preparar",
+        "sesiones"
+      ]
+    },
+    {
+      "id": "sellos",
+      "guia": "troya",
+      "tema": "Features",
+      "pregunta": "What do the ✓ and the fps on the game cards mean?",
+      "frases": [
+        "check on the game",
+        "tick on the card",
+        "fps on the card",
+        "badge",
+        "green mark"
+      ],
+      "claves": [
+        "badge",
+        "card",
+        "check",
+        "tick",
+        "mark"
+      ],
+      "respuesta": "It is Satronho's mark on each game: ✓ (green) means it is already prepared, and the number is the average FPS of its last session. The list view also shows how many stutters it had.",
+      "ver": [
+        "resumen",
+        "preparar"
+      ]
+    },
+    {
+      "id": "accesos-directos",
+      "guia": "samy",
+      "tema": "Features",
+      "pregunta": "What shows up when I long-press the app icon?",
+      "frases": [
+        "long press the icon",
+        "shortcuts",
+        "home screen shortcut",
+        "app icon",
+        "continue the last game"
+      ],
+      "claves": [
+        "icon",
+        "shortcut",
+        "home",
+        "launcher"
+      ],
+      "respuesta": "Long-pressing the Satronho NX icon shows the last games you opened, to jump straight in, and Satronho, which opens the Satronho screen. You can drag any of them to your home screen. On Android 13 or newer, with themed icons on, the Satronho planet takes your wallpaper's colors.",
+      "ver": [
+        "pantalla-satronho"
+      ]
+    }
+  ]
+}

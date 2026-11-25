@@ -41,6 +41,10 @@
 #define RYUJINX_DIR "Ryujinx"
 
 // yuzu-specific files
+#ifdef __ANDROID__
+#define LOG_FILE "satronho_log.txt"
+#else
 #define LOG_FILE "eden_log.txt"
+#endif
 #define LOSSLESS_DLL_FILE "Lossless.dll"
 #define LOSSLESS_CACHE_FILE "lsfg_spirv.cache"

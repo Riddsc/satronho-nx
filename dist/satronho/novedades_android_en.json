@@ -1,0 +1,70 @@
+{
+  "builds": [
+    {
+      "tag": "Android – preview 3",
+      "fecha": "November 25, 2026",
+      "titulo": "Satronho everywhere",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "The Satronho screen, like the desktop window: News, Suggested settings, Ask the guides and Guides, in tabs. Open it from Settings, by long-pressing the bubble or from the app icon."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "All five guides with their color, size and topic, as on PC. Each pet can be turned off, and then MechaRidds answers for it."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Summary when a game closes, created by Satronho NX on PC and brought to the phone: how long you played, average FPS and in the slowest moments, stutters and how many came from shaders. If shaders were the problem, Samy offers to prepare the game."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho's mark on each game: ✓ when it is prepared and the FPS of its last session. And the first time you open a game, Samy offers to prepare it."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "MechaRidds' three-step welcome (keys, games folder, suggested settings), an Android 13 themed icon with the Satronho planet, the Satronho shortcut on the app icon, and on-screen controls and in-game menu in our colors."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Updates from the app: when a new build is out, Satronho NX tells you, downloads it from the releases and installs it on top. Share log in one tap from the Satronho screen and the summary."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "The meter matches the desktop's: Building shaders N · shader stutter. The background logo is now our planet with the guides, as visible as you like (0 to 100 %). Guides and news in English too."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Fixed a crash when opening a game before Android hands over the screen (for example right after rotating the phone or leaving); the log is now satronho_log.txt and shows the build; the AMDBoost effect compiles; and the folder and file-reading errors at startup are gone."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Signed with Satronho NX's own key: uninstall the previous preview once; from here on, everything installs on top."
+        }
+      ]
+    },
+    {
+      "tag": "Android – preview 2",
+      "fecha": "November 25, 2026",
+      "titulo": "The real Satronho NX on Android",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX on Android with its own identity: name, logo, notification icon, TV banner, colors and About screen, in every language. The app starts from Eden and Lichii; Satronho NX picked it, adapted it and added everything on this list."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Prepare game, created by Satronho NX and brought to Android from our desktop Prepare for stream: it takes the game's shaders out ahead of time and builds them on the next loading screen."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Suggested settings for your phone: Satronho detects the GPU (Adreno, Mali/Tensor, Xclipse) and the RAM and offers Performance, Balanced and Quality, one recommended, applied in one tap."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "The guides come to Android in a floating bubble, with their own knowledge base for the phone. The Satronho meter, the session history, the news and a quick language picker."
+        }
+      ]
+    }
+  ]
+}

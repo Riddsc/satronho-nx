@@ -37,6 +37,7 @@ import org.yuzu.yuzu_emu.features.settings.model.IntSetting
 import org.yuzu.yuzu_emu.utils.NativeConfig
 import org.yuzu.yuzu_emu.satronho.Novedades
 import org.yuzu.yuzu_emu.satronho.Satronho
+import org.yuzu.yuzu_emu.satronho.SatronhoScreen
 import org.yuzu.yuzu_emu.satronho.Sesiones
 import org.yuzu.yuzu_emu.satronho.Sugeridas
 import org.yuzu.yuzu_emu.YuzuApplication
@@ -379,6 +380,14 @@ class HomeSettingsFragment : Fragment() {
 
         list.add(
             HomeSetting(
+                R.string.satronho_screen,
+                R.string.satronho_screen_description,
+                R.drawable.ic_satronho,
+                { SatronhoScreen.show(requireActivity()) }
+            )
+        )
+        list.add(
+            HomeSetting(
                 R.string.satronho_novedades,
                 R.string.satronho_novedades_description,
                 R.drawable.ic_new_label,
@@ -423,15 +432,54 @@ class HomeSettingsFragment : Fragment() {
                 details = meter
             )
         )
-        val logo = MutableStateFlow(onOff(Satronho.backgroundLogo))
+        val summary = MutableStateFlow(onOff(Satronho.summaryEnabled))
+        list.add(
+            HomeSetting(
+                R.string.satronho_summary_setting,
+                R.string.satronho_summary_setting_description,
+                R.drawable.ic_log,
+                {
+                    Satronho.summaryEnabled = !Satronho.summaryEnabled
+                    summary.value = onOff(Satronho.summaryEnabled)
+                },
+                details = summary
+            )
+        )
+        fun logoText(): String {
+            val opacity = Satronho.logoOpacity
+            return if (opacity <= 0) getString(R.string.satronho_off) else "$opacity %"
+        }
+        val logo = MutableStateFlow(logoText())
         list.add(
             HomeSetting(
                 R.string.satronho_background_logo,
                 R.string.satronho_background_logo_description,
                 R.drawable.ic_palette,
                 {
-                    Satronho.backgroundLogo = !Satronho.backgroundLogo
-                    logo.value = onOff(Satronho.backgroundLogo)
+                    val slider = com.google.android.material.slider.Slider(requireContext()).apply {
+                        valueFrom = 0f
+                        valueTo = 100f
+                        stepSize = 1f
+                        value = Satronho.logoOpacity.toFloat()
+                        setLabelFormatter { value ->
+                            if (value <= 0f) getString(R.string.satronho_off) else "${value.toInt()} %"
+                        }
+                    }
+                    val pad = Satronho.dp(requireContext(), 20)
+                    val box = android.widget.FrameLayout(requireContext()).apply {
+                        setPadding(pad, pad, pad, 0)
+                        addView(slider)
+                    }
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.satronho_background_logo)
+                        .setMessage(R.string.satronho_background_logo_slider)
+                        .setView(box)
+                        .setPositiveButton(R.string.satronho_apply) { _, _ ->
+                            Satronho.logoOpacity = slider.value.toInt()
+                            logo.value = logoText()
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
                 },
                 details = logo
             )
@@ -583,14 +631,14 @@ class HomeSettingsFragment : Fragment() {
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_log.txt"
+                "${DocumentProvider.ROOT_ID}/log/satronho_log.txt"
             )
         )!!
         val oldLog = DocumentFile.fromSingleUri(
             mainActivity,
             DocumentsContract.buildDocumentUri(
                 DocumentProvider.AUTHORITY,
-                "${DocumentProvider.ROOT_ID}/log/eden_log.txt.old.txt"
+                "${DocumentProvider.ROOT_ID}/log/satronho_log.txt.old.txt"
             )
         )!!
 

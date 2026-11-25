@@ -70,6 +70,7 @@ import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.satronho.Meter
 import org.yuzu.yuzu_emu.satronho.Satronho
+import org.yuzu.yuzu_emu.satronho.SesionActual
 import org.yuzu.yuzu_emu.activities.EmulationActivity
 import org.yuzu.yuzu_emu.databinding.DialogOverlayAdjustBinding
 import org.yuzu.yuzu_emu.databinding.FragmentEmulationBinding
@@ -959,6 +960,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
 
         emulationViewModel.emulationStarted.collect(viewLifecycleOwner) {
             if (it) {
+                game?.let { started -> SesionActual.begin(started.programId, started.title) }
                 binding.drawerLayout.setDrawerLockMode(IntSetting.LOCK_DRAWER.getInt())
                 ViewUtils.showView(binding.surfaceInputOverlay)
                 ViewUtils.hideView(binding.loadingIndicator)
@@ -977,6 +979,10 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     val vendorLabel = findViewById<TextView>(R.id.gpu_vendor)
 
                     titleView.text = game?.title ?: ""
+                    // Satronho NX's colors in the in-game menu.
+                    titleView.setTextColor(Satronho.LILAC)
+                    binding.inGameMenu.itemIconTintList =
+                        android.content.res.ColorStateList.valueOf(Satronho.VIOLET)
                     cpuBackendLabel.text = NativeLibrary.getCpuBackend()
                     vendorLabel.text = NativeLibrary.getGpuDriver()
                 }
@@ -1475,6 +1481,9 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     override fun onDestroyView() {
+        if (requireActivity().isFinishing) {
+            SesionActual.end(requireContext())
+        }
         super.onDestroyView()
         amiiboLoadJob?.cancel()
         amiiboLoadJob = null

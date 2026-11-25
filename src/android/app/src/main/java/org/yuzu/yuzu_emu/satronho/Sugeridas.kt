@@ -7,6 +7,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.util.TypedValue
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -116,7 +117,10 @@ object Sugeridas {
         NativeConfig.saveGlobalConfig()
     }
 
-    fun show(context: Context) {
+    /** The view and what «Aplicar» does with the profile picked in it. */
+    class Content(val view: View, val apply: () -> Unit)
+
+    fun buildContent(context: Context): Content {
         val device = detect(context)
         val list = profiles(device.family)
         val best = recommended(device)
@@ -165,18 +169,24 @@ object Sugeridas {
             setPadding(0, Satronho.dp(context, 4), 0, 0)
         })
 
+        val applyPicked = {
+            val index = (group.checkedRadioButtonId - 1000).coerceIn(0, list.size - 1)
+            apply(list[index])
+            Toast.makeText(
+                context,
+                context.getString(R.string.satronho_suggested_applied, context.getString(list[index].nameId)),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        return Content(ScrollView(context).apply { addView(root) }, applyPicked)
+    }
+
+    fun show(context: Context) {
+        val content = buildContent(context)
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.satronho_suggested)
-            .setView(ScrollView(context).apply { addView(root) })
-            .setPositiveButton(R.string.satronho_apply) { _, _ ->
-                val index = (group.checkedRadioButtonId - 1000).coerceIn(0, list.size - 1)
-                apply(list[index])
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.satronho_suggested_applied, context.getString(list[index].nameId)),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            .setView(content.view)
+            .setPositiveButton(R.string.satronho_apply) { _, _ -> content.apply() }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
     }

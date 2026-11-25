@@ -32,13 +32,24 @@ object Knowledge {
         "puedo", "que", "se", "si", "sirve", "su", "un", "una", "uno", "y", "yo", "tengo", "hace",
         "hacer", "hago", "tu", "le", "sobre", "algo", "eso", "esto", "ese", "muy", "mas", "ya",
         "no", "quiero", "necesito", "saber", "explica", "explicame", "dime", "ayuda", "hola",
-        "porfa", "favor"
+        "porfa", "favor",
+        // English
+        "the", "an", "and", "or", "of", "to", "in", "on", "for", "with", "is", "are", "it",
+        "my", "i", "do", "does", "how", "what", "where", "why", "can", "this", "that", "be",
+        "please", "want", "need", "know", "tell", "help", "hi", "hello", "about", "you", "your"
     )
 
     private var topics: List<Topic>? = null
     private var keywordTopics: Map<String, Int> = emptyMap()
 
+    private var topicsLanguage = ""
+
     fun topics(context: Context): List<Topic> {
+        val language = if (Satronho.isSpanish(context)) "es" else "en"
+        if (language != topicsLanguage) {
+            topics = null
+            topicsLanguage = language
+        }
         topics?.let { return it }
         val loaded = load(context)
         topics = loaded
@@ -87,7 +98,7 @@ object Knowledge {
     }
 
     private fun load(context: Context): List<Topic> {
-        val text = Satronho.readAsset(context, "conocimiento_android.json") ?: return emptyList()
+        val text = Satronho.readLocalizedAsset(context, "conocimiento_android.json") ?: return emptyList()
         return try {
             val entries = JSONObject(text).getJSONArray("entradas")
             (0 until entries.length()).map { i ->

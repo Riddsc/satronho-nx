@@ -31,20 +31,26 @@ import org.yuzu.yuzu_emu.R
 object GuideBubble {
     private const val FIRST_SHOWN_KEY = "bubble_first_shown"
 
-    /** The pet on the bubble this time: Samy the first time, then a weighted pick. */
+    /** The pet on the bubble this time: Samy the first time, then a weighted pick of the pets on. */
     private fun bubbleGuide(context: Context): String {
         val prefs = Satronho.prefs(context)
         if (!prefs.getBoolean(FIRST_SHOWN_KEY, false)) {
             prefs.edit().putBoolean(FIRST_SHOWN_KEY, true).apply()
-            return "samy"
+            return Satronho.speaker("samy")
         }
-        val roll = Random.nextInt(100)
-        return when {
-            roll < 33 -> "samy"
-            roll < 65 -> "troya"
-            roll < 83 -> "nono"
-            else -> "juana"
+        val pets = listOf("samy" to 33, "troya" to 32, "nono" to 18, "juana" to 17)
+            .filter { Satronho.petEnabled(it.first) }
+        if (pets.isEmpty()) {
+            return "mecharidds"
         }
+        var roll = Random.nextInt(pets.sumOf { it.second })
+        for ((pet, weight) in pets) {
+            if (roll < weight) {
+                return pet
+            }
+            roll -= weight
+        }
+        return pets.last().first
     }
 
     private fun avatar(context: Context, guide: String, sizeDp: Int): ImageView {
@@ -84,9 +90,14 @@ object GuideBubble {
         bubble.contentDescription = context.getString(R.string.satronho_guides)
         bubble.visibility = View.VISIBLE
         bubble.setOnClickListener { open(activity, guide) { setup(bubble, activity) } }
+        bubble.setOnLongClickListener {
+            SatronhoScreen.show(activity, onClose = { setup(bubble, activity) })
+            true
+        }
     }
 
-    private fun open(activity: Activity, guide: String, onClose: () -> Unit) {
+    /** The conversation with the guides: their greeting, topics, answers and the question box. */
+    fun buildChat(activity: Activity, guide: String): View {
         val context: Context = activity
         val pad = Satronho.dp(context, 20)
         val root = LinearLayout(context).apply {
@@ -158,7 +169,7 @@ object GuideBubble {
 
         lateinit var answer: (Knowledge.Topic) -> Unit
         answer = { topic ->
-            speak(topic.guide.ifEmpty { "mecharidds" }, topic.answer)
+            speak(Satronho.speaker(topic.guide), topic.answer)
             showLinks(
                 context.getString(R.string.satronho_guides_related),
                 topic.related.mapNotNull { Knowledge.find(context, it) },
@@ -230,11 +241,14 @@ object GuideBubble {
         }
         buttons.addView(askButton)
         root.addView(buttons)
+        return ScrollView(context).apply { addView(root) }
+    }
 
-        MaterialAlertDialogBuilder(context)
-            .setView(ScrollView(context).apply { addView(root) })
+    private fun open(activity: Activity, guide: String, onClose: () -> Unit) {
+        MaterialAlertDialogBuilder(activity)
+            .setView(buildChat(activity, guide))
             .setPositiveButton(R.string.satronho_close, null)
-            .setNeutralButton(R.string.satronho_novedades) { _, _ -> Novedades.show(activity) }
+            .setNeutralButton(R.string.satronho_screen) { _, _ -> SatronhoScreen.show(activity, onClose) }
             .setNegativeButton(R.string.satronho_guides_turn_off) { _, _ ->
                 Satronho.guidesEnabled = false
             }

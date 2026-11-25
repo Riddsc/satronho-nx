@@ -3,6 +3,8 @@
 
 package org.yuzu.yuzu_emu.ui.main
 
+import org.yuzu.yuzu_emu.satronho.Satronho
+import org.yuzu.yuzu_emu.satronho.SatronhoScreen
 import android.content.Intent
 import android.content.Context
 import android.net.Uri
@@ -168,6 +170,22 @@ class MainActivity : AppCompatActivity(), ThemeProvider {
         }
         setInsets()
         applyFullscreenPreference()
+
+        if (savedInstanceState == null) {
+            openSatronhoIfAsked(intent)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openSatronhoIfAsked(intent)
+    }
+
+    /** The launcher icon's «Satronho» shortcut. */
+    private fun openSatronhoIfAsked(intent: Intent?) {
+        if (intent?.action == Satronho.ACTION_OPEN) {
+            binding.root.post { SatronhoScreen.show(this) }
+        }
     }
 
     private fun checkForUpdates() {

@@ -74,6 +74,16 @@
                     android:ellipsize="end"
                     tools:text="The Legend of Zelda: Skyward Sword" />
 
+                <TextView
+                    android:id="@+id/satronho_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="6dp"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
             </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

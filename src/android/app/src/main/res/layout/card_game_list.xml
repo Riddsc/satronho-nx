@@ -67,6 +67,17 @@
             app:layout_constraintTop_toBottomOf="@+id/text_game_title"
             tools:text="Generic" />
 
+            <TextView
+            android:id="@+id/satronho_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/image_game_screen"
+            app:layout_constraintTop_toTopOf="@+id/image_game_screen" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </org.yuzu.yuzu_emu.views.GradientBorderCardView>

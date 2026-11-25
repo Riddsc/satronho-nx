@@ -4,11 +4,13 @@
 package org.yuzu.yuzu_emu.satronho
 
 import android.app.Activity
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import java.text.DateFormat
@@ -28,6 +30,36 @@ object PrepareGame {
     fun preparedAt(activity: Activity, game: Game): Long =
         Satronho.prefs(activity).getLong(preparedKey(game), 0L)
 
+    fun isPrepared(context: Context, programId: String): Boolean =
+        Satronho.prefs(context).getLong("prepared_$programId", 0L) > 0L
+
+    /**
+     * The first time a game that isn't prepared is opened, Samy offers to prepare it first.
+     * Asked once per game; [launch] opens the game as usual.
+     */
+    fun suggestBeforeLaunch(activity: Activity, game: Game, launch: () -> Unit) {
+        val prefs = Satronho.prefs(activity)
+        val askedKey = "prepare_asked_${game.programId}"
+        if (game.programId.isEmpty() || isPrepared(activity, game.programId) ||
+            prefs.getBoolean(askedKey, false) || !Satronho.guidesEnabled
+        ) {
+            launch()
+            return
+        }
+        prefs.edit().putBoolean(askedKey, true).apply()
+        val speaker = Satronho.speaker("samy")
+        MaterialAlertDialogBuilder(activity)
+            .setIcon(Satronho.guideBitmap(activity, speaker)?.let { bitmap ->
+                RoundedBitmapDrawableFactory.create(activity.resources, bitmap)
+                    .apply { isCircular = true }
+            })
+            .setTitle(activity.getString(R.string.satronho_prepare_suggest_title, Satronho.guide(speaker).name))
+            .setMessage(activity.getString(R.string.satronho_prepare_suggest, game.title))
+            .setPositiveButton(R.string.satronho_prepare_now) { _, _ -> start(activity, game, launch) }
+            .setNegativeButton(R.string.satronho_play_now) { _, _ -> launch() }
+            .show()
+    }
+
     fun menuDetails(activity: Activity, game: Game): String {
         val at = preparedAt(activity, game)
         return if (at == 0L) {
@@ -40,7 +72,7 @@ object PrepareGame {
         }
     }
 
-    fun start(activity: Activity, game: Game) {
+    fun start(activity: Activity, game: Game, onPlay: (() -> Unit)? = null) {
         val context = activity
         val pad = Satronho.dp(context, 20)
         val root = LinearLayout(context).apply {
@@ -119,11 +151,16 @@ object PrepareGame {
                     programs == -2L -> context.getString(R.string.satronho_prepare_busy)
                     else -> context.getString(R.string.satronho_prepare_failed, error)
                 }
-                MaterialAlertDialogBuilder(context)
+                val done = MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.satronho_prepare)
                     .setMessage(message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
+                if (onPlay != null && programs >= 0) {
+                    done.setPositiveButton(R.string.satronho_play_now) { _, _ -> onPlay() }
+                        .setNegativeButton(R.string.satronho_close, null)
+                } else {
+                    done.setPositiveButton(android.R.string.ok, null)
+                }
+                done.show()
             }
         }.start()
     }

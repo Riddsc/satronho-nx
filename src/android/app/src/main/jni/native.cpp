@@ -776,6 +776,9 @@ void Java_org_yuzu_yuzu_1emu_NativeLibrary_surfaceDestroyed(JNIEnv* env, jobject
 void Java_org_yuzu_yuzu_1emu_NativeLibrary_setAppDirectory(JNIEnv* env, jobject instance,
                                                            [[maybe_unused]] jstring j_directory) {
     Common::FS::SetAppDirectory(Common::Android::GetJString(env, j_directory));
+    // Satronho: create every data folder (cache/shader, load, tas...) up front, so the first
+    // session doesn't log "not a directory" and the shader cache has somewhere to go.
+    Common::FS::CreateEdenPaths();
 }
 
 int Java_org_yuzu_yuzu_1emu_NativeLibrary_installFileToNand(JNIEnv* env, jobject instance,
@@ -869,29 +872,37 @@ jboolean JNICALL Java_org_yuzu_yuzu_1emu_utils_GpuDriverHelper_supportsCustomDri
 jobjectArray Java_org_yuzu_yuzu_1emu_utils_GpuDriverHelper_getSystemDriverInfo(
     JNIEnv* env, jobject j_obj, jobject j_surf, jstring j_hook_lib_dir) {
 #ifdef ARCHITECTURE_arm64
-    const char* file_redirect_dir_{};
-    int featureFlags{};
-    std::string hook_lib_dir = Common::Android::GetJString(env, j_hook_lib_dir);
-    auto handle = adrenotools_open_libvulkan(RTLD_NOW, featureFlags, nullptr, hook_lib_dir.c_str(),
-                                             nullptr, nullptr, file_redirect_dir_, nullptr);
-    auto driver_library = std::make_shared<Common::DynamicLibrary>(handle);
-    InputCommon::InputSubsystem input_subsystem;
-    auto window =
-        std::make_unique<EmuWindow_Android>(ANativeWindow_fromSurface(env, j_surf), driver_library);
+    std::string version_string = "1.1.0";
+    std::string driver_name = "generic";
+    // Satronho: if Android won't give us a Vulkan surface right now (the app going to the
+    // background, a rotation), answer with the fallback instead of taking the app down.
+    try {
+        const char* file_redirect_dir_{};
+        int featureFlags{};
+        std::string hook_lib_dir = Common::Android::GetJString(env, j_hook_lib_dir);
+        auto handle = adrenotools_open_libvulkan(RTLD_NOW, featureFlags, nullptr, hook_lib_dir.c_str(),
+                                                 nullptr, nullptr, file_redirect_dir_, nullptr);
+        auto driver_library = std::make_shared<Common::DynamicLibrary>(handle);
+        InputCommon::InputSubsystem input_subsystem;
+        auto window =
+            std::make_unique<EmuWindow_Android>(ANativeWindow_fromSurface(env, j_surf), driver_library);
 
-    Vulkan::vk::InstanceDispatch dld;
-    Vulkan::vk::Instance vk_instance = Vulkan::CreateInstance(
-        *driver_library, dld, VK_API_VERSION_1_1, Core::Frontend::WindowSystemType::Android);
+        Vulkan::vk::InstanceDispatch dld;
+        Vulkan::vk::Instance vk_instance = Vulkan::CreateInstance(
+            *driver_library, dld, VK_API_VERSION_1_1, Core::Frontend::WindowSystemType::Android);
 
-    auto surface = Vulkan::CreateSurface(vk_instance, window->GetWindowInfo());
+        auto surface = Vulkan::CreateSurface(vk_instance, window->GetWindowInfo());
 
-    auto device = Vulkan::CreateDevice(vk_instance, dld, *surface);
+        auto device = Vulkan::CreateDevice(vk_instance, dld, *surface);
 
-    auto driver_version = device.GetDriverVersion();
-    auto version_string =
-        fmt::format("{}.{}.{}", VK_API_VERSION_MAJOR(driver_version),
-                    VK_API_VERSION_MINOR(driver_version), VK_API_VERSION_PATCH(driver_version));
-    auto driver_name = device.GetDriverName();
+        auto driver_version = device.GetDriverVersion();
+        version_string =
+            fmt::format("{}.{}.{}", VK_API_VERSION_MAJOR(driver_version),
+                        VK_API_VERSION_MINOR(driver_version), VK_API_VERSION_PATCH(driver_version));
+        driver_name = std::string(device.GetDriverName());
+    } catch (const std::exception& e) {
+        LOG_WARNING(Frontend, "Satronho: couldn't read the GPU driver right now ({})", e.what());
+    }
 #else
     auto driver_version = "1.0.0";
     auto version_string = "1.1.0"; //Assume lowest Vulkan level
@@ -904,29 +915,39 @@ jobjectArray Java_org_yuzu_yuzu_1emu_utils_GpuDriverHelper_getSystemDriverInfo(
 
 jstring Java_org_yuzu_yuzu_1emu_utils_GpuDriverHelper_getGpuModel(JNIEnv *env, jobject j_obj, jobject j_surf, jstring j_hook_lib_dir) {
 #ifdef ARCHITECTURE_arm64
-    const char* file_redirect_dir_{};
-    int featureFlags{};
-    std::string hook_lib_dir = Common::Android::GetJString(env, j_hook_lib_dir);
-    auto handle = adrenotools_open_libvulkan(RTLD_NOW, featureFlags, nullptr, hook_lib_dir.c_str(),
-                                             nullptr, nullptr, file_redirect_dir_, nullptr);
-    auto driver_library = std::make_shared<Common::DynamicLibrary>(handle);
-    InputCommon::InputSubsystem input_subsystem;
-    auto window =
-            std::make_unique<EmuWindow_Android>(ANativeWindow_fromSurface(env, j_surf), driver_library);
+    // Satronho: the model is asked for every time a game opens; Android computing it once per
+    // run (see GpuDriverHelper) plus this guard keeps a missing surface from closing the app.
+    static std::string cached_model;
+    if (!cached_model.empty()) {
+        return Common::Android::ToJString(env, cached_model);
+    }
+    try {
+        const char* file_redirect_dir_{};
+        int featureFlags{};
+        std::string hook_lib_dir = Common::Android::GetJString(env, j_hook_lib_dir);
+        auto handle = adrenotools_open_libvulkan(RTLD_NOW, featureFlags, nullptr, hook_lib_dir.c_str(),
+                                                 nullptr, nullptr, file_redirect_dir_, nullptr);
+        auto driver_library = std::make_shared<Common::DynamicLibrary>(handle);
+        InputCommon::InputSubsystem input_subsystem;
+        auto window =
+                std::make_unique<EmuWindow_Android>(ANativeWindow_fromSurface(env, j_surf), driver_library);
 
-    Vulkan::vk::InstanceDispatch dld;
-    Vulkan::vk::Instance vk_instance = Vulkan::CreateInstance(
-            *driver_library, dld, VK_API_VERSION_1_1, Core::Frontend::WindowSystemType::Android);
+        Vulkan::vk::InstanceDispatch dld;
+        Vulkan::vk::Instance vk_instance = Vulkan::CreateInstance(
+                *driver_library, dld, VK_API_VERSION_1_1, Core::Frontend::WindowSystemType::Android);
 
-    auto surface = Vulkan::CreateSurface(vk_instance, window->GetWindowInfo());
+        auto surface = Vulkan::CreateSurface(vk_instance, window->GetWindowInfo());
 
-    auto device = Vulkan::CreateDevice(vk_instance, dld, *surface);
+        auto device = Vulkan::CreateDevice(vk_instance, dld, *surface);
 
-    const std::string model_name{device.GetModelName()};
+        cached_model = std::string(device.GetModelName());
 
-    window.release();
-
-    return Common::Android::ToJString(env, model_name);
+        window.release();
+    } catch (const std::exception& e) {
+        LOG_WARNING(Frontend, "Satronho: couldn't read the GPU model right now ({})", e.what());
+        return Common::Android::ToJString(env, "Unknown");
+    }
+    return Common::Android::ToJString(env, cached_model);
 #else
     return Common::Android::ToJString(env, "no-info");
 #endif
@@ -1367,7 +1388,7 @@ void Java_org_yuzu_yuzu_1emu_NativeLibrary_run(JNIEnv* env, jobject jobj, jstrin
 }
 
 void Java_org_yuzu_yuzu_1emu_NativeLibrary_logDeviceInfo(JNIEnv* env, jclass clazz) {
-    LOG_INFO(Frontend, "eden Version: {}-{}", Common::g_scm_branch, Common::g_scm_desc);
+    LOG_INFO(Frontend, "Satronho NX version: {} ({}-{})", Common::g_build_release_tag[0] ? Common::g_build_release_tag : "vista previa", Common::g_scm_branch, Common::g_scm_desc);
     LOG_INFO(Frontend, "Host OS: Android API level {}", android_get_device_api_level());
 }
 

@@ -49,9 +49,10 @@
         "mascota",
         "preguntar"
       ],
-      "respuesta": "Somos MechaRidds y sus mascotas Samy, Troya, Ñoño y Juana. Vivimos en la burbuja de la esquina de la lista de juegos: tócala, escribe tu pregunta con tus palabras y te contestamos desde lo que sabemos de Satronho NX, sin internet. Cada uno tiene su tema: Samy las funciones, Troya los gráficos, Ñoño las configuraciones y Juana las actualizaciones.",
+      "respuesta": "Somos MechaRidds y sus mascotas Samy, Troya, Ñoño y Juana. Vivimos en la burbuja de la esquina de la lista de juegos: tócala, escribe tu pregunta con tus palabras y te contestamos desde lo que sabemos de Satronho NX, sin internet. Cada uno tiene su tema: Samy las funciones, Troya los gráficos y tus sesiones, Ñoño las configuraciones y Juana las actualizaciones. En Satronho → «Guías» nos conoces a los cinco.",
       "ver": [
         "apagar-guias",
+        "pantalla-satronho",
         "que-es"
       ]
     },
@@ -67,7 +68,15 @@
         "prender guias",
         "volver a ver la burbuja",
         "apago la burbuja",
-        "como apago la burbuja"
+        "como apago la burbuja",
+        "apagar una mascota",
+        "apagar a juana",
+        "quitar a samy",
+        "apago a juana",
+        "apago a samy",
+        "apago a troya",
+        "apago a nono",
+        "apagar una mascota"
       ],
       "claves": [
         "apagar",
@@ -80,7 +89,7 @@
         "apago",
         "quito"
       ],
-      "respuesta": "En la burbuja, «Apagar guías». Para volver a vernos: Ajustes (el engranaje de la lista) → «Guías», que cambia entre Activado y Desactivado.",
+      "respuesta": "En la burbuja, «Apagar guías» los apaga a todos. Para volver a vernos: Ajustes → «Guías». Si solo quieres apagar a una mascota, ve a Satronho → pestaña «Guías» y apaga su interruptor; MechaRidds responde por ella.",
       "ver": [
         "guias"
       ]
@@ -114,9 +123,10 @@
         "trabe",
         "traba"
       ],
-      "respuesta": "Es una función propia de Satronho NX. Mantén presionado el juego (o abre sus propiedades) y elige «Preparar juego»: Satronho saca ahora los shaders de los archivos del juego, y la próxima vez que lo abras, la pantalla de carga los arma todos con el driver de tu teléfono. Así no se traba cuando un shader aparece por primera vez. En el teléfono importa todavía más que en PC, porque armar shaders es mucho más lento. Si saltas la pantalla de carga, lo armado se guarda (también cada 10 minutos) y la siguiente vez sigue desde ahí.",
+      "respuesta": "Es una función propia de Satronho NX. La primera vez que abres un juego, Samy te ofrece prepararlo; después lo encuentras manteniendo presionado el juego (sus propiedades) → «Preparar juego». Satronho saca ahora los shaders de los archivos del juego, y la próxima vez que lo abras, la pantalla de carga los arma todos con el driver de tu teléfono. Así no se traba cuando un shader aparece por primera vez. En el teléfono importa todavía más que en PC, porque armar shaders es mucho más lento. Un juego preparado lleva un ✓ en su tarjeta.",
       "ver": [
         "medidor",
+        "sellos",
         "shaders-cache"
       ]
     },
@@ -141,10 +151,10 @@
         "overlay",
         "ms"
       ],
-      "respuesta": "Dentro del juego, arriba, el medidor muestra: FPS (verde si va bien, ámbar si baja, rojo si va muy lento), el tiempo de cada cuadro en milisegundos, los tirones (cuadros de más de 100 ms) y cuántos fueron mientras se armaban shaders, y los shaders que se están armando. Si dice «Tirón por shaders», ese tirón fue por la preparación de shaders, no un fallo. Se apaga o prende en Ajustes → «Medidor Satronho».",
+      "respuesta": "Dentro del juego, arriba, el medidor muestra: FPS (verde si va bien, ámbar si baja, rojo si va muy lento), el tiempo de cada cuadro en milisegundos, los tirones (cuadros de más de 100 ms) y cuántos fueron mientras se armaban shaders, y «Armando shaders N» con los que se están armando. Si aparece «tirón por shaders» en rojo, ese tirón fue por la preparación de shaders, no un fallo. Se apaga o prende en Ajustes → «Medidor Satronho».",
       "ver": [
         "preparar",
-        "sesiones"
+        "resumen"
       ]
     },
     {
@@ -168,8 +178,9 @@
         "compartir",
         "registro"
       ],
-      "respuesta": "Satronho NX guarda una copia del log de cada sesión, con la fecha, la build y el juego en el nombre (se quedan las 20 más nuevas). En Ajustes → «Historial de sesiones» eliges una y la compartes por WhatsApp, correo o donde quieras. Así ningún log se pierde al volver a abrir la app.",
+      "respuesta": "Satronho NX guarda una copia del log de cada sesión, con la fecha, la build y el juego en el nombre (se quedan las 20 más nuevas). En Ajustes → «Historial de sesiones» eliges una y la compartes. Para mandar el más reciente de una, usa «Compartir log» en la pantalla Satronho o en el resumen al cerrar el juego: se abre el menú de compartir de Android (WhatsApp, Drive, correo).",
       "ver": [
+        "resumen",
         "medidor"
       ]
     },
@@ -341,7 +352,7 @@
         "version",
         "build"
       ],
-      "respuesta": "Cada build nueva te muestra sus novedades al abrir la app, con etiquetas Nuevo, Mejora y Arreglo. Puedes volver a verlas en Ajustes → «Novedades» o desde la burbuja de los guías. Ahí salen primero las de Android y debajo las últimas de la versión de PC.",
+      "respuesta": "Cada build nueva te muestra sus novedades al abrir la app, con etiquetas Nuevo, Mejora y Arreglo. Puedes volver a verlas en la pantalla Satronho (pestaña «Novedades»), en Ajustes → «Novedades» o desde la burbuja. Ahí salen primero las de Android y debajo las últimas de la versión de PC.",
       "ver": [
         "actualizar"
       ]
@@ -355,16 +366,19 @@
         "como actualizo",
         "actualizar",
         "nueva version",
-        "descargar la ultima"
+        "descargar la ultima",
+        "como actualizo la app",
+        "actualizar la app"
       ],
       "claves": [
         "actualizar",
         "actualizacion",
         "descargar",
         "release",
-        "apk"
+        "apk",
+        "actualizo"
       ],
-      "respuesta": "Al abrir la app, Satronho NX revisa si hay una build nueva en sus releases de GitHub y te ofrece descargarla e instalarla encima, sin perder tus datos. También puedes bajar el APK a mano de los releases del repositorio Riddsc/satronho-nx.",
+      "respuesta": "Al abrir la app, Satronho NX revisa si hay una build nueva en sus releases de GitHub y te ofrece descargarla e instalarla encima, sin perder tus datos ni tus juegos. Se puede apagar en los ajustes de la app («Buscar actualizaciones»). También puedes bajar el APK a mano de los releases del repositorio Riddsc/satronho-nx.",
       "ver": [
         "novedades",
         "firma"
@@ -416,8 +430,108 @@
         "english",
         "lenguaje"
       ],
-      "respuesta": "Por defecto la app usa el idioma del teléfono. En Ajustes → «Idioma de la app» eliges entre el del teléfono, Español o English. Los guías y las novedades responden en español.",
+      "respuesta": "Por defecto la app usa el idioma del teléfono. En Ajustes → «Idioma de la app» eliges entre el del teléfono, Español o English. Los guías y las novedades de Android responden en el idioma de la app.",
       "ver": []
+    },
+    {
+      "id": "pantalla-satronho",
+      "guia": "mecharidds",
+      "tema": "Satronho NX",
+      "pregunta": "¿Qué es la pantalla Satronho?",
+      "frases": [
+        "pantalla satronho",
+        "abrir satronho",
+        "donde esta todo",
+        "ventana satronho",
+        "pestañas"
+      ],
+      "claves": [
+        "pantalla",
+        "pestaña",
+        "ventana",
+        "satronho",
+        "abrir"
+      ],
+      "respuesta": "Es el centro de Satronho NX, igual que la ventana Satronho de PC: Novedades, Configuraciones sugeridas, Pregúntale a los guías y Guías, en pestañas. Se abre desde Ajustes → «Satronho» (lo primero de la lista), manteniendo presionada la burbuja de los guías, o manteniendo presionado el ícono de la app → «Satronho».",
+      "ver": [
+        "guias",
+        "accesos-directos"
+      ]
+    },
+    {
+      "id": "resumen",
+      "guia": "troya",
+      "tema": "Funciones",
+      "pregunta": "¿Qué es el resumen al cerrar el juego?",
+      "frases": [
+        "resumen de la sesion",
+        "como me fue",
+        "al salir del juego",
+        "tarjeta al cerrar",
+        "fps promedio"
+      ],
+      "claves": [
+        "resumen",
+        "sesion",
+        "promedio",
+        "cerrar",
+        "salir"
+      ],
+      "respuesta": "Al salir de un juego después de jugar al menos medio minuto, Troya te muestra cuánto jugaste, los FPS promedio y en los momentos más lentos, los tirones y cuántos fueron por shaders, y el más largo. Si casi todos fueron por shaders y el juego no está preparado, Samy te ofrece prepararlo. Desde ahí también compartes el log. Se apaga con «No mostrar más» o en Ajustes → «Resumen al cerrar el juego».",
+      "ver": [
+        "sellos",
+        "preparar",
+        "sesiones"
+      ]
+    },
+    {
+      "id": "sellos",
+      "guia": "troya",
+      "tema": "Funciones",
+      "pregunta": "¿Qué significan el ✓ y los fps en las tarjetas de los juegos?",
+      "frases": [
+        "chulo en el juego",
+        "check en la tarjeta",
+        "fps en la tarjeta",
+        "sello",
+        "marca verde"
+      ],
+      "claves": [
+        "sello",
+        "tarjeta",
+        "check",
+        "marca",
+        "chulo"
+      ],
+      "respuesta": "Es el sello de Satronho en cada juego: ✓ (verde) quiere decir que ya está preparado, y el número es el promedio de FPS de su última sesión. En la vista de lista también sale cuántos tirones tuvo.",
+      "ver": [
+        "resumen",
+        "preparar"
+      ]
+    },
+    {
+      "id": "accesos-directos",
+      "guia": "samy",
+      "tema": "Funciones",
+      "pregunta": "¿Qué sale si mantengo presionado el ícono de la app?",
+      "frases": [
+        "mantener presionado el icono",
+        "accesos directos",
+        "atajo en el inicio",
+        "icono de la app",
+        "continuar el ultimo juego"
+      ],
+      "claves": [
+        "icono",
+        "acceso",
+        "directo",
+        "atajo",
+        "inicio"
+      ],
+      "respuesta": "Manteniendo presionado el ícono de Satronho NX salen los últimos juegos que abriste, para entrar directo, y «Satronho», que abre la pantalla Satronho. Puedes arrastrar cualquiera a la pantalla de inicio. En Android 13 o más nuevo, si activas los íconos temáticos, el planeta de Satronho toma los colores de tu fondo de pantalla.",
+      "ver": [
+        "pantalla-satronho"
+      ]
     }
   ]
 }

@@ -1,6 +1,49 @@
 {
   "builds": [
     {
+      "tag": "Android – vista previa 3",
+      "fecha": "25 de noviembre de 2026",
+      "titulo": "Satronho por todas partes",
+      "cambios": [
+        {
+          "tipo": "nuevo",
+          "texto": "La pantalla Satronho, como la ventana de PC: Novedades, Configuraciones sugeridas, Pregúntale a los guías y Guías, en pestañas. Se abre desde Ajustes, manteniendo presionada la burbuja o desde el ícono de la app."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Los cinco guías con su color, su tamaño y su tema, como en PC. Cada mascota se puede apagar, y entonces MechaRidds responde por ella."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Resumen al cerrar el juego, creado por Satronho NX en PC y traído al teléfono: cuánto jugaste, FPS promedio y en los momentos más lentos, tirones y cuántos fueron por shaders. Si los shaders fueron el problema, Samy te ofrece preparar el juego."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Sello Satronho en cada juego: ✓ si ya está preparado y los FPS de su última sesión. Y la primera vez que abres un juego, Samy te ofrece prepararlo."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Bienvenida de MechaRidds en tres pasos (llaves, carpeta de juegos y configuraciones sugeridas), ícono temático de Android 13 con el planeta de Satronho, el acceso «Satronho» en el ícono de la app, y controles en pantalla y menú del juego con nuestros colores."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Actualizaciones desde la app: cuando sale una build nueva, Satronho NX te avisa, la descarga de los releases y la instala encima. «Compartir log» a un toque desde la pantalla Satronho y el resumen."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El medidor igual al de PC: «Armando shaders N · tirón por shaders». El logo de fondo ahora es nuestro planeta con los guías, con la transparencia que quieras (de 0 a 100 %). Guías y novedades también en inglés."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Arreglado un cierre al abrir un juego cuando Android todavía no entrega la pantalla (por ejemplo, justo después de girar el teléfono o de salir); el log ahora se llama satronho_log.txt y dice la build; el efecto AMDBoost ya compila; y se acabaron los errores de carpetas y de lectura de archivos al iniciar."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Firmada con la llave propia de Satronho NX: desinstala la vista previa anterior una sola vez; desde aquí, todo se instala encima."
+        }
+      ]
+    },
+    {
       "tag": "Android – vista previa 2",
       "fecha": "25 de noviembre de 2026",
       "titulo": "Satronho NX de verdad en Android",

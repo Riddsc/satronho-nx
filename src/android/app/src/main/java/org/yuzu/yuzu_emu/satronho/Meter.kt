@@ -10,7 +10,6 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
-import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
 
 /**
@@ -18,11 +17,6 @@ import org.yuzu.yuzu_emu.R
  * built) and the shaders still building, in our colors, as on the desktop.
  */
 class Meter {
-    private var stutters = 0
-    private var shaderStutters = 0
-    private var lastStutterAt = 0L
-    private var lastShaderStutterAt = 0L
-
     private fun SpannableStringBuilder.span(text: String, color: Int, bold: Boolean = false) {
         val start = length
         append(text)
@@ -38,19 +32,12 @@ class Meter {
         }
     }
 
+    /** The counts come from [SesionActual], which watches the game whether or not this shows. */
     fun text(context: Context, fps: Double, frameTimeMs: Double, shadersBuilding: Int): CharSequence {
         val now = SystemClock.elapsedRealtime()
-        val taken = NativeLibrary.satronhoTakeStutters()
-        if (taken.isNotEmpty() && taken[0] > 0) {
-            stutters += taken[0]
-            lastStutterAt = now
-            if (shadersBuilding > 0) {
-                shaderStutters += taken[0]
-                lastShaderStutterAt = now
-            }
-        }
-        val recent = now - lastStutterAt < 5000
-        val recentShader = now - lastShaderStutterAt < 5000
+        val session = SesionActual
+        val recent = session.lastStutterAt != 0L && now - session.lastStutterAt < 5000
+        val recentShader = session.lastShaderStutterAt != 0L && now - session.lastShaderStutterAt < 5000
 
         val out = SpannableStringBuilder()
         val fpsColor = when {
@@ -65,18 +52,17 @@ class Meter {
         out.span(" ms", Satronho.DIM)
         out.separator()
         out.span(context.getString(R.string.satronho_meter_stutters) + " ", Satronho.DIM)
-        out.span(stutters.toString(), if (recent) Satronho.RED else Satronho.LILAC, true)
-        if (shaderStutters > 0) {
-            out.span(" " + context.getString(R.string.satronho_meter_by_shaders, shaderStutters), Satronho.DIM)
+        out.span(session.stutters.toString(), if (recent) Satronho.RED else Satronho.LILAC, true)
+        if (session.shaderStutters > 0) {
+            out.span(" " + context.getString(R.string.satronho_meter_by_shaders, session.shaderStutters), Satronho.DIM)
         }
+        // As on the desktop: «Armando shaders N · tirón por shaders».
         if (shadersBuilding > 0) {
             out.separator()
+            out.span(context.getString(R.string.satronho_meter_building) + " ", Satronho.DIM)
+            out.span(shadersBuilding.toString(), if (recentShader) Satronho.RED else Satronho.AMBER, true)
             if (recentShader) {
-                out.span(context.getString(R.string.satronho_meter_building_stutter) + " ", Satronho.DIM)
-                out.span(shadersBuilding.toString(), Satronho.RED, true)
-            } else {
-                out.span("Shaders ", Satronho.DIM)
-                out.span(shadersBuilding.toString(), Satronho.AMBER, true)
+                out.span(" · " + context.getString(R.string.satronho_meter_building_stutter), Satronho.RED)
             }
         }
         return out

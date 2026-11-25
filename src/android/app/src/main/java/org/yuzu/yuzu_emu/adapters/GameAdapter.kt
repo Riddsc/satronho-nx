@@ -3,6 +3,8 @@
 
 package org.yuzu.yuzu_emu.adapters
 
+import org.yuzu.yuzu_emu.satronho.PrepareGame
+import org.yuzu.yuzu_emu.satronho.Sellos
 import android.content.DialogInterface
 import android.text.Html
 import android.view.LayoutInflater
@@ -164,6 +166,7 @@ class GameAdapter(private val activity: AppCompatActivity) :
 
             listBinding.textGameTitle.text = model.title.replace("[\\t\\n\\r]+".toRegex(), " ")
             listBinding.textGameDeveloper.text = model.developer
+            Sellos.bind(listBinding.satronhoBadge, model, listBinding.textGameDeveloper, model.developer)
 
             listBinding.textGameTitle.marquee()
             listBinding.cardGameList.setOnClickListener { onClick(model) }
@@ -181,6 +184,7 @@ class GameAdapter(private val activity: AppCompatActivity) :
             GameIconUtils.loadGameIcon(model, gridBinding.imageGameScreen)
 
             gridBinding.textGameTitle.text = model.title.replace("[\\t\\n\\r]+".toRegex(), " ")
+            Sellos.bind(gridBinding.satronhoBadge, model)
 
             gridBinding.textGameTitle.marquee()
             gridBinding.cardGameGrid.setOnClickListener { onClick(model) }
@@ -198,6 +202,7 @@ class GameAdapter(private val activity: AppCompatActivity) :
             GameIconUtils.loadGameIcon(model, gridCompactBinding.imageGameScreenCompact)
 
             gridCompactBinding.textGameTitleCompact.text = model.title.replace("[\\t\\n\\r]+".toRegex(), " ")
+            Sellos.bind(gridCompactBinding.satronhoBadge, model)
 
             gridCompactBinding.textGameTitleCompact.marquee()
             gridCompactBinding.cardGameGridCompact.setOnClickListener { onClick(model) }
@@ -215,6 +220,7 @@ class GameAdapter(private val activity: AppCompatActivity) :
             GameIconUtils.loadGameIcon(model, carouselBinding.imageGameScreen)
 
             carouselBinding.textGameTitle.text = model.title.replace("[\\t\\n\\r]+".toRegex(), " ")
+            Sellos.bind(carouselBinding.satronhoBadge, model)
             carouselBinding.textGameTitle.marquee()
             carouselBinding.cardGameCarousel.setOnClickListener { onClick(model) }
             carouselBinding.cardGameCarousel.setOnLongClickListener { onLongClick(model) }
@@ -287,7 +293,7 @@ class GameAdapter(private val activity: AppCompatActivity) :
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .show()
             } else {
-                launch()
+                PrepareGame.suggestBeforeLaunch(activity, game, launch)
             }
         }
 

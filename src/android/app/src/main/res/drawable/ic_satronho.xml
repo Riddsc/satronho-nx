@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Satronho: a planet with its ring. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="?attr/colorControlNormal"
+        android:pathData="M12,5.5a6.5,6.5 0,1 0,0 13a6.5,6.5 0,1 0,0 -13z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="?attr/colorControlNormal"
+        android:strokeWidth="1.6"
+        android:pathData="M3.2,15.6C1.6,17.6 1.5,19 2.6,19.6C4.6,20.8 10.6,18.4 15.9,14.6C21.2,10.8 23.4,6.6 21.4,5.4C20.4,4.8 18.8,5.2 16.9,6.3" />
+</vector>

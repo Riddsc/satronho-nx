@@ -32,7 +32,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.satronho.Bienvenida
 import org.yuzu.yuzu_emu.satronho.GuideBubble
+import org.yuzu.yuzu_emu.satronho.PrepareGame
+import org.yuzu.yuzu_emu.satronho.ResumenSesion
+import org.yuzu.yuzu_emu.satronho.SatronhoShortcuts
+import org.yuzu.yuzu_emu.satronho.SesionActual
 import org.yuzu.yuzu_emu.satronho.Novedades
 import org.yuzu.yuzu_emu.satronho.Satronho
 import org.yuzu.yuzu_emu.YuzuApplication
@@ -126,13 +131,21 @@ class GamesFragment : Fragment() {
         applyGridGamesBinding()
 
         // Satronho NX: our logo behind the list, the guides' bubble and the news once per update.
-        Satronho.setVisible(binding.satronhoBackgroundLogo, Satronho.backgroundLogo)
+        Satronho.applyBackgroundLogo(binding.satronhoBackgroundLogo)
         GuideBubble.setup(binding.satronhoGuideBubble, requireActivity())
+        SatronhoShortcuts.publish(requireContext())
         val firstLaunch = PreferenceManager.getDefaultSharedPreferences(requireContext())
             .getBoolean(Settings.PREF_FIRST_APP_LAUNCH, true)
-        if (!firstLaunch && !newsShownThisRun && Novedades.hasUnseen(requireContext())) {
-            newsShownThisRun = true
-            Novedades.show(requireActivity())
+        if (!firstLaunch && !newsShownThisRun) {
+            if (Bienvenida.pending(requireContext())) {
+                // A fresh install: MechaRidds' welcome first; the news can wait for the next build.
+                newsShownThisRun = true
+                Novedades.markSeen(requireContext())
+                Bienvenida.show(requireActivity())
+            } else if (Novedades.hasUnseen(requireContext())) {
+                newsShownThisRun = true
+                Novedades.show(requireActivity())
+            }
         }
 
         binding.swipeRefresh.apply {
@@ -262,8 +275,29 @@ class GamesFragment : Fragment() {
         }
     }
 
+    /** Satronho NX: the summary of the game that just closed, and the refreshed card marks. */
+    private fun showSessionSummary() {
+        val activity = requireActivity()
+        Satronho.applyBackgroundLogo(binding.satronhoBackgroundLogo)
+        val resumen = SesionActual.takePending(activity) ?: return
+        if (::gameAdapter.isInitialized) {
+            gameAdapter.notifyDataSetChanged()
+        }
+        if (!Satronho.summaryEnabled) {
+            return
+        }
+        val game = gamesViewModel.games.value.firstOrNull { it.programId == resumen.programId }
+        ResumenSesion.show(
+            activity,
+            resumen,
+            PrepareGame.isPrepared(activity, resumen.programId),
+            game?.let { { PrepareGame.start(activity, it) } }
+        )
+    }
+
     override fun onResume() {
         super.onResume()
+        showSessionSummary()
         if (getCurrentViewType() == GameAdapter.VIEW_TYPE_CAROUSEL) {
             (binding.gridGames as? CarouselRecyclerView)?.setupCarousel(true)
             (binding.gridGames as? CarouselRecyclerView)?.restoreScrollState(gamesViewModel.lastScrollPosition)

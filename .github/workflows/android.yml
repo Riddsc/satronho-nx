@@ -101,7 +101,7 @@ jobs:
           SATRONHO_BUILD_TAG: ${{ inputs.tag != '' && format('build-{0}', inputs.build) || '' }}
         run: |
           chmod +x .ci/android/build.sh
-          .ci/android/build.sh -t standard -b Release
+          .ci/android/build.sh -t standard -b Release -r
           ls -la artifacts
 
       - name: Lista de todos los errores de compilación (si falló)

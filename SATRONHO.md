@@ -638,3 +638,19 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
 - Revisión local de Kotlin: `kotlinc` 1.9.20 (asset del release de JetBrains bajado con curl desde
   github.com) + `android.jar` API 33 (Sable/android-platforms) + stubs pequeños de material/androidx
   y de las clases del app; detecta errores de tipos en `org.yuzu.yuzu_emu.satronho` antes del CI.
+- **Android, vista previa 3 (rama `android`, 2026-11-25):** pantalla `SatronhoScreen` (pestañas
+  Novedades / Sugeridas / Pregúntale / Guías, como la ventana de PC; se abre desde Ajustes, la burbuja
+  mantenida y el acceso directo del ícono, acción `dev.satronho.nx.ABRIR_SATRONHO` en `MainActivity`),
+  los 5 guías con color/tamaño de `guides.cpp` y mascotas apagables (`Satronho.speaker`),
+  `SesionActual` (muestrea FPS/tirones cada segundo; es el único que llama `satronhoTakeStutters`,
+  el medidor lee de ahí) → `ResumenSesion` al volver a la lista y el sello `Sellos` en las tarjetas
+  (`satronho_badge` en los 5 layouts de tarjeta), `PrepareGame.suggestBeforeLaunch` (una vez por
+  juego), `Bienvenida` (una vez tras la configuración inicial), logo de fondo = `logo_fondo.png` con
+  opacidad 0–100, ícono temático (`ic_launcher_monochrome`), controles en pantalla teñidos de violeta
+  (script sobre los grises de los vectores), conocimiento y novedades en inglés (`*_en.json`, se
+  usan cuando la app no está en español). Arreglos del log de Celeste: el log de Android se llama
+  `satronho_log.txt` (`LOG_FILE` solo en `__ANDROID__`; PC sigue con `eden_log.txt`), la versión dice
+  el build, `CreateEdenPaths()` tras `setAppDirectory`, `FileUtil.isDirectory` sin error con cursor
+  vacío, `AMDBoost.fx` (`sample` es palabra reservada), y `getGpuModel`/`getSystemDriverInfo` atrapan
+  la excepción de Vulkan si Android aún no da superficie (antes cerraba la app). El actualizador
+  queda activo (`build.sh -r` en `android.yml`); solo busca si la build tiene tag `build-N`.

@@ -8,6 +8,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -61,21 +62,35 @@ object Novedades {
         Satronho.prefs(context).edit().putString(SEEN_KEY, newestKey(context)).apply()
     }
 
-    fun show(activity: Activity) {
-        val context: Context = activity
+    /** The news list: Android's first, then the desktop's latest (Spanish only). */
+    fun buildView(context: Context): View {
         val list = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             val pad = Satronho.dp(context, 20)
             setPadding(pad, Satronho.dp(context, 8), pad, Satronho.dp(context, 8))
         }
         section(list, context.getString(R.string.satronho_novedades_android))
-        load(context, "novedades_android.json").forEach { addBuild(list, it) }
-        section(list, context.getString(R.string.satronho_novedades_desktop))
-        load(context, "novedades.json").take(DESKTOP_BUILDS).forEach { addBuild(list, it) }
+        load(context, localized(context, "novedades_android.json")).forEach { addBuild(list, it) }
+        if (Satronho.isSpanish(context)) {
+            section(list, context.getString(R.string.satronho_novedades_desktop))
+            load(context, "novedades.json").take(DESKTOP_BUILDS).forEach { addBuild(list, it) }
+        }
+        return ScrollView(context).apply { addView(list) }
+    }
 
+    private fun localized(context: Context, file: String): String {
+        if (Satronho.isSpanish(context)) {
+            return file
+        }
+        val english = file.replace(".json", "_en.json")
+        return if (Satronho.readAsset(context, english) != null) english else file
+    }
+
+    fun show(activity: Activity) {
+        val context: Context = activity
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.satronho_novedades)
-            .setView(ScrollView(context).apply { addView(list) })
+            .setView(buildView(context))
             .setPositiveButton(android.R.string.ok, null)
             .setOnDismissListener { markSeen(context) }
             .show()

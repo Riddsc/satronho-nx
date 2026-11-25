@@ -183,11 +183,13 @@ object FileUtil {
         try {
             val mUri = Uri.parse(path)
             c = resolver.query(mUri, columns, null, null, null)
-            c!!.moveToNext()
-            val mimeType = c.getString(0)
-            isDirectory = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
+            // Satronho: a path that no longer exists (or one the provider can't read) just
+            // isn't a folder; asking an empty cursor for row 0 used to log an error each time.
+            if (c != null && c.moveToFirst() && !c.isNull(0)) {
+                isDirectory = c.getString(0) == DocumentsContract.Document.MIME_TYPE_DIR
+            }
         } catch (e: Exception) {
-            Log.error("[FileUtil]: Cannot list files, error: " + e.message)
+            Log.info("[FileUtil] Can't tell whether $path is a folder: " + e.message)
         } finally {
             closeQuietly(c)
         }

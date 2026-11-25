@@ -3,15 +3,23 @@
 
 package org.yuzu.yuzu_emu.satronho
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import java.io.File
 import kotlin.math.roundToInt
+import org.yuzu.yuzu_emu.R
+import org.yuzu.yuzu_emu.ui.main.MainActivity
+import org.yuzu.yuzu_emu.utils.DirectoryInitialization
 
 /** Satronho NX for Android: shared helpers, colors and preferences of our own features. */
 object Satronho {
@@ -34,6 +42,57 @@ object Satronho {
         "nono" to "Ñoño",
         "juana" to "Juana"
     )
+
+    /** One of the five guides, as on the desktop (src/yuzu/satronho/guides.cpp). */
+    data class Guide(
+        val key: String,
+        val name: String,
+        val roleId: Int,
+        val aboutId: Int,
+        val color: Int,
+        /** Avatar size in dp, after the guide's real size: Ñoño the biggest, Juana the smallest. */
+        val sizeDp: Int
+    )
+
+    val GUIDES = listOf(
+        Guide("mecharidds", "MechaRidds", R.string.satronho_guide_mecharidds_role,
+            R.string.satronho_guide_mecharidds_about, GREEN, 60),
+        Guide("samy", "Samy", R.string.satronho_guide_samy_role,
+            R.string.satronho_guide_samy_about, AMBER, 54),
+        Guide("troya", "Troya", R.string.satronho_guide_troya_role,
+            R.string.satronho_guide_troya_about, LILAC, 58),
+        Guide("nono", "Ñoño", R.string.satronho_guide_nono_role,
+            R.string.satronho_guide_nono_about, TEAL, 64),
+        Guide("juana", "Juana", R.string.satronho_guide_juana_role,
+            R.string.satronho_guide_juana_about, PINK, 40)
+    )
+
+    fun guide(key: String): Guide = GUIDES.firstOrNull { it.key == key } ?: GUIDES[0]
+
+    /** MechaRidds is always on; each pet can be turned off, and then MechaRidds answers for it. */
+    fun petEnabled(key: String): Boolean = key == "mecharidds" || flag("guide_$key", true)
+
+    fun setPetEnabled(key: String, enabled: Boolean) {
+        if (key != "mecharidds") {
+            setFlag("guide_$key", enabled)
+        }
+    }
+
+    /** Who speaks for [key]: the pet itself, or MechaRidds when that pet is off. */
+    fun speaker(key: String): String =
+        if (key.isNotEmpty() && petEnabled(key)) key else "mecharidds"
+
+    /** The guides, news and knowledge in English for any language but Spanish. */
+    fun isSpanish(context: Context): Boolean =
+        context.resources.configuration.locales[0].language == "es"
+
+    /** An asset in the app's language: "name_en.json" when not in Spanish, if it exists. */
+    fun readLocalizedAsset(context: Context, name: String): String? {
+        if (!isSpanish(context)) {
+            readAsset(context, name.replace(".json", "_en.json"))?.let { return it }
+        }
+        return readAsset(context, name)
+    }
 
     fun prefs(context: Context): SharedPreferences =
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -60,8 +119,75 @@ object Satronho {
         set(value) = setFlag("guides_enabled", value)
 
     var backgroundLogo: Boolean
-        get() = flag("background_logo", true)
-        set(value) = setFlag("background_logo", value)
+        get() = logoOpacity > 0
+        set(value) {
+            logoOpacity = if (value) DEFAULT_LOGO_OPACITY else 0
+        }
+
+    const val DEFAULT_LOGO_OPACITY = 15
+
+    /** How visible our logo is behind the games list, 0 (off) to 100 %, as on the desktop. */
+    var logoOpacity: Int
+        get() = appContext?.let { context ->
+            val prefs = prefs(context)
+            if (prefs.contains("logo_opacity")) {
+                prefs.getInt("logo_opacity", DEFAULT_LOGO_OPACITY)
+            } else if (prefs.getBoolean("background_logo", true)) {
+                DEFAULT_LOGO_OPACITY
+            } else {
+                0
+            }
+        } ?: DEFAULT_LOGO_OPACITY
+        set(value) {
+            appContext?.let { prefs(it).edit().putInt("logo_opacity", value.coerceIn(0, 100)).apply() }
+        }
+
+    /** Our planet with the guides behind the games list, the same image as the desktop's. */
+    fun applyBackgroundLogo(view: ImageView) {
+        val opacity = logoOpacity
+        if (opacity <= 0) {
+            view.visibility = View.GONE
+            return
+        }
+        if (view.tag != "satronho_logo") {
+            try {
+                view.context.assets.open("logo_fondo.png").use {
+                    view.setImageBitmap(BitmapFactory.decodeStream(it))
+                }
+                view.tag = "satronho_logo"
+            } catch (e: Exception) {
+                // Keep the app icon that the layout already shows.
+            }
+        }
+        view.alpha = opacity / 100f
+        view.visibility = View.VISIBLE
+    }
+
+    /** The summary card when a game closes. */
+    var summaryEnabled: Boolean
+        get() = flag("summary_enabled", true)
+        set(value) = setFlag("summary_enabled", value)
+
+    /** Shares the newest log: this session's if a game ran, otherwise the last session's. */
+    fun shareLatestLog(activity: Activity) {
+        val base = DirectoryInitialization.userDirectory
+        val newest = Sesiones.files().firstOrNull()
+        val current = base?.let { File(it, "log/satronho_log.txt") }
+        val file = listOfNotNull(newest, current?.takeIf { it.exists() && it.length() > 0 })
+            .maxByOrNull { it.lastModified() }
+        if (file == null) {
+            Toast.makeText(activity, R.string.share_log_missing, Toast.LENGTH_SHORT).show()
+            return
+        }
+        Sesiones.share(activity, file)
+    }
+
+    /** Opens the Satronho screen from a launcher shortcut. */
+    const val ACTION_OPEN = "dev.satronho.nx.ABRIR_SATRONHO"
+
+    fun openIntent(context: Context): Intent =
+        Intent(context, MainActivity::class.java).setAction(ACTION_OPEN)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
     var meterEnabled: Boolean
         get() = flag("meter_enabled", true)
