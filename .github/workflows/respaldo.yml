@@ -1,0 +1,63 @@
+name: respaldo
+
+# Copia completa del código (todas las ramas, con su historia) en un solo archivo: satronho-nx.bundle.
+# Se rehace con cada cambio en main o android y queda en la pre-release «respaldo-codigo».
+# Para volver a montar el repo desde ese archivo:  git clone satronho-nx.bundle satronho-nx
+# Si existe el secreto RESPALDO_REPO_TOKEN (y RESPALDO_REPO, «usuario/repo» privado), también se
+# copia todo ahí, para tener el código fuera de este repo.
+on:
+  push:
+    branches: [main, android]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: respaldo
+  cancel-in-progress: true
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Código completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Todas las ramas
+        run: |
+          git fetch --no-tags origin '+refs/heads/*:refs/remotes/origin/*'
+          for b in $(git for-each-ref --format='%(refname:strip=3)' refs/remotes/origin/ | grep -v '^HEAD$'); do
+            git branch -f "$b" "origin/$b" 2>/dev/null || true
+          done
+          git bundle create satronho-nx.bundle --branches --tags
+          git bundle verify satronho-nx.bundle
+          sha256sum satronho-nx.bundle | cut -d' ' -f1 > satronho-nx.bundle.sha256
+          ls -la satronho-nx.bundle
+
+      - name: Subir a «respaldo-codigo»
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTAS="Copia completa del código de Satronho NX (todas las ramas). Para recuperarlo: git clone satronho-nx.bundle satronho-nx. Actualizada: $(date -u '+%Y-%m-%d %H:%M') UTC, commit ${GITHUB_SHA::8}."
+          if ! gh release view respaldo-codigo -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release create respaldo-codigo -R "$GITHUB_REPOSITORY" --prerelease --latest=false --title "Respaldo del código" --notes "$NOTAS"
+          else
+            gh release edit respaldo-codigo -R "$GITHUB_REPOSITORY" --notes "$NOTAS"
+          fi
+          for i in 1 2 3; do
+            gh release upload respaldo-codigo satronho-nx.bundle satronho-nx.bundle.sha256 --clobber -R "$GITHUB_REPOSITORY" && break
+            sleep 15
+          done
+
+      - name: Copia en otro repo (si está configurada)
+        env:
+          TOKEN: ${{ secrets.RESPALDO_REPO_TOKEN }}
+          REPO: ${{ secrets.RESPALDO_REPO }}
+        if: env.TOKEN != '' && env.REPO != ''
+        run: |
+          git push --mirror "https://x-access-token:${TOKEN}@github.com/${REPO}.git" || echo "::warning::No se pudo copiar al repo de respaldo"
