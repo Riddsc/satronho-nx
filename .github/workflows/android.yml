@@ -1,8 +1,9 @@
 name: android
 
-# Satronho NX para Android (arm64, Android 13 o más nuevo). En la rama de trabajo «android» solo
-# compila y deja el APK como artefacto para probarlo; llamado desde release-binaries en main, sube
-# el APK al mismo release que la versión de Windows (después de que esta lo cree).
+# Satronho NX para Android (arm64, Android 13 o más nuevo). Todo va a releases, nunca a artefactos
+# de Actions: en la rama de trabajo «android» el APK reemplaza al de la pre-release
+# «android-vista-previa»; llamado desde release-binaries en main (o a mano con un tag), sube
+# satronho-nx-android-arm64.apk al mismo release que la versión de Windows.
 on:
   push:
     branches: [android]
@@ -97,6 +98,7 @@ jobs:
       - name: APK
         env:
           CPM_SOURCE_CACHE: ${{ github.workspace }}/.cache/cpm
+          SATRONHO_BUILD_TAG: ${{ inputs.tag != '' && format('build-{0}', inputs.build) || '' }}
         run: |
           chmod +x .ci/android/build.sh
           .ci/android/build.sh -t standard -b Release
@@ -114,21 +116,34 @@ jobs:
         id: apk
         run: |
           APK=$(ls artifacts/*.apk | head -1)
-          N="${{ inputs.build }}"
-          if [ -z "$N" ] || [ "$N" = "0" ]; then N="prueba-${{ github.run_number }}"; fi
-          NAME="satronho-nx-build-$N-android-arm64.apk"
+          if [ -n "${{ inputs.tag }}" ]; then NAME="satronho-nx-android-arm64.apk"; else NAME="satronho-nx-android-arm64-vista-previa.apk"; fi
           cp "$APK" "$NAME"
           sha256sum "$NAME" | cut -d' ' -f1 > "$NAME.sha256"
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
           ls -la "$NAME"
 
-      - name: APK de prueba (rama de trabajo)
+      - name: Pre-release «Android – vista previa» (rama de trabajo)
         if: inputs.tag == ''
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ steps.apk.outputs.name }}
-          path: ${{ steps.apk.outputs.name }}
-          retention-days: 14
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG=android-vista-previa
+          FIRMA="llave de Satronho NX"
+          [ -n "$ANDROID_KEYSTORE_FILE" ] || FIRMA="llave de prueba (faltan los secretos de la llave)"
+          NOTAS=$(printf '%s\n\n%s\n%s' \
+            "Vista previa de Satronho NX para Android (arm64, Android 13 o más nuevo)." \
+            "Rama android, commit ${GITHUB_SHA::8}, $(date -u '+%Y-%m-%d %H:%M') UTC. Firma: $FIRMA." \
+            "Cada compilación de prueba reemplaza este APK.")
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release edit "$TAG" -R "$GITHUB_REPOSITORY" --prerelease \
+              --title "Android – vista previa" --notes "$NOTAS"
+          else
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+              --title "Android – vista previa" --notes "$NOTAS" --latest=false
+          fi
+          gh release upload "$TAG" "${{ steps.apk.outputs.name }}" "${{ steps.apk.outputs.name }}.sha256" \
+            --clobber -R "$GITHUB_REPOSITORY"
 
       - name: Subir al release
         if: inputs.tag != ''

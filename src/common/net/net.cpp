@@ -51,6 +51,9 @@ std::vector<Asset> Release::GetPlatformAssets(std::string_view platform,
         }
     } else if (platform == "windows-x86_64" || (platform == "macos-arm64" && !pgo)) {
         extensions = {".zip"};
+    } else if (platform == "android-arm64" && !pgo) {
+        // Satronho NX: one APK per release, satronho-nx-android-arm64.apk.
+        extensions = {".apk"};
     } else {
         return {};
     }

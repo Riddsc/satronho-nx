@@ -92,6 +92,16 @@ android {
                     )
                 )
 
+                // Satronho NX: a release build knows its build-N tag and asset platform, so the
+                // update checker finds the next release's APK.
+                System.getenv("SATRONHO_BUILD_TAG")?.takeIf { it.matches(Regex("build-[0-9]+")) }
+                    ?.let { tag ->
+                        arguments.addAll(listOf(
+                            "-DLICHII_BUILD_TAG=$tag",
+                            "-DLICHII_BUILD_PLATFORM=android-arm64",
+                        ))
+                    }
+
                 if (isNightly) {
                     arguments.addAll(listOf(
                         "-DENABLE_UPDATE_CHECKER=ON",
@@ -265,12 +275,12 @@ android {
     }
 
     productFlavors.all {
-        val currentName = manifestPlaceholders["appNameBase"] as? String ?: "Eden"
+        val currentName = manifestPlaceholders["appNameBase"] as? String ?: "Satronho NX"
         val suffix = if (isNightly) " Nightly" else ""
 
         // apply nightly suffix I/A
         resValue("string", "app_name_suffixed", "$currentName$suffix")
-        resValue("string", "app_name", "Eden$suffix")
+        resValue("string", "app_name", "Satronho NX$suffix")
     }
 
     sourceSets {
@@ -382,7 +392,8 @@ fun getGitVersion(): String {
         )
     ).replace(Regex("(-0)?-[^-]+$"), "")
     val versionName = if (System.getenv("GITHUB_ACTIONS") != null) {
-        System.getenv("GIT_TAG_NAME") ?: gitVersion
+        System.getenv("SATRONHO_BUILD_TAG")?.ifEmpty { null }
+            ?: System.getenv("GIT_TAG_NAME") ?: gitVersion
     } else {
         gitVersion
     }
