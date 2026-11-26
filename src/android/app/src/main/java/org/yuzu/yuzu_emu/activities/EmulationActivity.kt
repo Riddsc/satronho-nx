@@ -126,6 +126,7 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
         ThemeHelper.setTheme(this)
 
         super.onCreate(savedInstanceState)
+        org.yuzu.yuzu_emu.satronho.MemoryWatch.start(this)
 
         NativeConfig.reloadGlobalConfig()
 
@@ -261,8 +262,14 @@ class EmulationActivity : AppCompatActivity(), SensorEventListener, InputManager
         super.onPause()
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        org.yuzu.yuzu_emu.satronho.MemoryWatch.onTrimMemory(this, level)
+    }
+
     override fun onDestroy() {
         org.yuzu.yuzu_emu.satronho.HubGate.playing = false
+        org.yuzu.yuzu_emu.satronho.MemoryWatch.stop()
         mainHandler.removeCallbacks(romSwapStopTimeoutRunnable)
         super.onDestroy()
         inputManager.unregisterInputDeviceListener(this)

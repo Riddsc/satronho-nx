@@ -74,6 +74,7 @@ class YuzuApplication : Application() {
         NativeLibrary.logDeviceInfo()
         PowerStateUpdater.start()
         Log.logDeviceInfo()
+        org.yuzu.yuzu_emu.satronho.MemoryWatch.logLastExit(this)
         ControllerNavigationGlobalHook.install(this)
 
         createNotificationChannels()

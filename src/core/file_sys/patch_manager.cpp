@@ -63,6 +63,8 @@ struct BuiltinPatch {
     size_t state_size = 0;
     // Another built-in this one contains; it is skipped once this one is applied.
     std::string_view replaces{};
+    // Left off on Android: it costs memory and GPU time a phone does not have.
+    bool pc_only = false;
 };
 
 constexpr std::array<u8, 4> MAX_RESOLUTION_ORIGINAL{0xE8, 0x41, 0x00, 0x36};
@@ -125,6 +127,7 @@ constexpr std::array BUILTIN_PATCHES{
         .module = "main",
         .build_id = "E0F3CCFAF50065AE4EA01EB5AEB13B1A45DA3348",
         .records = MAX_RESOLUTION_RECORDS,
+        .pc_only = true,
     },
     // With Max Resolution the guard house outgrows the initial pool and dereferences a null
     // allocation.
@@ -134,6 +137,7 @@ constexpr std::array BUILTIN_PATCHES{
         .module = "main",
         .build_id = "E0F3CCFAF50065AE4EA01EB5AEB13B1A45DA3348",
         .records = TEXTURE_POOL_RECORDS,
+        .pc_only = true,
     },
     // Dark's routine with a tail that also lowers the step above 60 fps, so the game keeps real
     // speed at any frame rate limit (Settings frame_rate_limit).
@@ -596,6 +600,14 @@ std::vector<u8> PatchManager::PatchNSO(const std::vector<u8>& nso, const std::st
             LOG_INFO(Loader, "    - Skipping \"{}\": disabled in Add-Ons", patch.name);
             continue;
         }
+#ifdef __ANDROID__
+        if (patch.pc_only) {
+            LOG_INFO(Loader, "    - Skipping \"{}\": PC only (the game keeps its own dynamic "
+                             "resolution on Android)",
+                     patch.name);
+            continue;
+        }
+#endif
         if (std::find(replaced.cbegin(), replaced.cend(), patch.name) != replaced.cend()) {
             LOG_INFO(Loader, "    - Skipping \"{}\": included in an applied built-in patch",
                      patch.name);
@@ -1263,7 +1275,10 @@ std::vector<Patch> PatchManager::GetPatches(VirtualFile update_raw) const {
                        .version = replacing != BUILTIN_PATCHES.end()
                                       ? fmt::format("IPS, replaced by {} when it applies",
                                                     replacing->name)
-                                      : std::string{"IPS"},
+#ifdef __ANDROID__
+                                  : patch.pc_only ? std::string{"IPS, PC only"}
+#endif
+                                                  : std::string{"IPS"},
                        .type = PatchType::Mod,
                        .program_id = title_id,
                        .title_id = title_id,

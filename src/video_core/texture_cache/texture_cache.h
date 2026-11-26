@@ -18,6 +18,9 @@
 #include <bit>
 #include <string>
 #include <utility>
+#ifdef __ANDROID__
+#include <unistd.h>
+#endif
 #include "common/container/unordered_map.h"
 #include <boost/container/small_vector.hpp>
 
@@ -351,6 +354,21 @@ void TextureCache<P>::ApplyThresholdOverrides(bool log) {
             *target = (std::min)(static_cast<u64>(std::strtoull(value, nullptr, 10)) << 20, limit);
         }
     }
+#ifdef __ANDROID__
+    // On phones the GPU shares the system RAM, so a texture cache sized like a 4 GiB card pushes
+    // the whole process past what Android keeps alive (Pixel 6 Pro, 12 GB: killed at ~3.4 GB RSS
+    // seconds after Ocarina's first frame). Phones with 12 GB or less keep it at 1.5/2.25 GiB.
+    {
+        const long pages = sysconf(_SC_PHYS_PAGES);
+        const long page_size = sysconf(_SC_PAGE_SIZE);
+        if (pages > 0 && page_size > 0 &&
+            static_cast<u64>(pages) * static_cast<u64>(page_size) <= 12_GiB + 512_MiB) {
+            critical_memory = (std::min)(critical_memory, u64{2304_MiB});
+            expected_memory = (std::min)(expected_memory, u64{1536_MiB});
+            minimum_memory = (std::min)(minimum_memory, u64{512_MiB});
+        }
+    }
+#endif
     expected_memory = (std::min)(expected_memory, critical_memory);
     if (log) {
         LogThresholds();

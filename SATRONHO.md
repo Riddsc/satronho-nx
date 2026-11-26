@@ -730,3 +730,5 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   llegar al micrófono). En Android, `LoadDiskResources` no hace el precache de arranque para
   juegos de Switch 2 (log «Satronho: Switch 2 game on Android, starting without the boot
   precache»); los shaders se arman al necesitarse.
+
+- Android (prueba): en Switch 2, "Max Resolution" y "Texture Pool x2" (incluidos) no se aplican; el juego usa su resolución dinámica. "FPS Unlock" sigue. La caché de texturas se limita a 1.5/2.25 GiB en teléfonos de 12 GB o menos. El log anota el motivo de la salida anterior (ApplicationExitInfo), la memoria cada 10 s y los avisos onTrimMemory (`satronho/MemoryWatch.kt`).
