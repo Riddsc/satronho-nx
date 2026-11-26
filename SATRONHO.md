@@ -707,3 +707,5 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   Xclipse) con FSR y shaders asíncronos; con menos de 16 GB de RAM avisa que Android puede cerrar
   el juego. Handheld y precisión baja ya son lo de fábrica en Android. ASTC: los GPU de teléfono lo
   leen nativo (`IsOptimalAstcSupported`), no hace falta recomprimir.
+- **Desde la build 57 la rama `android` quedó unida a `main`** (avance rápido, con visto bueno de
+  Riddsc): se trabaja en `main` y cada release lleva el .zip de Windows y el APK.
