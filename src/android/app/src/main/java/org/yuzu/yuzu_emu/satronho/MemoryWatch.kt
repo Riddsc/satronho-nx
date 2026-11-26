@@ -73,7 +73,17 @@ object MemoryWatch {
         val worker = Thread({
             try {
                 while (!Thread.currentThread().isInterrupted) {
+                    val before = android.os.Debug.getNativeHeapSize()
+                    try {
+                        org.yuzu.yuzu_emu.NativeLibrary.satronhoPurgeNativeMemory()
+                    } catch (e: Throwable) {
+                    }
+                    val after = android.os.Debug.getNativeHeapSize()
+                    if (before - after >= 16L * 1024 * 1024) {
+                        Log.info("Satronho memory: purge gave back ${(before - after) / (1024 * 1024)} MiB")
+                    }
                     logSnapshot(am, "periodic")
+                    logMappings()
                     Thread.sleep(PERIOD_MS)
                 }
             } catch (e: InterruptedException) {
@@ -111,14 +121,61 @@ object MemoryWatch {
         } catch (e: Throwable) {
             -1L
         }
+        val heapUsed = android.os.Debug.getNativeHeapAllocatedSize() / (1024 * 1024)
+        val heapSize = android.os.Debug.getNativeHeapSize() / (1024 * 1024)
         Log.info(
             "Satronho memory ($why): rss_mib=${mib(status["VmRSS:"])} game_mib=$guest " +
+                "malloc_used_mib=$heapUsed malloc_held_mib=$heapSize " +
                 "swap_mib=${mib(status["VmSwap:"])} " +
                 "phone_available_mib=${mib(meminfo["MemAvailable:"])} " +
                 "phone_swap_free_mib=${mib(meminfo["SwapFree:"])} " +
                 "phone_total_mib=${mib(meminfo["MemTotal:"])} " +
                 "low_memory=$low threshold_mib=$threshold"
         )
+    }
+
+    /** The largest kinds of memory of the process by name (from /proc/self/smaps), in MiB. */
+    private fun logMappings() {
+        val totals = HashMap<String, LongArray>()
+        try {
+            var name = "?"
+            File("/proc/self/smaps").forEachLine { line ->
+                val first = line.firstOrNull() ?: return@forEachLine
+                if (first.isDigit() || (first in 'a'..'f')) {
+                    // Header: address perms offset dev inode [path]
+                    val parts = line.split(Regex("\\s+"), limit = 6)
+                    name = if (parts.size >= 6 && parts[5].isNotBlank()) {
+                        groupName(parts[5].trim())
+                    } else {
+                        "[anon]"
+                    }
+                } else if (line.startsWith("Rss:")) {
+                    val kb = line.substring(4).trim().split(' ').firstOrNull()?.toLongOrNull() ?: 0L
+                    val entry = totals.getOrPut(name) { LongArray(2) }
+                    entry[0] += kb
+                } else if (line.startsWith("Private_Dirty:")) {
+                    val kb = line.substring(14).trim().split(' ').firstOrNull()?.toLongOrNull() ?: 0L
+                    totals.getOrPut(name) { LongArray(2) }[1] += kb
+                }
+            }
+        } catch (e: Exception) {
+            Log.warning("Satronho memory: could not read smaps: ${e.message}")
+            return
+        }
+        val top = totals.entries.sortedByDescending { it.value[0] }.take(10)
+        Log.info(
+            "Satronho memory map: " + top.joinToString("; ") {
+                "${it.key} rss ${it.value[0] / 1024} dirty ${it.value[1] / 1024}"
+            }
+        )
+    }
+
+    private fun groupName(path: String): String {
+        // Keep the kind, not the instance: "[anon:scudo:primary]", "/dev/mali0", a library name.
+        if (path.startsWith("[")) {
+            return path.replace(Regex("\\d+"), "#")
+        }
+        return path.substringAfterLast('/').replace(" (deleted)", "")
     }
 
     private fun mib(kb: Long?): String = if (kb == null) "?" else (kb / 1024).toString()

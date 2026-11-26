@@ -239,6 +239,9 @@ object NativeLibrary {
     /** Satronho NX: memory the running game uses, in MiB (-1 with no game). */
     external fun satronhoGuestMemoryMib(): Long
 
+    /** Satronho NX: hands memory the native allocator freed back to Android. */
+    external fun satronhoPurgeNativeMemory()
+
     /**
      * Returns the current CPU backend.
      */

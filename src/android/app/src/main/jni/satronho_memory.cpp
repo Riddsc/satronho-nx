@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <dlfcn.h>
+#include <malloc.h>
 #include <fcntl.h>
 #include <jni.h>
 #include <sys/prctl.h>
@@ -165,6 +166,14 @@ JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoSetMemoryOp
              "Satronho memory options: free zero pages {}, smaller game memory {}, game memory in "
              "a file {}",
              trim_zero ? "on" : "off", smaller_pool ? "on" : "off", file_backed ? "on" : "off");
+}
+
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPurgeNativeMemory(JNIEnv* env,
+                                                                                    jobject obj) {
+    // Freed memory the allocator still holds goes back to Android.
+#ifdef M_PURGE
+    mallopt(M_PURGE, 0);
+#endif
 }
 
 JNIEXPORT jlong JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoGuestMemoryMib(JNIEnv* env,
