@@ -2093,4 +2093,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <string name="satronho_backup_all">Back up every save</string>
     <string name="satronho_backup_all_description">All your games\' saves in one .zip, for Drive, WhatsApp or your PC</string>
     <string name="satronho_backup_none_all">There are no saves to back up yet.</string>
+    <!-- Satronho: the real reason a game didn't load (instead of «Your ROM is encrypted») -->
+    <string name="satronho_error_keys_title">Ñoño: your keys can\'t open this game</string>
+    <string name="satronho_error_keys">Your prod.keys are missing or older than this game. Copy the prod.keys (and title.keys) from your own Switch, updated to its latest firmware, and add them again in Satronho NX.</string>
+    <string name="satronho_error_update_title">Ñoño: this game needs its update</string>
+    <string name="satronho_error_update">This copy of the game can\'t start on its own: it needs its update file. Put the update (and DLC, if you have them) in the same folder as the game. Satronho Emulation groups them and opens them together.</string>
+    <string name="satronho_error_load_title">Ñoño: this game didn\'t load</string>
+    <string name="satronho_error_load">Satronho NX couldn\'t load this game. Check that the file is complete (not cut off when copying) and that it comes from your own console. If it keeps happening, send the log to Ridds.</string>
 </resources>

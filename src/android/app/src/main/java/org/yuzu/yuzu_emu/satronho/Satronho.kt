@@ -78,9 +78,12 @@ object Satronho {
         }
     }
 
-    /** A pet on, by how much each one appears; MechaRidds when every pet is off. */
+    /**
+     * Who speaks, by how much each one appears (of 1000, same as Satronho Emulation): MechaRidds 300,
+     * and the other 700 split 65 % Samy and Troya, 25 % Ñoño, 10 % Juana. Pets turned off are skipped.
+     */
     fun pickPet(): String {
-        val pets = listOf("samy" to 33, "troya" to 32, "nono" to 25, "juana" to 10)
+        val pets = listOf("mecharidds" to 300, "samy" to 230, "troya" to 225, "nono" to 175, "juana" to 70)
             .filter { petEnabled(it.first) }
         if (pets.isEmpty()) {
             return "mecharidds"

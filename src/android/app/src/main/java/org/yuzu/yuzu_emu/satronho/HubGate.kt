@@ -20,6 +20,9 @@ import java.util.concurrent.locks.ReentrantLock
  *  - mientras hay un juego abierto, NX no atiende al hub (solo le dice que está ocupado).
  */
 object HubGate {
+    /** Intent extra: the update/DLC files (URIs) the hub sends with a game. */
+    const val EXTRA_FILES = "satronho_files"
+
     private val ready = CountDownLatch(1)
     private val lock = ReentrantLock()
 
