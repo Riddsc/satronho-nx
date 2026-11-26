@@ -2490,6 +2490,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
             emulationThread = Thread({
                 Log.debug("[EmulationFragment] Starting emulation thread.")
                 NativeLibrary.satronhoSetPerformanceHints(Satronho.performanceHints)
+                Satronho.applyMemoryOptions()
                 NativeLibrary.run(gamePath, programIndex, false)
             }, "NativeEmulation")
             emulationThread.start()
@@ -2558,6 +2559,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                     emulationThread = Thread({
                         Log.debug("[EmulationFragment] Starting emulation thread.")
                         NativeLibrary.satronhoSetPerformanceHints(Satronho.performanceHints)
+                        Satronho.applyMemoryOptions()
                         NativeLibrary.run(gamePath, programIndex, true)
                     }, "NativeEmulation")
                     emulationThread.start()

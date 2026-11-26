@@ -228,6 +228,17 @@ object NativeLibrary {
     external fun satronhoSetPerformanceHints(enabled: Boolean)
     external fun satronhoPerformanceHintsSupported(): Boolean
 
+    /** Satronho NX: memory options for the next game (Switch 2 on phones). */
+    external fun satronhoSetMemoryOptions(
+        trimZero: Boolean,
+        smallerPool: Boolean,
+        fileBacked: Boolean,
+        cacheDir: String
+    )
+
+    /** Satronho NX: memory the running game uses, in MiB (-1 with no game). */
+    external fun satronhoGuestMemoryMib(): Long
+
     /**
      * Returns the current CPU backend.
      */

@@ -22,6 +22,10 @@
 #include <boost/icl/interval_set.hpp>
 #include <fcntl.h>
 #include <sys/mman.h>
+#ifdef __ANDROID__
+#include <string>
+#include <sys/statvfs.h>
+#endif
 #include <unistd.h>
 #include "common/scope_exit.h"
 #include "common/settings.h"
@@ -589,6 +593,9 @@ public:
                fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, static_cast<off_t>(offset),
                          static_cast<off_t>(length)) == 0;
     }
+    bool HasBackingFile() const {
+        return fd >= 0;
+    }
 #endif
 
     bool Init() {
@@ -639,6 +646,32 @@ public:
             unlink(template_path);
         }
 #else
+#ifdef __ANDROID__
+        // Satronho NX: guest memory in a file on the phone's storage (an option for Switch 2
+        // games), so Android can write pages out under memory pressure instead of killing the
+        // emulator. Only with room for all of it: a full disk turns guest writes into SIGBUS.
+        if (const char* dir = std::getenv("SATRONHO_GUEST_FILE_DIR");
+            dir != nullptr && backing_size > (size_t{8} << 30)) {
+            const std::string path = std::string{dir} + "/satronho_guest_memory.bin";
+            struct statvfs disk {};
+            const bool room = statvfs(dir, &disk) == 0 &&
+                              u64{disk.f_bavail} * disk.f_frsize >= backing_size + (u64{2} << 30);
+            if (room) {
+                fd = open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+            }
+            if (fd >= 0) {
+                unlink(path.c_str());
+                LOG_INFO(Common_Memory, "Satronho: guest memory ({} MiB) is kept in a file",
+                         backing_size >> 20);
+            } else {
+                LOG_WARNING(Common_Memory,
+                            "Satronho: guest memory stays in RAM ({})",
+                            room ? strerror(errno) : "not enough free storage");
+                fd = -1;
+            }
+        }
+        if (fd < 0)
+#endif
         fd = memfd_create("HostMemory", 0);
 #endif
         bool use_anon = false;
@@ -1232,6 +1265,69 @@ std::pair<size_t, size_t> HostMemory::TrimZeroPages() const {
         i = j;
     }
     return {(backing_pages.size() + view_pages.size()) * PageAlignment, zero_bytes};
+#elif defined(__ANDROID__)
+    // Satronho NX: games clear their heaps while booting (Ocarina ~7 GB), and on a phone those
+    // zero pages took the RAM Android needed (killed ~13 s after the first frame). Resident pages
+    // of the backing that hold only zeros are handed back to the kernel: a hole reads as zeros,
+    // so the guest sees the same memory. Only resident pages are looked at (reading a hole would
+    // commit it, and a swapped page is not known to be zero), in runs of at most 64 KiB so a
+    // guest write can only land in the moment between the check and the punch of a short run.
+    if (backing_base == nullptr || !impl || !impl->HasBackingFile()) {
+        return {0, 0};
+    }
+    const size_t host_page = static_cast<size_t>(sysconf(_SC_PAGESIZE));
+    if (host_page == 0 || host_page % PageAlignment != 0) {
+        return {0, 0};
+    }
+    constexpr size_t Chunk = size_t{64} << 20;
+    const size_t max_run = (std::max)(host_page, size_t{64} << 10);
+    std::vector<unsigned char> resident(Chunk / host_page);
+    size_t resident_bytes = 0;
+    size_t trimmed = 0;
+    const auto is_zero = [host_page](const u8* page) {
+        for (size_t sub = 0; sub < host_page; sub += PageAlignment) {
+            if (!IsZeroPage(page + sub)) {
+                return false;
+            }
+        }
+        return true;
+    };
+    for (size_t base = 0; base < backing_size; base += Chunk) {
+        const size_t length = (std::min)(Chunk, backing_size - base);
+        if (mincore(backing_base + base, length, resident.data()) != 0) {
+            continue;
+        }
+        const size_t pages = length / host_page;
+        size_t run_begin = 0;
+        size_t run_length = 0;
+        const auto flush = [&] {
+            if (run_length != 0 && impl->PunchHole(base + run_begin, run_length)) {
+                trimmed += run_length;
+            }
+            run_length = 0;
+        };
+        for (size_t page = 0; page < pages; ++page) {
+            if ((resident[page] & 1) == 0) {
+                flush();
+                continue;
+            }
+            resident_bytes += host_page;
+            const size_t offset = page * host_page;
+            if (!is_zero(backing_base + base + offset)) {
+                flush();
+                continue;
+            }
+            if (run_length == 0) {
+                run_begin = offset;
+            }
+            run_length += host_page;
+            if (run_length >= max_run) {
+                flush();
+            }
+        }
+        flush();
+    }
+    return {resident_bytes, trimmed};
 #else
     return {0, 0};
 #endif

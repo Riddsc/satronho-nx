@@ -4,6 +4,7 @@
 // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <cstdlib>
 #include <random>
 
 #include "common/literals.h"
@@ -153,6 +154,16 @@ std::size_t KSystemControl::Init::GetApplicationPoolSize() {
         case Smc::MemoryArrangement_10GB:
             return 8178_MiB;
         case Smc::MemoryArrangement_12GB:
+#ifdef __ANDROID__
+            // Satronho NX: a smaller application pool on phones (the app's switch). Switch 2
+            // titles size their heap from it, so they ask a 12 GB phone for less memory.
+            if (const char* value = std::getenv("SATRONHO_NX2_POOL_MIB")) {
+                const size_t mib = std::strtoull(value, nullptr, 10);
+                if (mib >= 4096 && mib < 9809) {
+                    return mib * 1_MiB;
+                }
+            }
+#endif
             return 9809_MiB;
         }
     }();

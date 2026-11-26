@@ -20,6 +20,7 @@ add_library(yuzu-android SHARED
     native_post_processing.cpp
     satronho_adpf.cpp
     satronho_adpf.h
+    satronho_memory.cpp
 )
 
 set_property(TARGET yuzu-android PROPERTY IMPORTED_LOCATION ${FFmpeg_LIBRARY_DIR})

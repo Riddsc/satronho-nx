@@ -732,3 +732,5 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   precache»); los shaders se arman al necesitarse.
 
 - Android (prueba): en Switch 2, "Max Resolution" y "Texture Pool x2" (incluidos) no se aplican; el juego usa su resolución dinámica. "FPS Unlock" sigue. La caché de texturas se limita a 1.5/2.25 GiB en teléfonos de 12 GB o menos. El log anota el motivo de la salida anterior (ApplicationExitInfo), la memoria cada 10 s y los avisos onTrimMemory (`satronho/MemoryWatch.kt`).
+
+- Android (prueba de memoria): opciones en Sugeridas para Switch 2. "Liberar memoria sin usar" (encendida) busca cada pocos segundos páginas del juego que solo tienen ceros y se las devuelve al teléfono (`HostMemory::TrimZeroPages` en Android, con `fallocate` PUNCH_HOLE). "Menos memoria para el juego" baja la reserva de aplicación a 7168 MiB (`SATRONHO_NX2_POOL_MIB`). "Memoria del juego en un archivo" respalda la memoria del juego con un archivo en la caché (`SATRONHO_GUEST_FILE_DIR`). El log lleva `EDEN_NX2_MEM_TRACE`, la memoria del juego cada 10 s y, si el emulador aborta, el hilo y la pila (`satronho_abort.txt`, se lee al abrir la app).

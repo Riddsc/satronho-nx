@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__ANDROID__)
 #include <algorithm>
+#include <cstdlib>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -29,12 +30,20 @@ DeviceMemory::DeviceMemory()
              VirtualReserveSize} {
 #ifdef _WIN32
     zero_trim_thread = std::jthread{[this](std::stop_token stop) { TrimZeroPages(stop); }};
+#elif defined(__ANDROID__)
+    // Satronho NX: the same pass on phones, where zero pages are punched out of the backing.
+    // Only for the large layouts (Switch 2), and only with the app's switch on.
+    if (std::getenv("SATRONHO_TRIM_ZERO") != nullptr &&
+        Kernel::Board::Nintendo::Nx::KSystemControl::Init::GetIntendedMemorySize() >
+            (size_t{8} << 30)) {
+        zero_trim_thread = std::jthread{[this](std::stop_token stop) { TrimZeroPages(stop); }};
+    }
 #endif
 }
 
 DeviceMemory::~DeviceMemory() = default;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__ANDROID__)
 // Windows can't punch holes in the guest memory section, so pages holding only zeros (games clear
 // their heaps while booting: Ocarina leaves ~7 GB) stay resident until they leave the working set.
 // A pass comes every 5 s while they keep turning up, backing off to once every 5 minutes: after
@@ -92,7 +101,12 @@ void DeviceMemory::TrimZeroPages(std::stop_token stop) {
                             std::chrono::steady_clock::now() - start)
                             .count();
         if (trimmed < Busy) {
+#ifdef __ANDROID__
+            // A phone has no room to wait minutes: a game can clear gigabytes in seconds.
+            interval = (std::min)(interval * 2, std::chrono::seconds{10});
+#else
             interval = (std::min)(interval * 2, std::chrono::seconds{300});
+#endif
             continue;
         }
         interval = 5s;

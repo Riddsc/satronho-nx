@@ -2100,4 +2100,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <string name="satronho_error_update">This copy of the game can\'t start on its own: it needs its update file. Put the update (and DLC, if you have them) in the same folder as the game. Satronho Emulation groups them and opens them together.</string>
     <string name="satronho_error_load_title">Ñoño: this game didn\'t load</string>
     <string name="satronho_error_load">Satronho NX couldn\'t load this game. Check that the file is complete (not cut off when copying) and that it comes from your own console. If it keeps happening, send the log to Ridds.</string>
+    <string name="satronho_free_zero_memory">Free unused game memory (Switch 2)</string>
+    <string name="satronho_free_zero_memory_description">Switch 2 games fill gigabytes with zeros when they start. Satronho gives that memory back to the phone so Android does not close the game.</string>
+    <string name="satronho_smaller_game_memory">Less memory for the game (Switch 2)</string>
+    <string name="satronho_smaller_game_memory_description">Tells Switch 2 games the console has about 2.5 GB less memory, so they ask for less. Turn it off if a game does not load.</string>
+    <string name="satronho_game_memory_file">Game memory in a file (Switch 2)</string>
+    <string name="satronho_game_memory_file_description">Keeps the memory of the game in a file on the phone, so Android can move part of it to storage instead of closing the game. Needs about 14 GB free and may cause small stutters.</string>
 </resources>

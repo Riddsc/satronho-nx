@@ -50,6 +50,23 @@ object MemoryWatch {
         }
     }
 
+    /** What the last abort left in the cache folder (thread and stack), into this log. */
+    fun logLastAbort(context: Context) {
+        try {
+            val file = File(context.cacheDir, "satronho_abort.txt")
+            if (!file.exists()) {
+                return
+            }
+            val text = file.readText().trim()
+            if (text.isNotEmpty()) {
+                text.lines().forEach { Log.warning("Satronho last abort: $it") }
+            }
+            file.delete()
+        } catch (e: Exception) {
+            Log.warning("Satronho memory: could not read the last abort: ${e.message}")
+        }
+    }
+
     fun start(context: Context) {
         stop()
         val am = context.applicationContext.getSystemService(ActivityManager::class.java)
@@ -89,8 +106,13 @@ object MemoryWatch {
             low = info.lowMemory.toString()
             threshold = info.threshold / (1024 * 1024)
         }
+        val guest = try {
+            org.yuzu.yuzu_emu.NativeLibrary.satronhoGuestMemoryMib()
+        } catch (e: Throwable) {
+            -1L
+        }
         Log.info(
-            "Satronho memory ($why): rss_mib=${mib(status["VmRSS:"])} " +
+            "Satronho memory ($why): rss_mib=${mib(status["VmRSS:"])} game_mib=$guest " +
                 "swap_mib=${mib(status["VmSwap:"])} " +
                 "phone_available_mib=${mib(meminfo["MemAvailable:"])} " +
                 "phone_swap_free_mib=${mib(meminfo["SwapFree:"])} " +

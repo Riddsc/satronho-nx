@@ -143,6 +143,31 @@ object Satronho {
         get() = flag("performance_hints", true)
         set(value) = setFlag("performance_hints", value)
 
+    /** Switch 2 on phones: hand zero pages back to Android; on by default. */
+    var freeZeroMemory: Boolean
+        get() = flag("free_zero_memory", true)
+        set(value) = setFlag("free_zero_memory", value)
+
+    /** Switch 2 on phones: tell the game it has less memory; off by default. */
+    var smallerGameMemory: Boolean
+        get() = flag("smaller_game_memory", false)
+        set(value) = setFlag("smaller_game_memory", value)
+
+    /** Switch 2 on phones: keep the game's memory in a file; off by default. */
+    var gameMemoryInFile: Boolean
+        get() = flag("game_memory_in_file", false)
+        set(value) = setFlag("game_memory_in_file", value)
+
+    fun applyMemoryOptions() {
+        val dir = appContext?.cacheDir?.absolutePath ?: ""
+        org.yuzu.yuzu_emu.NativeLibrary.satronhoSetMemoryOptions(
+            freeZeroMemory,
+            smallerGameMemory,
+            gameMemoryInFile,
+            dir
+        )
+    }
+
     var backgroundLogo: Boolean
         get() = logoOpacity > 0
         set(value) {
