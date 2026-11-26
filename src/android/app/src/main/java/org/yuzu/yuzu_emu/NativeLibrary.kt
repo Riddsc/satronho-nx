@@ -216,6 +216,9 @@ object NativeLibrary {
     external fun satronhoPrepareError(): String
     external fun satronhoPrepareCancel()
     external fun satronhoGameRequested(programId: String): Boolean
+
+    /** Satronho: title ids inside a Switch file (base, update, DLC), comma-separated; "" if unreadable. */
+    external fun satronhoContentIds(path: String): String
     external fun satronhoTakeStutters(): IntArray
 
     /**
@@ -410,11 +413,26 @@ object NativeLibrary {
             }
 
             else -> {
-                captionId = R.string.loader_error_encrypted
-                descriptionId = R.string.loader_error_encrypted_roms_description
-                if (!reloadKeys()) {
-                    descriptionId = R.string.loader_error_encrypted_keys_description
+                // Satronho: say what really happened. Loader errors arrive as ErrorLoader + the
+                // loader's own status (core.cpp), e.g. 7 + 26 (ErrorNoExeFS) = 33.
+                val loader = if (resultCode >= ErrorLoader) resultCode - ErrorLoader else -1
+                val keyErrors = setOf(13, 14, 15, 18, 19, 20, 21, 22, 23)
+                val needsUpdate = setOf(24, 25, 26, 52, 60, 61, 69)
+                when {
+                    !reloadKeys() || loader in keyErrors -> {
+                        captionId = R.string.satronho_error_keys_title
+                        descriptionId = R.string.satronho_error_keys
+                    }
+                    loader in needsUpdate -> {
+                        captionId = R.string.satronho_error_update_title
+                        descriptionId = R.string.satronho_error_update
+                    }
+                    else -> {
+                        captionId = R.string.satronho_error_load_title
+                        descriptionId = R.string.satronho_error_load
+                    }
                 }
+                Log.error("[NativeLibrary] Game failed to load: result $resultCode (loader $loader)")
             }
         }
 

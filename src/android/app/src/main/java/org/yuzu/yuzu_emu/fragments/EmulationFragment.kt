@@ -271,8 +271,19 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
      * recargan las claves y se intenta una vez más antes de decir «No bootable game present!».
      */
     private fun gameFromIntent(uri: Uri): Game? {
+        // The hub sends the game's update and DLC too (as NX's own library knows them from the game
+        // folders): without them, a base game that needs its update fails with «No ExeFS».
+        val extras = requireActivity().intent.getStringArrayListExtra(HubGate.EXTRA_FILES) ?: arrayListOf()
         val check: () -> Game? = {
             if (!HubGate.keysLoaded) HubGate.keysLoaded = NativeLibrary.reloadKeys()
+            for (extra in extras) {
+                try {
+                    NativeLibrary.addFileToFilesystemProvider(extra)
+                } catch (e: Throwable) {
+                    Log.warning("[EmulationFragment] Could not add $extra: ${e.message}")
+                }
+            }
+            if (extras.isNotEmpty()) Log.info("[EmulationFragment] Hub sent ${extras.size} update/DLC file(s)")
             var found = GameHelper.getGame(uri, false)
             if (found == null) {
                 Log.warning("[EmulationFragment] First check of the intent game failed, retrying with fresh keys")

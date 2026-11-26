@@ -1397,4 +1397,11 @@
     <string name="satronho_backup_all">Respaldar todas las partidas</string>
     <string name="satronho_backup_all_description">Las partidas de todos tus juegos en un .zip, para Drive, WhatsApp o tu PC</string>
     <string name="satronho_backup_none_all">Todavía no hay partidas guardadas que respaldar.</string>
+    <!-- Satronho: el motivo real de que un juego no cargue (en vez de «Su ROM está encriptada») -->
+    <string name="satronho_error_keys_title">Ñoño: tus claves no abren este juego</string>
+    <string name="satronho_error_keys">Faltan tus prod.keys o son más viejas que este juego. Saca las prod.keys (y title.keys) de tu propia Switch, actualizada al último firmware, y agrégalas de nuevo en Satronho NX.</string>
+    <string name="satronho_error_update_title">Ñoño: este juego necesita su actualización</string>
+    <string name="satronho_error_update">Esta copia del juego no arranca sola: le falta su archivo de actualización. Pon la actualización (y los DLC, si los tienes) en la misma carpeta del juego. Satronho Emulation los junta y los abre juntos.</string>
+    <string name="satronho_error_load_title">Ñoño: este juego no cargó</string>
+    <string name="satronho_error_load">Satronho NX no pudo cargar este juego. Revisa que el archivo esté completo (que no se haya cortado al copiarlo) y que salga de tu propia consola. Si sigue pasando, mándale el registro a Ridds.</string>
 </resources>

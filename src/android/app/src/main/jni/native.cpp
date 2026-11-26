@@ -2491,5 +2491,41 @@ JNIEXPORT jintArray JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoTakeSt
     return array;
 }
 
+// Satronho: which titles a Switch file carries (base game, update or DLC), for the hub to group a
+// game with its update and DLC. Comma-separated 16-digit hex title ids; "" if it can't be read.
+JNIEXPORT jstring JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoContentIds(JNIEnv* env, jobject,
+                                                                                  jstring jpath) {
+    const std::string path = Common::Android::GetJString(env, jpath);
+    auto& system = EmulationSession::GetInstance().System();
+    const auto file = system.GetFilesystem()->OpenFile(path, FileSys::OpenMode::Read);
+    std::string out;
+    if (file) {
+        const auto type = Loader::IdentifyFile(file);
+        std::shared_ptr<FileSys::NSP> nsp;
+        if (type == Loader::FileType::NSP || type == Loader::FileType::NSZ) {
+            nsp = std::make_shared<FileSys::NSP>(file);
+        } else if (type == Loader::FileType::XCI || type == Loader::FileType::XCZ) {
+            FileSys::XCI xci{file};
+            if (xci.GetStatus() == Loader::ResultStatus::Success) {
+                nsp = xci.GetSecurePartitionNSP();
+            }
+            if (!nsp && type == Loader::FileType::XCZ) {
+                nsp = std::make_shared<FileSys::NSP>(file);
+            }
+        }
+        if (nsp && nsp->GetStatus() == Loader::ResultStatus::Success) {
+            for (const auto& [title_id, ncas] : nsp->GetNCAs()) {
+                if (ncas.empty()) {
+                    continue;
+                }
+                char hex[20];
+                std::snprintf(hex, sizeof(hex), "%016llX", static_cast<unsigned long long>(title_id));
+                out += (out.empty() ? "" : ",") + std::string(hex);
+            }
+        }
+    }
+    return Common::Android::ToJString(env, out);
+}
+
 } // extern "C"
 

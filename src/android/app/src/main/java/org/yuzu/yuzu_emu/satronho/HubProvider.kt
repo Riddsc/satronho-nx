@@ -57,13 +57,14 @@ class HubProvider : ContentProvider() {
                 when (method) {
                     "estado" -> status(ctx)
                     "info" -> arg?.let { info(it) }
+                    "contenido" -> arg?.let { content(it) }
                     "claves" -> arg?.let { keys(it) }
                     "firmware" -> arg?.let { firmware(ctx, it) }
                     "partidas" -> exportSaves(ctx)
                     "restaurar_partidas" -> arg?.let { importSaves(ctx, it) }
                     "ocultar" -> launcher(ctx, false)
                     "mostrar" -> launcher(ctx, true)
-                    else -> null
+                    else -> Bundle().apply { putString("error", "unknown") }
                 }
             } ?: busy("ocupado")
         } catch (e: Throwable) {
@@ -93,6 +94,9 @@ class HubProvider : ContentProvider() {
             putString("firmware", firmware)
             putBoolean("lanzador", launcherShown(ctx))
             putString("version", info.versionName ?: "")
+            // What this NX understands, so the hub only asks for what exists.
+            putBoolean("contenido", true)
+            putBoolean("extras", true)
             putLong("codigo", info.longVersionCode)
         }
     }
@@ -113,16 +117,27 @@ class HubProvider : ContentProvider() {
             programId.isNotEmpty() && NativeLibrary.gameRequiresFirmware(programId) && !NativeLibrary.isFirmwareAvailable())
         val icon = GameMetadata.getIcon(uri)
         if (icon.isNotEmpty()) {
-            // Small PNG so it fits a binder call: the hub uses it as the cover.
-            val bmp = BitmapFactory.decodeByteArray(icon, 0, icon.size)
-            if (bmp != null) {
-                val small = Bitmap.createScaledBitmap(bmp, 256, 256, true)
-                val png = ByteArrayOutputStream()
-                small.compress(Bitmap.CompressFormat.PNG, 100, png)
-                out.putByteArray("icono", png.toByteArray())
+            // The game's own icon at full quality (Switch icons are 256×256 JPEG): the hub uses it as
+            // the cover. Only a bigger one is scaled down, so it fits a binder call.
+            if (icon.size <= 400_000) {
+                out.putByteArray("icono", icon)
+            } else {
+                val bmp = BitmapFactory.decodeByteArray(icon, 0, icon.size)
+                if (bmp != null) {
+                    val small = Bitmap.createScaledBitmap(bmp, 512, 512, true)
+                    val png = ByteArrayOutputStream()
+                    small.compress(Bitmap.CompressFormat.JPEG, 95, png)
+                    out.putByteArray("icono", png.toByteArray())
+                }
             }
         }
         return out
+    }
+
+    /** Which titles a file carries: the hub groups a game with its update and DLC. */
+    private fun content(uri: String): Bundle {
+        ensureKeys()
+        return Bundle().apply { putString("ids", NativeLibrary.satronhoContentIds(uri)) }
     }
 
     private fun keys(uri: String): Bundle {
