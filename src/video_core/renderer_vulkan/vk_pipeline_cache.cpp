@@ -1206,11 +1206,21 @@ void PipelineCache::LoadDiskResources(u64 title_id, std::stop_token stop_loading
     used_pipelines_saved = std::chrono::steady_clock::now();
 
     namespace ShaderWarm = VideoCommon::ShaderWarm;
-    const bool precache =
+    bool precache =
         ShaderWarm::PrecacheBeforeStart(
             Settings::values.precache_shaders.GetValue(), ShaderWarm::TakeWarmBeforeStart(),
             ShaderWarm::WarmRequested(ShaderWarm::ComputeWarmPath(title_id))) &&
         build_at_boot;
+#ifdef __ANDROID__
+    // Satronho NX: a phone GPU built Ocarina's 3996 prepared compute programs on 2 threads for
+    // minutes before the game could start, behind a black screen. On Android a Switch 2 game
+    // starts at once and builds its shaders as it needs them.
+    if (precache && Settings::CurrentProgramIsSwitch2()) {
+        LOG_INFO(Render_Vulkan, "Satronho: Switch 2 game on Android, starting without the boot "
+                                "precache (shaders build as needed)");
+        precache = false;
+    }
+#endif
     if (use_vulkan_pipeline_cache) {
         vulkan_pipeline_cache_filename =
             VideoCommon::VersionedPipelineCachePath(base_dir, "vulkan_pipelines", CACHE_VERSION);

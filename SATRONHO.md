@@ -724,3 +724,9 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   revisa Stop y se informa el avance. (4) `EmulationState.watchShutdown`: si el hilo de emulación
   sigue vivo 20 s después de `stopEmulation`, la app se reinicia en la lista (`killProcess`).
   Pendiente: ver si Mali-G78 dibuja el primer cuadro (le faltan clip distances, multiViewport, etc.).
+- **Prueba Android tras la 58 (rama `android`, solo APK):** log de la 58 con Ocarina ya preparado:
+  «Preparar» terminó (3996 cómputos, 399 s; el sondeo bajó de 709 a 382 s) y al abrir el juego
+  `PrecacheShaders` armaba los 3996 en 2 hilos antes de arrancar (más de 4.5 min en negro, sin
+  llegar al micrófono). En Android, `LoadDiskResources` no hace el precache de arranque para
+  juegos de Switch 2 (log «Satronho: Switch 2 game on Android, starting without the boot
+  precache»); los shaders se arman al necesitarse.
