@@ -6,6 +6,7 @@
 
 #include "common/android/android_common.h"
 #include "core/core.h"
+#include "core/file_sys/control_metadata.h"
 #include "core/file_sys/fs_filesystem.h"
 #include "core/file_sys/patch_manager.h"
 #include "core/loader/loader.h"
@@ -38,7 +39,17 @@ static RomMetadata CacheRomMetadata(const std::string& path) {
         };
         const auto control = pm.GetControlMetadata();
 
-        if (control.first != nullptr) {
+        FileSys::NACP own_nacp{};
+        if (loader->GetFileType() == Loader::FileType::NUP &&
+            loader->ReadControlData(own_nacp) == Loader::ResultStatus::Success) {
+            // Satronho NX: a NUP is already the updated game; its own control data is the
+            // version to show, as the PC game list does.
+            entry.developer = own_nacp.GetDeveloperName();
+            entry.version = own_nacp.GetVersionString();
+            if (entry.version.empty()) {
+                entry.version = "1.0.0";
+            }
+        } else if (control.first != nullptr) {
             entry.developer = control.first->GetDeveloperName();
             entry.version = control.first->GetVersionString();
         } else {
@@ -77,7 +88,8 @@ jboolean Java_org_yuzu_yuzu_1emu_utils_GameMetadata_getIsValid(JNIEnv* env, jobj
             if (file_type == Loader::FileType::Unknown || file_type == Loader::FileType::Error)
                 return false;
             if ((file_type == Loader::FileType::NSP || file_type == Loader::FileType::XCI ||
-                 file_type == Loader::FileType::NSZ || file_type == Loader::FileType::XCZ) &&
+                 file_type == Loader::FileType::NSZ || file_type == Loader::FileType::XCZ ||
+                 file_type == Loader::FileType::NUP) &&
                 !Loader::IsBootableGameContainer(file, file_type))
                 return false;
             u64 program_id = 0;

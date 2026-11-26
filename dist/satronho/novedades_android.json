@@ -7,6 +7,18 @@
       "cambios": [
         {
           "tipo": "nuevo",
+          "texto": "Juegos de Switch 2 en el teléfono: Satronho NX para Android ya lee los archivos .nup, como la versión de PC (la app de Lichii para Android todavía no los lee; esto lo conectamos nosotros). El juego sale en tu lista con su versión real, y sus actualizaciones y DLC incluidos se cargan solos."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Perfil de teléfono para Switch 2: la primera vez que abres un juego de Switch 2, Troya te ofrece dejarle, solo a ese juego, una resolución interna más liviana con FSR y shaders asíncronos, elegida según la gráfica de tu teléfono. Si tu teléfono tiene menos de 16 GB de RAM, te avisa antes de jugar."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Impulso del teléfono (Configuraciones sugeridas): Satronho le dice a Android qué hilos dibujan cada cuadro y cuánto tardan, para que suba su velocidad en cuanto un cuadro se atrasa y la baje cuando el juego va a su ritmo. Viene encendido y se puede apagar."
+        },
+        {
+          "tipo": "nuevo",
           "texto": "Satronho Emulation (el hub de Ridds) ya juega tus juegos de Switch con Satronho NX: los abre directo, le pasa tus claves y tu firmware, y al salir vuelves a su biblioteca. Si el hub instaló NX por ti, NX no pone ícono propio: se abre desde el hub."
         },
         {

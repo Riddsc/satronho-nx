@@ -6,6 +6,7 @@ package org.yuzu.yuzu_emu.adapters
 import org.yuzu.yuzu_emu.satronho.ContinuarWidget
 import org.yuzu.yuzu_emu.satronho.FichaJuego
 import org.yuzu.yuzu_emu.satronho.PrepareGame
+import org.yuzu.yuzu_emu.satronho.Switch2Telefono
 import org.yuzu.yuzu_emu.satronho.Sellos
 import android.content.DialogInterface
 import android.text.Html
@@ -302,7 +303,9 @@ class GameAdapter(private val activity: AppCompatActivity) :
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .show()
             } else {
-                PrepareGame.suggestBeforeLaunch(activity, game, launch)
+                Switch2Telefono.beforeLaunch(activity, game) {
+                    PrepareGame.suggestBeforeLaunch(activity, game, launch)
+                }
             }
         }
 

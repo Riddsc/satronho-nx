@@ -1363,6 +1363,14 @@
     <string name="satronho_summary_lighter">Perfil más liviano</string>
     <string name="satronho_nono_lower">Bajar resolución</string>
     <string name="satronho_nono_tuned">Listo: %1$s pasa de %2$s a %3$s, solo en este juego.</string>
+    <string name="satronho_switch2_phone_title">%1$s preparó tu juego de Switch 2</string>
+    <string name="satronho_switch2_phone">%1$s es un juego de Switch 2, lo más pesado que hay para un teléfono. Para que arranque lo más fluido posible, le puedo dejar un perfil de teléfono, solo para este juego: resolución interna %2$s con FSR para que se vea nítido, y shaders asíncronos. Lo puedes cambiar cuando quieras en sus propiedades.</string>
+    <string name="satronho_switch2_phone_ram">Ojo: tu teléfono tiene %1$d GB de RAM y los juegos de Switch 2 piden %2$d GB. Cierra las otras apps antes de jugar; si Android se queda sin memoria, puede cerrar el juego.</string>
+    <string name="satronho_switch2_phone_apply">Usar el perfil</string>
+    <string name="satronho_switch2_phone_keep">Dejarlo como está</string>
+    <string name="satronho_switch2_phone_applied">Perfil de teléfono listo para %1$s.</string>
+    <string name="satronho_boost">Impulso del teléfono</string>
+    <string name="satronho_boost_description">Satronho le dice a Android qué hilos dibujan cada cuadro y cuánto tardan, así los acelera cuando un cuadro se atrasa y los deja descansar cuando el juego va a su ritmo. Apágalo si el teléfono se calienta demasiado.</string>
     <string name="satronho_nono_lowest">Este juego ya está en la resolución más baja.</string>
     <string name="satronho_widget_name">Satronho NX · Continuar</string>
     <string name="satronho_widget_description">Tu último juego, cómo te fue y un botón para seguir jugando</string>

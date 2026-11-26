@@ -15,6 +15,8 @@ import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.materialswitch.MaterialSwitch
+import org.yuzu.yuzu_emu.NativeLibrary
 import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.features.settings.model.BooleanSetting
 import org.yuzu.yuzu_emu.features.settings.model.IntSetting
@@ -29,14 +31,14 @@ object Sugeridas {
     enum class Family { AdrenoHigh, Adreno, Mali, Xclipse }
 
     // ResolutionSetup indices (common/settings_enums.h).
-    private const val RES_1_2 = 1
-    private const val RES_3_4 = 2
-    private const val RES_1X = 3
-    private const val RES_3_2 = 5
+    internal const val RES_1_2 = 1
+    internal const val RES_3_4 = 2
+    internal const val RES_1X = 3
+    internal const val RES_3_2 = 5
 
     // ScalingFilter indices.
-    private const val FILTER_BILINEAR = 1
-    private const val FILTER_FSR = 6
+    internal const val FILTER_BILINEAR = 1
+    internal const val FILTER_FSR = 6
 
     data class Profile(
         val nameId: Int,
@@ -168,6 +170,32 @@ object Sugeridas {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             setPadding(0, Satronho.dp(context, 4), 0, 0)
         })
+
+        // Satronho NX: the phone boost (Android performance hints), when the phone has it.
+        if (NativeLibrary.satronhoPerformanceHintsSupported()) {
+            val row = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(0, Satronho.dp(context, 12), 0, 0)
+            }
+            val texts = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+            texts.addView(TextView(context).apply {
+                text = context.getString(R.string.satronho_boost)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            })
+            texts.addView(TextView(context).apply {
+                text = context.getString(R.string.satronho_boost_description)
+                setTextColor(Satronho.DIM)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            })
+            row.addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            row.addView(MaterialSwitch(context).apply {
+                isChecked = Satronho.performanceHints
+                contentDescription = context.getString(R.string.satronho_boost)
+                setOnCheckedChangeListener { _, checked -> Satronho.performanceHints = checked }
+            })
+            root.addView(row)
+        }
 
         val applyPicked = {
             val index = (group.checkedRadioButtonId - 1000).coerceIn(0, list.size - 1)

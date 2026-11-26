@@ -218,6 +218,13 @@ object NativeLibrary {
     external fun satronhoGameRequested(programId: String): Boolean
     external fun satronhoTakeStutters(): IntArray
 
+    /** Satronho NX: whether the game file holds a Switch 2 program. */
+    external fun satronhoIsSwitch2(path: String): Boolean
+
+    /** Satronho NX: Android performance hints (ADPF) for the next game. */
+    external fun satronhoSetPerformanceHints(enabled: Boolean)
+    external fun satronhoPerformanceHintsSupported(): Boolean
+
     /**
      * Returns the current CPU backend.
      */

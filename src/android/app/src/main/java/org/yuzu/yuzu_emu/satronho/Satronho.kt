@@ -135,6 +135,11 @@ object Satronho {
         get() = flag("guides_enabled", true)
         set(value) = setFlag("guides_enabled", value)
 
+    /** Android performance hints (ADPF) for the emulator's frame threads; on by default. */
+    var performanceHints: Boolean
+        get() = flag("performance_hints", true)
+        set(value) = setFlag("performance_hints", value)
+
     var backgroundLogo: Boolean
         get() = logoOpacity > 0
         set(value) {

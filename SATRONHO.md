@@ -688,3 +688,22 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   «Respaldar todas las partidas» (`FichaJuego.backupAll`, un .zip con una carpeta por program id),
   `satronho_gpu.log`. `release-binaries.yml` llama a `android.yml` con el tag de la build, así cada
   release lleva el APK.
+- **Android, vista previa 6 (rama `android`, va en la build 57):** (1) **.nup en Android:** el núcleo ya
+  los leía (`loader/nup.cpp`, `file_sys/nup_container`), pero la lista de Android solo buscaba
+  `xci nsp nca nro nsz xcz` (`Game.extensions`): ahora también `nup`, y `GameHelper`
+  los monta como contenido externo (sus add-ons por `AddEntriesFromContainer`). `getIsValid` revisa
+  que el NUP arranque (`IsBootableGameContainer`) y la versión sale del NACP del propio NUP, como en
+  PC. Lichii para Android tampoco los lee (revisado en lichii/nx2 hasta 2026-11-26). (2) **Impulso del
+  teléfono (ADPF):** `jni/satronho_adpf.*`: sesión de `APerformanceHint` (dlsym, Android 13+;
+  `setThreads` en 14+, si no se recrea) con los hilos `CPUCore_*`, `GPU`, `GPUBack`, `VulkanWorker`
+  y `VulkanPresent` (se buscan en `/proc/self/task/*/comm` cada 2 s); cada 100 ms reporta los
+  intervalos de presentación nuevos de `PerfStats::GetRecentFrameTimes` (omite >500 ms). Meta de
+  33 ms hasta que el juego pasa 2 s casi todo bajo 22 ms; luego 16 ms. Log: «Satronho ADPF: …» y
+  «Satronho ADPF summary». Interruptor en Configuraciones sugeridas (`Satronho.performanceHints`,
+  `satronhoSetPerformanceHints` antes de `NativeLibrary.run`). Sin medir aún en un teléfono.
+  (3) **Perfil de teléfono para Switch 2** (`Switch2Telefono`, antes de `PrepareGame` en
+  `GameAdapter`): la primera vez que se abre un juego de Switch 2 (`satronhoIsSwitch2` →
+  `FindSwitch2Program`), Troya ofrece en su config propia resolución 1/2 (3/4 en Adreno 8 Gen 2+ y
+  Xclipse) con FSR y shaders asíncronos; con menos de 16 GB de RAM avisa que Android puede cerrar
+  el juego. Handheld y precisión baja ya son lo de fábrica en Android. ASTC: los GPU de teléfono lo
+  leen nativo (`IsOptimalAstcSupported`), no hace falta recomprimir.

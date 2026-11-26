@@ -108,8 +108,8 @@ object GameHelper {
     }
 
     // File extensions considered as external content, buuut should
-    // be done better imo.
-    private val externalContentExtensions = setOf("nsp", "xci", "nsz", "xcz")
+    // be done better imo. Satronho NX: a .nup brings its own updates and add-ons too.
+    private val externalContentExtensions = setOf("nsp", "xci", "nsz", "xcz", "nup")
 
     private fun scanContentContainersRecursive(
         files: Array<MinimalDocumentFile>,

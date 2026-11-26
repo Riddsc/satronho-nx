@@ -57,6 +57,7 @@ extern "C" {
 #include "common/settings.h"
 #include "common/string_util.h"
 #include "common/thread.h"
+#include "satronho_adpf.h"
 #include "frontend_common/play_time_manager.h"
 #include "core/constants.h"
 #include "core/core.h"
@@ -426,6 +427,9 @@ void EmulationSession::RunEmulation() {
 
     void(m_system.Run());
 
+    // Satronho NX: performance hints for the emulator's frame threads while the game runs.
+    Satronho::Adpf::Start(m_system);
+
     if (m_system.DebuggerEnabled()) {
         m_system.InitializeDebugger();
     }
@@ -447,6 +451,8 @@ void EmulationSession::RunEmulation() {
         if (reload_title.has_value())
             ReloadDiskShaderCache(*reload_title);
     }
+
+    Satronho::Adpf::Stop();
 
     // Reset current applet ID.
     m_applet_id = static_cast<int>(Service::AM::AppletId::Application);
@@ -2459,6 +2465,31 @@ JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoGameReq
     namespace ShaderWarm = VideoCommon::ShaderWarm;
     const u64 program_id = std::stoull(Common::Android::GetJString(env, j_program_id));
     return ShaderWarm::WarmRequested(ShaderWarm::ComputeWarmPath(program_id));
+}
+
+// Satronho NX: whether a game file holds a Switch 2 program (.nup dumps, Switch 2 Editions).
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoIsSwitch2(JNIEnv* env,
+                                                                                  jobject obj,
+                                                                                  jstring j_path) {
+    try {
+        auto& system = EmulationSession::GetInstance().System();
+        const auto file =
+            Core::GetGameFileFromPath(system.GetFilesystem(), Common::Android::GetJString(env, j_path));
+        return file != nullptr && Core::FindSwitch2Program(file, 0, 0).has_value();
+    } catch (...) {
+        return false;
+    }
+}
+
+// Satronho NX: the performance hints switch, and whether this phone offers them.
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoSetPerformanceHints(
+    JNIEnv* env, jobject obj, jboolean enabled) {
+    Satronho::Adpf::SetEnabled(enabled);
+}
+
+JNIEXPORT jboolean JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPerformanceHintsSupported(
+    JNIEnv* env, jobject obj) {
+    return Satronho::Adpf::IsSupported();
 }
 
 // Satronho NX meter: stutters (frames over 100 ms) since the last call, and the worst frame of them.

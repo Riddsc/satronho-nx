@@ -2051,6 +2051,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <string name="satronho_summary_lighter">Lighter profile</string>
     <string name="satronho_nono_lower">Lower resolution</string>
     <string name="satronho_nono_tuned">Done: %1$s goes from %2$s to %3$s, only in this game.</string>
+    <string name="satronho_switch2_phone_title">%1$s set up your Switch 2 game</string>
+    <string name="satronho_switch2_phone">%1$s is a Switch 2 game, the heaviest kind for a phone. For it to start as smooth as possible, I can leave it a phone profile, only for this game: internal resolution %2$s with FSR to keep it sharp, and asynchronous shaders. You can change it whenever you want in its properties.</string>
+    <string name="satronho_switch2_phone_ram">Heads up: your phone has %1$d GB of RAM and Switch 2 games ask for %2$d GB. Close the other apps before playing; if Android runs out of memory, it may close the game.</string>
+    <string name="satronho_switch2_phone_apply">Use the profile</string>
+    <string name="satronho_switch2_phone_keep">Leave it as is</string>
+    <string name="satronho_switch2_phone_applied">Phone profile ready for %1$s.</string>
+    <string name="satronho_boost">Phone boost</string>
+    <string name="satronho_boost_description">Satronho tells Android which threads draw each frame and how long they take, so it speeds them up when a frame runs late and lets them rest when the game keeps its pace. Turn it off if the phone gets too hot.</string>
     <string name="satronho_nono_lowest">This game is already at the lowest resolution.</string>
     <string name="satronho_widget_name">Satronho NX · Continue</string>
     <string name="satronho_widget_description">Your last game, how it went and a button to keep playing</string>
