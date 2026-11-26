@@ -621,7 +621,16 @@ Result BuildWarmFilesWith(Core::System& system, const fs::path& game_path, u64 t
                   [](const ArchiveFile& a, const ArchiveFile& b) { return a.path < b.path; });
         steps.Advance("RomFS file classification and header probing", files.size());
         std::vector<ArchiveFile> package_effects;
+        size_t probed = 0;
         for (auto& file : files) {
+            // Satronho NX: on a phone each header read goes through the system's file provider
+            // (186 587 files took 12 minutes), so the step reports its progress and stops at once.
+            if ((++probed & 511) == 0) {
+                if (stop.stop_requested()) {
+                    return fail("Stopped");
+                }
+                report(StageReading, probed, files.size());
+            }
             switch (ClassifyGameFile(file.path)) {
             case GameFileKind::ShaderArchive:
                 archives.push_back(file);
@@ -632,11 +641,19 @@ Result BuildWarmFilesWith(Core::System& system, const fs::path& game_path, u64 t
             case GameFileKind::ZstdDictionaries:
                 dictionary_pack = file.file; // the newest package wins
                 break;
-            case GameFileKind::Other:
-                if (IsFramePack(file.file->ReadBytes(4, 0), file.path, file.file->GetSize())) {
+            case GameFileKind::Other: {
+                // A .zs member starts with the zstd magic, never "PDAT": only its size can make
+                // it a pack, so its header is not read (most of a Switch 2 RomFS is .zs).
+                const auto& path = file.path;
+                const bool zstd_member = path.size() > 3 &&
+                                         (path.ends_with(".zs") || path.ends_with(".ZS"));
+                const std::vector<u8> head =
+                    zstd_member ? std::vector<u8>{} : file.file->ReadBytes(4, 0);
+                if (IsFramePack(head, file.path, file.file->GetSize())) {
                     packs.push_back(file);
                 }
                 break;
+            }
             }
         }
         effects.insert(effects.end(), package_effects.begin(), package_effects.end());

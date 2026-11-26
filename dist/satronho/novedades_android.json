@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-58",
+      "fecha": "26 de noviembre de 2026",
+      "titulo": "Switch 2 en el teléfono, paso a paso",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia de Satronho NX: los juegos de Switch 2 se quedaban en negro a los pocos segundos porque Android nunca terminaba de abrir el micrófono que el juego pide al arrancar (y por eso tampoco se podía cerrar). Rastreamos el problema en los registros de Ridds y ahora el juego recibe silencio, como con el micrófono de la consola apagado."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia: en teléfonos con procesadores anteriores a los de la Switch 2, el cargador del juego se caía al usar NCE. Satronho NX usa Dynarmic automáticamente para los juegos de Switch 2 en Android; los de Switch 1 siguen con NCE, que es más rápido."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "«Preparar juego» ya no revisa uno por uno los archivos comprimidos que nunca pueden traer shaders: en Ocarina eran casi 186 mil y tardaban unos 12 minutos en el teléfono. Además muestra cuánto lleva y el botón de detener responde al instante."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Si un juego tarda más de 20 segundos en cerrarse, Satronho NX se reinicia solo en la lista de juegos en vez de quedarse congelado."
+        }
+      ]
+    },
+    {
       "tag": "build-57",
       "fecha": "25 de noviembre de 2026",
       "titulo": "En los releases, junto a PC",

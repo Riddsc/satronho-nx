@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-58",
+      "fecha": "November 26, 2026",
+      "titulo": "Switch 2 on the phone, step by step",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Satronho NX's own fix: Switch 2 games went black a few seconds in because Android never finished opening the microphone the game asks for at boot (which also kept them from closing). We tracked it down in Ridds' logs, and now the game gets silence, as with the console's microphone muted."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Our own fix: on phones with CPUs older than the Switch 2's, the game's loader crashed under NCE. Satronho NX now uses Dynarmic automatically for Switch 2 games on Android; Switch 1 games keep NCE, which is faster."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "\"Prepare game\" no longer checks, one by one, the compressed files that can never hold shaders: in Ocarina there were almost 186 thousand and they took about 12 minutes on the phone. It also shows its progress, and Stop answers at once."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "If a game takes more than 20 seconds to close, Satronho NX restarts itself on the game list instead of freezing."
+        }
+      ]
+    },
+    {
       "tag": "build-57",
       "fecha": "November 25, 2026",
       "titulo": "In the releases, next to PC",

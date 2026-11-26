@@ -709,3 +709,18 @@ lichii/nx2`) es la prueba de que no se perdió nada propio ni quedó nada viejo.
   leen nativo (`IsOptimalAstcSupported`), no hace falta recomprimir.
 - **Desde la build 57 la rama `android` quedó unida a `main`** (avance rápido, con visto bueno de
   Riddsc): se trabaja en `main` y cada release lleva el .zip de Windows y el APK.
+- **Build 58 (2026-11-26), Switch 2 en Android (Pixel 6 Pro, Mali-G78, logs de Riddsc):**
+  (1) Con NCE, Ocarina se caía en `nnrtld` a los 6 s (backtrace en rtld+0xC68); con Dynarmic arranca.
+  `Settings::SetNceEnabled` apaga NCE en Android si `CurrentProgramIsSwitch2()` (log «Satronho:
+  Switch 2 program on Android, using Dynarmic»); `ReadTrapsEnabled` (memory.cpp) mira ahora
+  `IsNceEnabled()` y no el ajuste. (2) Con Dynarmic el juego se trababa siempre a los 28.6 s tras
+  `CreateStream 'InputStream-0<=1ch48kQ15<=AudioVirtualOutput0'` (micrófono): nunca salía ni
+  «Opening SDL stream» ni «Error opening SDL audio device», o sea `SDL_OpenAudioDeviceStream` de
+  grabación no volvía (la app no declara RECORD_AUDIO y no es una SDLActivity). El hilo atrapado
+  también colgaba el cierre. En Android, `SysmixOutput::Open` usa `SilentInputStream` para las
+  entradas sin abrir el micrófono. (3) Precache: «RomFS file classification and header probing» leía
+  4 bytes de cada uno de 186 587 archivos (709 s en el teléfono, 0 asset packs); los `.zs` ya no se
+  leen (empiezan con la magia zstd, nunca «PDAT»; solo cuenta el tamaño), y cada 512 archivos se
+  revisa Stop y se informa el avance. (4) `EmulationState.watchShutdown`: si el hilo de emulación
+  sigue vivo 20 s después de `stopEmulation`, la app se reinicia en la lista (`killProcess`).
+  Pendiente: ver si Mali-G78 dibuja el primer cuadro (le faltan clip distances, multiViewport, etc.).

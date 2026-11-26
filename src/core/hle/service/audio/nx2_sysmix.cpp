@@ -226,9 +226,21 @@ Result SysmixOutput::Open(u32 sample_type, u32 channels, u32 rate, u32 frames, u
                  memory.Read32Acquire(p.buffer + WriteOffset, write) && read < slots &&
                  write < slots,
              ResultInvalidAddressInfo);
-    p.host = p.sink.AcquireSinkStream(p.system, channels, "sysmix-" + std::to_string(p.id),
-                                      p.input_stream ? AudioCore::Sink::StreamType::In
-                                                     : AudioCore::Sink::StreamType::Sysmix);
+#ifdef __ANDROID__
+    // Satronho NX: on Android, opening the phone's microphone for a Switch 2 input stream never
+    // returned (no recording permission), which froze the game at boot and then its shutdown.
+    // The game gets silence instead, as with the console's microphone muted.
+    if (p.input_stream) {
+        LOG_INFO(Service_Audio, "sysmix stream {}: silent input on Android (microphone not opened)",
+                 p.id);
+        p.UseSilentInput(channels);
+    } else
+#endif
+    {
+        p.host = p.sink.AcquireSinkStream(p.system, channels, "sysmix-" + std::to_string(p.id),
+                                          p.input_stream ? AudioCore::Sink::StreamType::In
+                                                         : AudioCore::Sink::StreamType::Sysmix);
+    }
     if (p.input_stream && (!p.host || !p.host->IsReady())) {
         p.UseSilentInput(channels);
     }

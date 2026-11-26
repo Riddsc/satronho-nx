@@ -67,6 +67,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.yuzu.yuzu_emu.HomeNavigationDirections
 import org.yuzu.yuzu_emu.NativeLibrary
+import org.yuzu.yuzu_emu.YuzuApplication
 import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.satronho.Captura
 import org.yuzu.yuzu_emu.satronho.Carga
@@ -2388,10 +2389,35 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 Log.debug("[EmulationFragment] Stopping emulation.")
                 NativeLibrary.stopEmulation()
                 state = State.STOPPED
+                watchShutdown()
             } else {
                 Log.warning("[EmulationFragment] Stop called while already stopped.")
                 NativeLibrary.stopEmulation()
             }
+        }
+
+        /**
+         * Satronho NX: a game thread stuck in a host call can keep the shutdown waiting forever.
+         * After [SHUTDOWN_LIMIT_MS] the app restarts itself on the game list instead of freezing.
+         */
+        private fun watchShutdown() {
+            if (!::emulationThread.isInitialized) {
+                return
+            }
+            val thread = emulationThread
+            Thread({
+                thread.join(SHUTDOWN_LIMIT_MS)
+                if (!thread.isAlive) {
+                    return@Thread
+                }
+                Log.warning("[EmulationFragment] Satronho: shutdown still running after ${SHUTDOWN_LIMIT_MS / 1000} s, restarting the app")
+                val context = YuzuApplication.appContext
+                context.packageManager.getLaunchIntentForPackage(context.packageName)?.let { intent ->
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    context.startActivity(intent)
+                }
+                android.os.Process.killProcess(android.os.Process.myPid())
+            }, "SatronhoShutdownWatch").apply { isDaemon = true }.start()
         }
 
         @Synchronized
@@ -2569,6 +2595,8 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
     }
 
     companion object {
+        /** Satronho NX: how long a shutdown may take before the app restarts itself. */
+        private const val SHUTDOWN_LIMIT_MS = 20_000L
         private val AMIIBO_MIME_TYPES =
             arrayOf("application/octet-stream", "application/x-binary", "*/*")
         private val perfStatsUpdateHandler = Handler(Looper.myLooper()!!)

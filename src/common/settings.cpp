@@ -232,6 +232,14 @@ void SetNceEnabled(bool is_39bit) {
             "Program does not utilize 39-bit address space, unable to natively execute code");
     }
     is_nce_enabled = IsFastmemEnabled() && is_nce_selected && is_39bit;
+#ifdef __ANDROID__
+    // Satronho NX: native execution crashed Switch 2 programs in their loader (nnrtld) on phone
+    // CPUs older than the console's, before the game ran. Dynarmic boots them.
+    if (is_nce_enabled && CurrentProgramIsSwitch2()) {
+        LOG_INFO(Common, "Satronho: Switch 2 program on Android, using Dynarmic instead of NCE");
+        is_nce_enabled = false;
+    }
+#endif
 }
 
 bool IsNceEnabled() {

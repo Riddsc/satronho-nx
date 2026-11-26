@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-58",
+      "fecha": "26 de noviembre de 2026",
+      "titulo": "Switch 2 en el teléfono, paso a paso",
+      "cambios": [
+        {
+          "tipo": "mejora",
+          "texto": "«Preparar para directo» y la precompilación leen más rápido los juegos de Switch 2: ya no abren uno por uno los archivos comprimidos que nunca pueden traer shaders, muestran su avance mientras revisan y se detienen al instante."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Android, correcciones propias de Satronho NX: los juegos de Switch 2 ya no se quedan en negro esperando el micrófono del teléfono, usan Dynarmic automáticamente para no caerse al arrancar, y si un juego tarda más de 20 segundos en cerrarse la app se reinicia sola."
+        }
+      ]
+    },
+    {
       "tag": "build-57",
       "fecha": "25 de noviembre de 2026",
       "titulo": "PC y Android, juntos",

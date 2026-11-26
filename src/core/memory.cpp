@@ -594,7 +594,7 @@ struct Memory::Impl {
         }();
         return !disabled && current_page_table->fastmem_arena &&
                !Settings::ReactiveFlushing() &&
-               Settings::values.cpu_backend.GetValue() != Settings::CpuBackend::Nce;
+               !Settings::IsNceEnabled(); // Satronho NX: NCE actually in use, not just selected
     }
 
     void RasterizerArmReadTraps(u64 vaddr, u64 size) {
