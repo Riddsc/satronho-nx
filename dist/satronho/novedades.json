@@ -11,6 +11,10 @@
         },
         {
           "tipo": "nuevo",
+          "texto": "Switch 2 también en el teléfono, propio de Satronho NX: la app de Android ya lee los .nup (la de Lichii para Android todavía no), le ofrece a cada juego de Switch 2 un perfil de teléfono la primera vez y trae el Impulso del teléfono, que le avisa a Android qué hilos dibujan cada cuadro para que los acelere cuando se atrasan."
+        },
+        {
+          "tipo": "nuevo",
           "texto": "Modo directo automático, creado por Satronho NX: cada cinco segundos Satronho mira si OBS, Streamlabs o TikTok LIVE Studio están abiertos y, si lo están, los shaders que el juego todavía no necesita se arman con la mitad de los hilos para dejarle procesador a la transmisión. Los shaders que el juego está esperando nunca se frenan. El medidor dice «modo directo» mientras actúa y el resumen de la sesión lo anota. Es el punto que dejamos pendiente en la build 56; se apaga en Satronho → «Modo directo automático»."
         },
         {
