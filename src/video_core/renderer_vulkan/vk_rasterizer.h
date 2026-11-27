@@ -276,6 +276,10 @@ private:
     void UpdateOcarinaJitter();
     void TrackOcarinaActor(u64 shader_hash, bool is_indexed, bool is_indirect);
     bool TryOcarinaUpscale(const ComputePipeline& pipeline, bool replace);
+    /// Satronho NX (Android): whether Ocarina's upscale pass is replaced by a bilinear blit.
+    bool OcarinaCheapUpscale(const ComputePipeline& pipeline) const;
+    /// The blit; false when the pass's images don't fit it (the game's pass then runs).
+    bool BlitOcarinaUpscale(const ComputePipeline& pipeline);
     void ReadOcarinaActor(struct OcarinaActorMesh& mesh);
     /// Records the uniform and storage buffers of the current draw or dispatch for the frame dump.
     bool FrameDumpBuffers(bool compute, std::span<const u64> shader_hashes);

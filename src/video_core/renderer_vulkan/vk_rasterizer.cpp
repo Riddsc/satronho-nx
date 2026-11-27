@@ -2378,6 +2378,9 @@ void RasterizerVulkan::DispatchCompute() {
                              (pipeline->ShaderHash() != ComputePipeline::OcarinaFullSizeShader ||
                               oot_backend == VideoCommon::OcarinaUpscaleBackend::Fsr) &&
                              !indirect_address && !frame_dump.Capturing();
+    // Satronho NX (Android): Ocarina's end-of-frame upscale pass took 2.3-3.6 s a frame on a
+    // Mali-G78. With "No sharpening", it is replaced by a bilinear blit of its input.
+    const bool cheap_upscale = !can_replace && !indirect_address && OcarinaCheapUpscale(*pipeline);
     // Until a dispatch overwrites the scene, each direct one binds only after the effects are
     // marked. The indirect path records its bind at once.
     const bool marking_effects = oot_effects_frame == render_trace_frame && OcarinaTemporalEnabled() &&
@@ -2385,10 +2388,18 @@ void RasterizerVulkan::DispatchCompute() {
     ComputePipeline::BindCommand deferred_bind;
     if (!pipeline->Configure(*kepler_compute, *gpu_memory, scheduler, buffer_cache,
                              texture_cache, texture_cache_runtime, byte_addressed_shadow,
-                             can_replace || marking_effects ? &deferred_bind : nullptr)) {
+                             can_replace || marking_effects || cheap_upscale ? &deferred_bind
+                                                                             : nullptr)) {
         if (kepler_compute->IsNativeMode()) throw Shader::RuntimeError("Native compute resources unavailable");
         return;
     }
+    if (cheap_upscale && BlitOcarinaUpscale(*pipeline)) {
+        scheduler.InvalidateState();
+        buffer_cache.NoteWorkRecorded(true);
+        SubmitNx2ListCopies();
+        return;
+    }
+    // Without the blit the game's pass runs below, with the bind Configure deferred.
     SCOPE_EXIT {
         if (!frame_dump.Capturing()) {
             return;
@@ -3348,6 +3359,114 @@ void RasterizerVulkan::ReadOcarinaActor(OcarinaActorMesh& mesh) {
 }
 
 /// Track the scene depth on its reader dispatch, or try to replace a recognized upscale dispatch.
+bool RasterizerVulkan::OcarinaCheapUpscale(const ComputePipeline& pipeline) const {
+#ifdef __ANDROID__
+    constexpr u64 ocarina_program = 0x0400486024DEC000ULL;
+    if (program_id != ocarina_program ||
+        Settings::values.oot_anti_aliasing.GetValue() != Settings::OotAntiAliasing::NoSharpening) {
+        return false;
+    }
+    const u64 hash = pipeline.ShaderHash();
+    return hash == 0xe40f5efb5480e692ULL || hash == 0xef542df87cacfe9eULL ||
+           hash == 0x03bf0ffc7d2d0bedULL;
+#else
+    static_cast<void>(pipeline);
+    return false;
+#endif
+}
+
+bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
+    const auto fail = [](const char* reason) {
+        static const char* last = nullptr;
+        if (reason != last) {
+            last = reason;
+            LOG_INFO(Render_Vulkan, "Ocarina of Time: the game's upscale runs ({})", reason);
+        }
+        return false;
+    };
+    const auto sampled = pipeline.SampledImages();
+    const auto written = pipeline.WrittenImages();
+    if (sampled.empty() || written.size() != 1 || !written[0]) {
+        return fail("unexpected bindings");
+    }
+    using VideoCore::Surface::PixelFormat;
+    // The input is the largest B10G11R11 image the pass samples (the scene); others it may read
+    // (lookup tables, edge data) are left out of the blit.
+    VideoCommon::ImageViewId color_id{};
+    u64 color_area = 0;
+    for (const auto& image : sampled) {
+        if (!image.id) {
+            continue;
+        }
+        const auto& view = texture_cache.GetImageView(image.id);
+        const u64 area = u64{view.size.width} * view.size.height;
+        if (view.format == PixelFormat::B10G11R11_FLOAT && area > color_area) {
+            color_id = image.id;
+            color_area = area;
+        }
+    }
+    if (!color_id) {
+        return fail("no scene image sampled");
+    }
+    auto& color = texture_cache.GetImageView(color_id);
+    auto& target = texture_cache.GetImageView(written[0]);
+    const auto* const color_image = color.BackingImage();
+    const auto* const target_image = target.BackingImage();
+    if (!color_image || !target_image || color.format != PixelFormat::B10G11R11_FLOAT ||
+        target.format != PixelFormat::B10G11R11_FLOAT || color_image == target_image ||
+        color.size.width == 0 || color.size.height == 0 ||
+        color.size.width > target.size.width || color.size.height > target.size.height) {
+        return fail("unexpected images");
+    }
+    const auto surface = [](const Image& image) {
+        Tegra::Engines::Fermi2D::Surface result{};
+        result.format = Tegra::RenderTargetFormat::B10G11R11_FLOAT;
+        result.linear = Tegra::Engines::Fermi2D::MemoryLayout::BlockLinear;
+        result.block_width.Assign(image.info.block.width);
+        result.block_height.Assign(image.info.block.height);
+        result.block_depth.Assign(image.info.block.depth);
+        result.depth = 1;
+        result.width = image.info.size.width;
+        result.height = image.info.size.height;
+        result.addr_upper = static_cast<u32>(image.gpu_addr >> 32);
+        result.addr_lower = static_cast<u32>(image.gpu_addr);
+        return result;
+    };
+    if (color_image->info.type != VideoCommon::ImageType::e2D ||
+        target_image->info.type != VideoCommon::ImageType::e2D) {
+        return fail("not 2D images");
+    }
+    const Tegra::Engines::Fermi2D::Config config{
+        .operation = Tegra::Engines::Fermi2D::Operation::SrcCopy,
+        .filter = Tegra::Engines::Fermi2D::Filter::Bilinear,
+        .must_accelerate = true,
+        .dst_x0 = 0,
+        .dst_y0 = 0,
+        .dst_x1 = static_cast<s32>(target.size.width),
+        .dst_y1 = static_cast<s32>(target.size.height),
+        .src_x0 = 0,
+        .src_y0 = 0,
+        .src_x1 = static_cast<s32>(color.size.width),
+        .src_y1 = static_cast<s32>(color.size.height),
+    };
+    const u32 color_width = color.size.width;
+    const u32 color_height = color.size.height;
+    const u32 target_width = target.size.width;
+    const u32 target_height = target.size.height;
+    const auto src = surface(*color_image);
+    const auto dst = surface(*target_image);
+    if (!texture_cache.BlitImage(dst, src, config)) {
+        return fail("blit failed");
+    }
+    static bool logged = false;
+    if (!std::exchange(logged, true)) {
+        LOG_INFO(Render_Vulkan,
+                 "Ocarina of Time: upscale pass {:016x} replaced by a bilinear blit, {}x{} -> {}x{}",
+                 pipeline.ShaderHash(), color_width, color_height, target_width, target_height);
+    }
+    return true;
+}
+
 bool RasterizerVulkan::TryOcarinaUpscale(const ComputePipeline& pipeline, bool replace) {
     constexpr u64 depth_reader = 0x1fc7a0423116281fULL;
     const bool pass_1440p = replace && pipeline.ShaderHash() == ComputePipeline::Ocarina1440pShader;
