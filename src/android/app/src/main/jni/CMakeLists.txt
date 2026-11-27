@@ -21,6 +21,7 @@ add_library(yuzu-android SHARED
     satronho_adpf.cpp
     satronho_adpf.h
     satronho_memory.cpp
+    satronho_leaks.cpp
 )
 
 set_property(TARGET yuzu-android PROPERTY IMPORTED_LOCATION ${FFmpeg_LIBRARY_DIR})

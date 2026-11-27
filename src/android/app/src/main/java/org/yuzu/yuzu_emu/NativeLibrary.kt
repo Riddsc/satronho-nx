@@ -242,6 +242,9 @@ object NativeLibrary {
     /** Satronho NX: hands memory the native allocator freed back to Android. */
     external fun satronhoPurgeNativeMemory()
 
+    /** Satronho NX test build: logs the call stacks holding the most never-freed memory. */
+    external fun satronhoLeakReport()
+
     /**
      * Returns the current CPU backend.
      */
