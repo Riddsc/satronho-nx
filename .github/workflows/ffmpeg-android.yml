@@ -1,0 +1,61 @@
+name: ffmpeg-android
+
+# FFmpeg para Android arm64 con AV1 (dav1d y el decodificador por hardware del teléfono), en el
+# formato de paquete que descarga CPMUtil. Se compila solo con un push a la rama «ffmpeg-android»
+# y queda en la pre-release cuyo tag es VERSION; cpmfile.json («ffmpeg-ci-av1-android») la usa.
+# Para una versión nueva: sube VERSION aquí y en cpmfile.json.
+on:
+  push:
+    branches: [ffmpeg-android]
+    paths:
+      - ".ci/ffmpeg-android/**"
+      - ".github/workflows/ffmpeg-android.yml"
+
+permissions:
+  contents: write
+
+env:
+  VERSION: 9.0.2-av1-android-1
+  FFMPEG_COMMIT: 946fcce07b6dcd0331c8cc609192aeff5e1924f8
+  DAV1D_VERSION: 1.5.4
+  NDK_VERSION: 28.2.13676358
+  API: "23"
+
+jobs:
+  ffmpeg:
+    name: FFmpeg Android arm64 (AV1)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Código
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+
+      - name: Herramientas
+        run: |
+          set -e
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq meson ninja-build pkg-config zstd
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          for attempt in 1 2 3; do
+            "$SDKM" "ndk;$NDK_VERSION" > /dev/null && break
+            echo "sdkmanager falló (intento $attempt), reintentando..."; sleep 20
+          done
+          echo "NDK=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
+
+      - name: Compilar
+        run: bash .ci/ffmpeg-android/build.sh
+
+      - name: Publicar
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          if ! gh release view "$VERSION" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release create "$VERSION" -R "$GITHUB_REPOSITORY" --prerelease --target "$GITHUB_SHA" \
+              --title "FFmpeg Android con AV1 ($VERSION)" \
+              --notes "Paquete de FFmpeg para compilar Satronho NX en Android: FFmpeg $FFMPEG_COMMIT con dav1d $DAV1D_VERSION y los decodificadores MediaCodec (H.264, VP8, VP9 y AV1). No es una versión del emulador."
+          fi
+          gh release upload "$VERSION" -R "$GITHUB_REPOSITORY" --clobber artifacts/*
