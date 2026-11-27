@@ -185,6 +185,10 @@ if (YUZU_USE_BUNDLED_FFMPEG)
         AddJsonPackage(ffmpeg-ci-av1)
     elseif (MINGW AND CPMUTIL_AMD64)
         AddJsonPackage(ffmpeg-ci-av1-mingw)
+    elseif (ANDROID AND CPMUTIL_ARM64)
+        # Satronho NX: built by .github/workflows/ffmpeg-android.yml, with libdav1d and the
+        # MediaCodec decoders (av1 included).
+        AddJsonPackage(ffmpeg-ci-av1-android)
     else()
         AddJsonPackage(ffmpeg-ci)
     endif()

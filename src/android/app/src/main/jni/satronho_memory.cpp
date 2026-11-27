@@ -165,6 +165,9 @@ JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoSetMemoryOp
     SetOrClear("SATRONHO_GUEST_FILE_DIR", file_backed && !cache_dir.empty(), cache_dir.c_str());
     // What the texture and buffer caches and the GPU heaps hold, every 2 s.
     setenv("EDEN_NX2_MEM_TRACE", "1", 1);
+    // Satronho NX test: draws per frame every 10 s («Draw reuse per frame»), to tell a game that
+    // draws a black picture from one that draws nothing.
+    setenv("EDEN_NX2_DRAW_REUSE_PROBE", "1", 1);
     InstallHandlers(cache_dir.empty() ? std::string{} : cache_dir + "/satronho_abort.txt");
     LOG_INFO(Frontend,
              "Satronho memory options: free zero pages {}, smaller game memory {}, game memory in "

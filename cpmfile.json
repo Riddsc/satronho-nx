@@ -88,6 +88,13 @@
         "repo": "Takoroka/ffmpeg-av1",
         "version": "9.0.2-av1-1"
     },
+    "ffmpeg-ci-av1-android": {
+        "ci": true,
+        "name": "ffmpeg",
+        "package": "FFmpeg",
+        "repo": "Riddsc/satronho-nx",
+        "version": "9.0.2-av1-android-1"
+    },
     "ffmpeg-ci-av1-mingw": {
         "ci": true,
         "name": "ffmpeg",
