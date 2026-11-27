@@ -3384,58 +3384,62 @@ bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
         }
         return false;
     };
-    const auto sampled = pipeline.SampledImages();
     const auto written = pipeline.WrittenImages();
-    if (sampled.empty() || written.size() != 1 || !written[0]) {
+    if (written.size() != 1 || !written[0]) {
         return fail("unexpected bindings");
     }
     using VideoCore::Surface::PixelFormat;
-    // The input is the largest B10G11R11 image the pass samples (the scene); others it may read
-    // (lookup tables, edge data) are left out of the blit.
-    VideoCommon::ImageViewId color_id{};
-    u64 color_area = 0;
-    for (const auto& image : sampled) {
-        if (!image.id) {
-            continue;
-        }
-        const auto& view = texture_cache.GetImageView(image.id);
-        const u64 area = u64{view.size.width} * view.size.height;
-        if (view.format == PixelFormat::B10G11R11_FLOAT && area > color_area) {
-            color_id = image.id;
-            color_area = area;
-        }
-    }
-    if (!color_id) {
-        return fail("no scene image sampled");
-    }
-    auto& color = texture_cache.GetImageView(color_id);
     auto& target = texture_cache.GetImageView(written[0]);
-    const auto* const color_image = color.BackingImage();
     const auto* const target_image = target.BackingImage();
-    if (!color_image || !target_image || color.format != PixelFormat::B10G11R11_FLOAT ||
-        target.format != PixelFormat::B10G11R11_FLOAT || color_image == target_image ||
-        color.size.width == 0 || color.size.height == 0 ||
-        color.size.width > target.size.width || color.size.height > target.size.height) {
-        return fail("unexpected images");
-    }
-    const auto surface = [](const Image& image) {
-        Tegra::Engines::Fermi2D::Surface result{};
-        result.format = Tegra::RenderTargetFormat::B10G11R11_FLOAT;
-        result.linear = Tegra::Engines::Fermi2D::MemoryLayout::BlockLinear;
-        result.block_width.Assign(image.info.block.width);
-        result.block_height.Assign(image.info.block.height);
-        result.block_depth.Assign(image.info.block.depth);
-        result.depth = 1;
-        result.width = image.info.size.width;
-        result.height = image.info.size.height;
-        result.addr_upper = static_cast<u32>(image.gpu_addr >> 32);
-        result.addr_lower = static_cast<u32>(image.gpu_addr);
-        return result;
-    };
-    if (color_image->info.type != VideoCommon::ImageType::e2D ||
+    if (!target_image || target.format != PixelFormat::B10G11R11_FLOAT ||
         target_image->info.type != VideoCommon::ImageType::e2D) {
-        return fail("not 2D images");
+        return fail("unexpected output image");
     }
+    // The source is the tonemapped scene (render target 0 of the game's tonemap draw), the clean
+    // image the pass's own inputs are made from; only its drawn part (the tonemap viewport).
+    Tegra::Engines::Maxwell3D::Regs::RenderTargetConfig tonemapped;
+    u32 drawn_width{};
+    u32 drawn_height{};
+    {
+        std::scoped_lock lock{oot_network_bypass.mutex};
+        tonemapped = oot_network_bypass.tonemapped;
+        drawn_width = oot_network_bypass.tonemapped_width;
+        drawn_height = oot_network_bypass.tonemapped_height;
+    }
+    if (tonemapped.Address() == 0 ||
+        tonemapped.format != Tegra::RenderTargetFormat::B10G11R11_FLOAT ||
+        tonemapped.tile_mode.is_pitch_linear || tonemapped.Address() == target_image->gpu_addr) {
+        return fail("no tonemapped scene");
+    }
+    if (drawn_width == 0 || drawn_height == 0) {
+        drawn_width = tonemapped.width;
+        drawn_height = tonemapped.height;
+    }
+    if (drawn_width > target.size.width || drawn_height > target.size.height) {
+        return fail("scene larger than the output");
+    }
+    Tegra::Engines::Fermi2D::Surface src{};
+    src.format = Tegra::RenderTargetFormat::B10G11R11_FLOAT;
+    src.linear = Tegra::Engines::Fermi2D::MemoryLayout::BlockLinear;
+    src.block_width.Assign(tonemapped.tile_mode.block_width);
+    src.block_height.Assign(tonemapped.tile_mode.block_height);
+    src.block_depth.Assign(tonemapped.tile_mode.block_depth);
+    src.depth = 1;
+    src.width = tonemapped.width;
+    src.height = tonemapped.height;
+    src.addr_upper = tonemapped.address_high;
+    src.addr_lower = tonemapped.address_low;
+    Tegra::Engines::Fermi2D::Surface dst{};
+    dst.format = Tegra::RenderTargetFormat::B10G11R11_FLOAT;
+    dst.linear = Tegra::Engines::Fermi2D::MemoryLayout::BlockLinear;
+    dst.block_width.Assign(target_image->info.block.width);
+    dst.block_height.Assign(target_image->info.block.height);
+    dst.block_depth.Assign(target_image->info.block.depth);
+    dst.depth = 1;
+    dst.width = target_image->info.size.width;
+    dst.height = target_image->info.size.height;
+    dst.addr_upper = static_cast<u32>(target_image->gpu_addr >> 32);
+    dst.addr_lower = static_cast<u32>(target_image->gpu_addr);
     const Tegra::Engines::Fermi2D::Config config{
         .operation = Tegra::Engines::Fermi2D::Operation::SrcCopy,
         .filter = Tegra::Engines::Fermi2D::Filter::Bilinear,
@@ -3446,15 +3450,11 @@ bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
         .dst_y1 = static_cast<s32>(target.size.height),
         .src_x0 = 0,
         .src_y0 = 0,
-        .src_x1 = static_cast<s32>(color.size.width),
-        .src_y1 = static_cast<s32>(color.size.height),
+        .src_x1 = static_cast<s32>(drawn_width),
+        .src_y1 = static_cast<s32>(drawn_height),
     };
-    const u32 color_width = color.size.width;
-    const u32 color_height = color.size.height;
     const u32 target_width = target.size.width;
     const u32 target_height = target.size.height;
-    const auto src = surface(*color_image);
-    const auto dst = surface(*target_image);
     if (!texture_cache.BlitImage(dst, src, config)) {
         return fail("blit failed");
     }
@@ -3462,7 +3462,7 @@ bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
     if (!std::exchange(logged, true)) {
         LOG_INFO(Render_Vulkan,
                  "Ocarina of Time: upscale pass {:016x} replaced by a bilinear blit, {}x{} -> {}x{}",
-                 pipeline.ShaderHash(), color_width, color_height, target_width, target_height);
+                 pipeline.ShaderHash(), drawn_width, drawn_height, target_width, target_height);
     }
     return true;
 }
