@@ -847,10 +847,30 @@ struct Memory::Impl {
             },
             [&]() { HandleRasterizerWrite(GetInteger(vaddr), sizeof(T)); });
         if (ptr) {
+#ifndef ARCHITECTURE_x86_64
+            // Satronho NX: an ARM host refuses atomics on a misaligned address (SIGBUS, alignment
+            // fault: Ocarina loading Hyrule on a phone); x86 does them. Swap those under a lock.
+            if (reinterpret_cast<uintptr_t>(ptr) % sizeof(T) != 0) {
+                return MisalignedCompareAndSwap(ptr, &data, &expected, sizeof(T));
+            }
+#endif
             return Common::AtomicCompareAndSwap(reinterpret_cast<T*>(ptr), data, expected);
         }
         return true;
     }
+
+#ifndef ARCHITECTURE_x86_64
+    static bool MisalignedCompareAndSwap(u8* ptr, const void* data, const void* expected,
+                                         size_t size) {
+        static std::mutex misaligned_mutex;
+        std::scoped_lock lock{misaligned_mutex};
+        if (std::memcmp(ptr, expected, size) != 0) {
+            return false;
+        }
+        std::memcpy(ptr, data, size);
+        return true;
+    }
+#endif
 
     bool WriteExclusive128(Common::ProcessAddress vaddr, const u128 data, const u128 expected) {
         u8* const ptr = GetPointerImpl(
@@ -861,6 +881,11 @@ struct Memory::Impl {
             },
             [&]() { HandleRasterizerWrite(GetInteger(vaddr), sizeof(u128)); });
         if (ptr) {
+#ifndef ARCHITECTURE_x86_64
+            if (reinterpret_cast<uintptr_t>(ptr) % 16 != 0) {
+                return MisalignedCompareAndSwap(ptr, &data, &expected, sizeof(u128));
+            }
+#endif
             return Common::AtomicCompareAndSwap(reinterpret_cast<u64*>(ptr), data, expected);
         }
         return true;
