@@ -197,43 +197,13 @@ object Sugeridas {
             root.addView(row)
         }
 
-        // Satronho NX: memory options for Switch 2 games on phones.
-        val memoryRow = { title: Int, description: Int, get: () -> Boolean, set: (Boolean) -> Unit ->
-            val row = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(0, Satronho.dp(context, 12), 0, 0)
-            }
-            val texts = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            texts.addView(TextView(context).apply {
-                text = context.getString(title)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            })
-            texts.addView(TextView(context).apply {
-                text = context.getString(description)
-                setTextColor(Satronho.DIM)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            })
-            row.addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-            row.addView(MaterialSwitch(context).apply {
-                isChecked = get()
-                contentDescription = context.getString(title)
-                setOnCheckedChangeListener { _, checked -> set(checked) }
-            })
-            root.addView(row)
-        }
-        memoryRow(
-            R.string.satronho_smaller_game_memory,
-            R.string.satronho_smaller_game_memory_description,
-            { Satronho.smallerGameMemory },
-            { Satronho.smallerGameMemory = it }
-        )
-        memoryRow(
-            R.string.satronho_game_memory_file,
-            R.string.satronho_game_memory_file_description,
-            { Satronho.gameMemoryInFile },
-            { Satronho.gameMemoryInFile = it }
-        )
+        // Satronho NX: the memory of Switch 2 games is set up by the app for this phone.
+        root.addView(TextView(context).apply {
+            text = context.getString(R.string.satronho_memory_auto)
+            setTextColor(Satronho.DIM)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+            setPadding(0, Satronho.dp(context, 12), 0, 0)
+        })
 
         val applyPicked = {
             val index = (group.checkedRadioButtonId - 1000).coerceIn(0, list.size - 1)

@@ -1416,6 +1416,7 @@
     <string name="satronho_free_zero_memory_description">Los juegos de Switch 2 llenan gigas con ceros al empezar. Satronho le devuelve esa memoria al teléfono para que Android no cierre el juego.</string>
     <string name="satronho_smaller_game_memory">Menos memoria para el juego (Switch 2)</string>
     <string name="satronho_smaller_game_memory_description">Le dice a los juegos de Switch 2 que la consola tiene unos 2.5 GB menos, así piden menos. Apágalo si un juego no carga.</string>
+    <string name="satronho_memory_auto">La memoria de los juegos de Switch 2 se ajusta sola según tu teléfono: no hay que tocar nada.</string>
     <string name="satronho_game_memory_file">Memoria del juego en un archivo (Switch 2)</string>
     <string name="satronho_game_memory_file_description">Guarda la memoria del juego en un archivo del teléfono, así Android puede pasar una parte al almacenamiento en vez de cerrar el juego. Necesita unos 14 GB libres y puede dar pequeños tirones.</string>
 </resources>

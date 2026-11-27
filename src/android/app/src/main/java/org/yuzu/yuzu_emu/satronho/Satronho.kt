@@ -143,20 +143,13 @@ object Satronho {
         get() = flag("performance_hints", true)
         set(value) = setFlag("performance_hints", value)
 
-    /** Switch 2 on phones: hand zero pages back to Android; on by default. */
-    var freeZeroMemory: Boolean
-        get() = flag("free_zero_memory", true)
-        set(value) = setFlag("free_zero_memory", value)
-
-    /** Switch 2 on phones: tell the game it has less memory; off by default. */
-    var smallerGameMemory: Boolean
-        get() = flag("smaller_game_memory", false)
-        set(value) = setFlag("smaller_game_memory", value)
-
-    /** Switch 2 on phones: keep the game's memory in a file; off by default. */
-    var gameMemoryInFile: Boolean
-        get() = flag("game_memory_in_file", false)
-        set(value) = setFlag("game_memory_in_file", value)
+    /**
+     * Switch 2 on phones with 12 GB or less: the game's memory goes in a file, so Android can page
+     * part of it out instead of closing the emulator. Decided by the phone, not a switch; the
+     * native side also checks there is storage for it (games under 8 GB never use it).
+     */
+    private val gameMemoryInFile: Boolean
+        get() = org.yuzu.yuzu_emu.utils.MemoryUtil.totalMemory <= 13f * 1024 * 1024 * 1024
 
     fun applyMemoryOptions() {
         val dir = appContext?.cacheDir?.absolutePath ?: ""
@@ -164,7 +157,8 @@ object Satronho {
             // Off: punching out zero pages could drop a write the game made between the check
             // and the punch (Ocarina crashed loading data with it on).
             false,
-            smallerGameMemory,
+            // Off: a smaller application pool stopped Ocarina with 2162-0001.
+            false,
             gameMemoryInFile,
             dir
         )
