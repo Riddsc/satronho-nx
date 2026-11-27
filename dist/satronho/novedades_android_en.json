@@ -1,6 +1,37 @@
 {
   "builds": [
     {
+      "tag": "build-59",
+      "fecha": "November 26, 2026",
+      "titulo": "Ocarina of Time boots on the phone",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Satronho NX's own fix: Ocarina of Time closed 15-20 seconds after showing a picture because memory ran out. We tracked it down in Ridds' logs: the CPU translator (Dynarmic) kept some tables for every block of translated code and never freed them, past 1 GB in under a minute. Now they are freed and the translator starts over safely, and the game reaches the logo and the menu."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Our own fix: after a few minutes the game dropped to 1-2 FPS because one of the translator's lists was never emptied and the emulator translated the same code again and again. Now it is emptied, and if the game needs more code at once, the translator keeps more before starting over."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "In Switch 2 games the built-in \"Max Resolution\" and \"Texture Pool x2\" patches are not applied on the phone (they cost memory and GPU time a phone does not have); \"FPS Unlock\" still is. The texture cache is capped on phones with 12 GB or less."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Switch 2 games start without precompiling all their shaders at boot (in Ocarina that was over 4 minutes of black screen); shaders are built when they are needed."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "The hub opens Switch games with their update and DLC, and if a game does not load, Ñoño tells the real reason."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Memory options at the bottom of Settings → Suggested settings: \"Game memory in a file\" (recommended for Switch 2) and \"Free unused game memory\". The log records the phone's memory and why the app last exited, to find problems faster."
+        }
+      ]
+    },
+    {
       "tag": "build-58",
       "fecha": "November 26, 2026",
       "titulo": "Switch 2 on the phone, step by step",

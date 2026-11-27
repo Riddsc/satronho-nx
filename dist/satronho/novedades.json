@@ -1,6 +1,21 @@
 {
   "builds": [
     {
+      "tag": "build-59",
+      "fecha": "26 de noviembre de 2026",
+      "titulo": "Ocarina of Time arranca en el teléfono",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Android, correcciones propias de Satronho NX: Ocarina of Time (Switch 2) ya no se cierra a los 20 segundos por falta de memoria y deja de ir a 1-2 FPS a los pocos minutos. El traductor de CPU del teléfono (Dynarmic) guardaba datos de cada bloque de código traducido sin liberarlos nunca."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Android: el hub abre los juegos de Switch con su actualización y DLC, y los juegos de Switch 2 arrancan sin precompilar todos sus shaders al inicio."
+        }
+      ]
+    },
+    {
       "tag": "build-58",
       "fecha": "26 de noviembre de 2026",
       "titulo": "Switch 2 en el teléfono, paso a paso",

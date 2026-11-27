@@ -1,6 +1,37 @@
 {
   "builds": [
     {
+      "tag": "build-59",
+      "fecha": "26 de noviembre de 2026",
+      "titulo": "Ocarina of Time arranca en el teléfono",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia de Satronho NX: Ocarina of Time se cerraba a los 15-20 segundos de mostrar imagen porque se acababa la memoria. Rastreamos el problema en los registros de Ridds: el traductor de CPU (Dynarmic) guardaba unas tablas por cada bloque de código traducido y nunca las liberaba, hasta pasar de 1 GB en menos de un minuto. Ahora se liberan y el traductor vuelve a empezar de forma segura, y el juego llega al logo y al menú."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia: después de unos minutos el juego bajaba a 1-2 FPS porque una lista del traductor nunca se vaciaba y el emulador traducía el mismo código una y otra vez. Ahora se vacía, y si el juego necesita más código a la vez, el traductor guarda más antes de empezar de nuevo."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "En los juegos de Switch 2 no se aplican en el teléfono los parches incluidos «Max Resolution» ni «Texture Pool x2» (gastan memoria y GPU que el teléfono no tiene); «FPS Unlock» sí. La caché de texturas se limita en teléfonos de 12 GB o menos."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Los juegos de Switch 2 arrancan sin precompilar todos sus shaders al inicio (en Ocarina eran más de 4 minutos en negro); los shaders se arman cuando hacen falta."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El hub abre los juegos de Switch con su actualización y DLC, y si un juego no carga, Ñoño dice el motivo real."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Opciones de memoria al final de Ajustes → Configuraciones sugeridas: «Memoria del juego en un archivo» (recomendada para Switch 2) y «Liberar memoria sin usar». El registro anota la memoria del teléfono y el motivo de la salida anterior, para encontrar fallos más rápido."
+        }
+      ]
+    },
+    {
       "tag": "build-58",
       "fecha": "26 de noviembre de 2026",
       "titulo": "Switch 2 en el teléfono, paso a paso",
