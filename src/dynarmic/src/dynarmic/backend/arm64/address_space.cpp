@@ -110,6 +110,14 @@ EmittedBlockInfo AddressSpace::Emit(IR::Block block) {
     if (GetRemainingSize() < 1024 * 1024) {
         ClearCache();
     }
+#ifdef __ANDROID__
+    // Satronho NX: each block keeps a few KiB of link and fastmem tables beside its code, so on a
+    // phone those tables reached GBs (Ocarina, 6 cores) long before the 128 MiB of code filled
+    // and the emulator ran out of memory. Start over once a core holds this many blocks.
+    else if (block_infos.size() >= 32768) {
+        ClearCache();
+    }
+#endif
 
     UnprotectCodeMemory();
 
