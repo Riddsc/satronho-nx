@@ -461,7 +461,14 @@ struct Values {
                                                   true};
     // The Legend of Zelda: Ocarina of Time's own anti-aliasing network and its sharpening output
     // pass, or the tonemapped image as the game renders it (video_core/oot_network.h).
-    SwitchableSetting<OotAntiAliasing> oot_anti_aliasing{linkage, OotAntiAliasing::Game,
+    // Satronho NX: No sharpening by default on Android. The network is a tensor network that
+    // took 2.5-3.5 s a frame on a Mali-G78 (Pixel 6 Pro), nearly all of the frame.
+    SwitchableSetting<OotAntiAliasing> oot_anti_aliasing{linkage,
+#ifdef __ANDROID__
+                                                         OotAntiAliasing::NoSharpening,
+#else
+                                                         OotAntiAliasing::Game,
+#endif
                                                          "oot_anti_aliasing", Category::Renderer};
     // Satronho NX: Ocarina of Time's volumetric fog and exposure, in percent of what the game
     // asks for (100 = unchanged). Applied when its shaders are translated, so they take effect
