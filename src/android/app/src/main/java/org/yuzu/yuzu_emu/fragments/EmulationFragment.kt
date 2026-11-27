@@ -777,6 +777,12 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
         binding.inGameMenu.menu.findItem(R.id.menu_quick_settings)?.isVisible =
             BooleanSetting.ENABLE_QUICK_SETTINGS.getBoolean()
 
+        // Satronho NX: frame pictures, with «Guardar una foto de un cuadro» on in Diagnóstico.
+        binding.inGameMenu.menu.findItem(R.id.menu_satronho_frame_take)?.isVisible =
+            Satronho.framePictures
+        binding.inGameMenu.menu.findItem(R.id.menu_satronho_frame_share)?.isVisible =
+            Satronho.framePictures
+
         binding.pausedIcon.setOnClickListener {
             if (this::emulationState.isInitialized && emulationState.isPaused) {
                 resumeEmulationFromUi()
@@ -913,6 +919,18 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 R.id.menu_satronho_share_log -> {
                     binding.drawerLayout.close()
                     Satronho.shareLatestLog(requireActivity())
+                    true
+                }
+
+                R.id.menu_satronho_frame_take -> {
+                    binding.drawerLayout.close()
+                    Satronho.takeFramePicture(requireActivity())
+                    true
+                }
+
+                R.id.menu_satronho_frame_share -> {
+                    binding.drawerLayout.close()
+                    Satronho.shareFramePicture(requireActivity())
                     true
                 }
 

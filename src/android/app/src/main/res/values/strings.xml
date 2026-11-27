@@ -2105,6 +2105,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <string name="satronho_smaller_game_memory">Less memory for the game (Switch 2)</string>
     <string name="satronho_smaller_game_memory_description">Tells Switch 2 games the console has about 2.5 GB less memory, so they ask for less. Turn it off if a game does not load.</string>
     <string name="satronho_memory_auto">The memory of Switch 2 games is set up for your phone automatically: nothing to change.</string>
+    <string name="satronho_diagnostics">Diagnostics</string>
+    <string name="satronho_diag_draw_count">Count draws per frame</string>
+    <string name="satronho_diag_draw_count_description">Writes to the log how many things the game draws each frame. Helps find problems; starts counting after you reopen the app.</string>
+    <string name="satronho_diag_frame">Save a picture of a frame</string>
+    <string name="satronho_diag_frame_description">Adds «Take frame picture» and «Share frame picture» to the in-game menu, to send how the image is drawn step by step. Takes effect when the game starts.</string>
+    <string name="satronho_frame_take">Take frame picture</string>
+    <string name="satronho_frame_share">Share frame picture</string>
+    <string name="satronho_frame_taking">Taking the frame picture… Wait a few seconds (the game may stall for a moment), then use «Share frame picture».</string>
+    <string name="satronho_frame_failed">Could not ask for the frame picture.</string>
+    <string name="satronho_frame_not_ready">The frame picture is not ready yet. Wait a little longer and try again.</string>
     <string name="satronho_game_memory_file">Game memory in a file (Switch 2)</string>
     <string name="satronho_game_memory_file_description">Keeps the memory of the game in a file on the phone, so Android can move part of it to storage instead of closing the game. Needs about 14 GB free and may cause small stutters.</string>
 </resources>

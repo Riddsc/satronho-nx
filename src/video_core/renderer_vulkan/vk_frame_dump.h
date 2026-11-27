@@ -217,6 +217,7 @@ private:
     void Write(const Job& job);
     void WriteBuffer(const Job& job);
     void WriteFile(const std::string& name, std::span<const u8> data);
+    void ResetCapture();
     void StopWriter();
 
     const Device& device;

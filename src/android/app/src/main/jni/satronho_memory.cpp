@@ -224,14 +224,24 @@ JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoSetMemoryOp
     SetOrClear("SATRONHO_GUEST_FILE_DIR", file_backed && !cache_dir.empty(), cache_dir.c_str());
     // What the texture and buffer caches and the GPU heaps hold, every 2 s.
     setenv("EDEN_NX2_MEM_TRACE", "1", 1);
-    // Satronho NX test: draws per frame every 10 s («Draw reuse per frame»), to tell a game that
-    // draws a black picture from one that draws nothing.
-    setenv("EDEN_NX2_DRAW_REUSE_PROBE", "1", 1);
     InstallHandlers(cache_dir.empty() ? std::string{} : cache_dir + "/satronho_abort.txt");
     LOG_INFO(Frontend,
              "Satronho memory options: free zero pages {}, smaller game memory {}, game memory in "
              "a file {}",
              trim_zero ? "on" : "off", smaller_pool ? "on" : "off", file_backed ? "on" : "off");
+}
+
+JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoSetDiagnostics(
+    JNIEnv* env, jobject obj, jboolean draw_count, jstring j_frame_dump_dir) {
+    const std::string frame_dump_dir = Common::Android::GetJString(env, j_frame_dump_dir);
+    // Draws per frame every 10 s («Draw reuse per frame»), to tell a game that draws a black
+    // picture from one that draws nothing. Read once per run of the app.
+    SetOrClear("EDEN_NX2_DRAW_REUSE_PROBE", draw_count, "1");
+    // One frame's pictures, each time <dir>/capture.now appears (the in-game menu makes it).
+    SetOrClear("EDEN_NX2_FRAME_DUMP", !frame_dump_dir.empty(), frame_dump_dir.c_str());
+    SetOrClear("EDEN_NX2_FRAME_DUMP_AT", !frame_dump_dir.empty(), "file");
+    LOG_INFO(Frontend, "Satronho diagnostics: draw count {}, frame pictures {}",
+             draw_count ? "on" : "off", frame_dump_dir.empty() ? "off" : frame_dump_dir);
 }
 
 JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPurgeNativeMemory(JNIEnv* env,

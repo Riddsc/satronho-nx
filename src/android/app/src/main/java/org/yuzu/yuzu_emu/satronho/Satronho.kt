@@ -151,7 +151,25 @@ object Satronho {
     private val gameMemoryInFile: Boolean
         get() = org.yuzu.yuzu_emu.utils.MemoryUtil.totalMemory <= 13f * 1024 * 1024 * 1024
 
+    /** Diagnóstico: draws per frame in the log every 10 s. Off by default. */
+    var drawCount: Boolean
+        get() = flag("diag_draw_count", false)
+        set(value) = setFlag("diag_draw_count", value)
+
+    /** Diagnóstico: the in-game menu can save one frame's pictures to share. Off by default. */
+    var framePictures: Boolean
+        get() = flag("diag_frame_pictures", false)
+        set(value) = setFlag("diag_frame_pictures", value)
+
+    /** Where a frame's pictures go, inside the emulator's folder so they can be shared. */
+    private val frameDumpDir: File?
+        get() = DirectoryInitialization.userDirectory?.let { File(it, "frame_dump") }
+
     fun applyMemoryOptions() {
+        org.yuzu.yuzu_emu.NativeLibrary.satronhoSetDiagnostics(
+            drawCount,
+            if (framePictures) frameDumpDir?.absolutePath ?: "" else ""
+        )
         val dir = appContext?.cacheDir?.absolutePath ?: ""
         org.yuzu.yuzu_emu.NativeLibrary.satronhoSetMemoryOptions(
             // Off: punching out zero pages could drop a write the game made between the check
@@ -248,6 +266,58 @@ object Satronho {
             return
         }
         Sesiones.share(activity, file)
+    }
+
+    /**
+     * Asks the renderer for one frame's pictures: the last ones are cleared and capture.now is
+     * made; the renderer looks for it every 30 frames and removes it once the pictures are taken.
+     */
+    fun takeFramePicture(activity: Activity) {
+        val dir = frameDumpDir ?: return
+        Thread {
+            dir.mkdirs()
+            dir.listFiles()?.forEach { it.delete() }
+            val made = runCatching { File(dir, "capture.now").writeText("1") }.isSuccess
+            activity.runOnUiThread {
+                Toast.makeText(
+                    activity,
+                    if (made) R.string.satronho_frame_taking else R.string.satronho_frame_failed,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }.start()
+    }
+
+    /** Puts the last frame's pictures (PNG and their notes) in one .zip and shares it. */
+    fun shareFramePicture(activity: Activity) {
+        val dir = frameDumpDir ?: return
+        Thread {
+            val manifest = File(dir, "manifest.jsonl")
+            val finished = manifest.exists() &&
+                manifest.useLines { lines -> lines.any { it.contains("\"kind\":\"summary\"") } }
+            val zip = File(dir.parentFile, "satronho_frame.zip")
+            val ok = finished && runCatching {
+                java.util.zip.ZipOutputStream(zip.outputStream().buffered()).use { out ->
+                    dir.listFiles()
+                        ?.filter { it.name.endsWith(".png") || it.name.endsWith(".jsonl") ||
+                            it.name.endsWith(".json") }
+                        ?.sortedBy { it.name }
+                        ?.forEach { file ->
+                            out.putNextEntry(java.util.zip.ZipEntry(file.name))
+                            file.inputStream().use { it.copyTo(out) }
+                            out.closeEntry()
+                        }
+                }
+            }.isSuccess
+            activity.runOnUiThread {
+                if (ok) {
+                    Sesiones.share(activity, zip, "application/zip")
+                } else {
+                    Toast.makeText(activity, R.string.satronho_frame_not_ready, Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+        }.start()
     }
 
     /** Opens the Satronho screen from a launcher shortcut. */

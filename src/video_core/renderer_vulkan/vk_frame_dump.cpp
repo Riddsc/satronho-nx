@@ -274,6 +274,10 @@ void FrameDump::Arm(std::filesystem::path directory_, bool sampled, bool buffers
     }
     StopWriter();
     directory = std::move(directory_);
+    ResetCapture();
+}
+
+void FrameDump::ResetCapture() {
     truncated = false;
     recorded_bytes = 0;
     written_bytes = 0;
@@ -865,6 +869,11 @@ void FrameDump::TickFrame() {
     case FrameDumpSchedule::Step::Start:
         break;
     }
+    if (writer.joinable()) {
+        // A later picture of "file" mode: the last one's writer is done, start clean.
+        StopWriter();
+        ResetCapture();
+    }
     std::error_code error;
     std::filesystem::create_directories(directory, error);
     manifest.open(directory / "manifest.jsonl", std::ios::trunc);
@@ -920,7 +929,14 @@ FrameDumpSchedule::Step FrameDumpSchedule::Tick(double elapsed_seconds) {
     ++frame;
     if (capturing) {
         SetCapturing(false);
-        done = true;
+        if (!trigger_file.empty() && capture_id == 0) {
+            // Satronho NX: "file" mode captures again each time the file comes back, so a
+            // player can take several pictures in one session.
+            std::error_code remove_error;
+            std::filesystem::remove(trigger_file, remove_error);
+        } else {
+            done = true;
+        }
         return Step::Finish;
     }
     std::error_code error;

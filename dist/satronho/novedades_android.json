@@ -1,6 +1,41 @@
 {
   "builds": [
     {
+      "tag": "build-60",
+      "fecha": "27 de noviembre de 2026",
+      "titulo": "Ocarina of Time entra a Hyrule",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia de Satronho NX: Ocarina of Time se cerraba al cargar Hyrule. Con los registros de Ridds encontramos la causa: el juego guarda datos compartidos entre núcleos en una dirección que no está alineada, y el procesador del teléfono (ARM) no acepta esa operación como sí lo hace un PC. Ahora el emulador la hace de otra forma segura y el juego siguió más de 18 minutos sin cerrarse."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX trae su propio FFmpeg para Android con AV1: los videos de los juegos de Switch 2 (como las escenas de Ocarina) ya se ven. Usa el decodificador de video del teléfono y, si falla, uno por programa (dav1d)."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia: los videos ya no se ven en bloques ni se pierden partes; el emulador espera a que el decodificador del teléfono tenga espacio antes de mandarle más."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "La memoria de los juegos de Switch 2 se ajusta sola según tu teléfono: ya no hay interruptores que tocar. Se quitó «Liberar memoria sin usar», que podía cerrar el juego."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "El traductor de CPU usa mucha menos memoria por cada bloque de código, y la memoria se mantiene estable durante el juego."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Aviso de actualización: la app avisa cuando hay una build nueva de Satronho NX y la descarga desde GitHub."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Diagnóstico, al final de Configuraciones sugeridas (apagado por defecto): «Contar dibujos por cuadro» y «Guardar una foto de un cuadro». La foto se toma y se comparte desde el menú del juego, para encontrar fallos de imagen en cualquier teléfono."
+        }
+      ]
+    },
+    {
       "tag": "build-59",
       "fecha": "26 de noviembre de 2026",
       "titulo": "Ocarina of Time arranca en el teléfono",

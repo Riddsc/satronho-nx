@@ -1417,6 +1417,16 @@
     <string name="satronho_smaller_game_memory">Menos memoria para el juego (Switch 2)</string>
     <string name="satronho_smaller_game_memory_description">Le dice a los juegos de Switch 2 que la consola tiene unos 2.5 GB menos, así piden menos. Apágalo si un juego no carga.</string>
     <string name="satronho_memory_auto">La memoria de los juegos de Switch 2 se ajusta sola según tu teléfono: no hay que tocar nada.</string>
+    <string name="satronho_diagnostics">Diagnóstico</string>
+    <string name="satronho_diag_draw_count">Contar dibujos por cuadro</string>
+    <string name="satronho_diag_draw_count_description">Anota en el registro cuántas cosas dibuja el juego en cada cuadro. Sirve para buscar fallos; cuenta desde que abres la app de nuevo.</string>
+    <string name="satronho_diag_frame">Guardar una foto de un cuadro</string>
+    <string name="satronho_diag_frame_description">Añade al menú del juego «Tomar foto de cuadro» y «Compartir foto de cuadro», para enviar cómo se dibuja la imagen paso a paso. Se activa al abrir el juego.</string>
+    <string name="satronho_frame_take">Tomar foto de cuadro</string>
+    <string name="satronho_frame_share">Compartir foto de cuadro</string>
+    <string name="satronho_frame_taking">Tomando la foto del cuadro… Espera unos segundos (el juego puede trabarse un momento) y luego usa «Compartir foto de cuadro».</string>
+    <string name="satronho_frame_failed">No se pudo pedir la foto del cuadro.</string>
+    <string name="satronho_frame_not_ready">La foto del cuadro aún no está lista. Espera un poco más y vuelve a intentarlo.</string>
     <string name="satronho_game_memory_file">Memoria del juego en un archivo (Switch 2)</string>
     <string name="satronho_game_memory_file_description">Guarda la memoria del juego en un archivo del teléfono, así Android puede pasar una parte al almacenamiento en vez de cerrar el juego. Necesita unos 14 GB libres y puede dar pequeños tirones.</string>
 </resources>

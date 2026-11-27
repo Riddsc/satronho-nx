@@ -36,7 +36,7 @@ object Sesiones {
         return listOf("$date $time".trim(), rest).filter { it.isNotEmpty() }.joinToString(" · ")
     }
 
-    fun share(activity: Activity, file: File) {
+    fun share(activity: Activity, file: File, type: String = FileUtil.TEXT_PLAIN) {
         val base = DirectoryInitialization.userDirectory ?: return
         val relative = file.relativeTo(File(base)).path
         val uri = DocumentsContract.buildDocumentUri(
@@ -44,7 +44,7 @@ object Sesiones {
             "${DocumentProvider.ROOT_ID}/$relative"
         )
         val intent = Intent(Intent.ACTION_SEND)
-            .setDataAndType(uri, FileUtil.TEXT_PLAIN)
+            .setDataAndType(uri, type)
             .putExtra(Intent.EXTRA_STREAM, uri)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         activity.startActivity(

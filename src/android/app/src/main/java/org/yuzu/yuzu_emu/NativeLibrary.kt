@@ -236,6 +236,9 @@ object NativeLibrary {
         cacheDir: String
     )
 
+    /** Satronho NX: diagnostics for the next game (draw count, frame pictures into a folder). */
+    external fun satronhoSetDiagnostics(drawCount: Boolean, frameDumpDir: String)
+
     /** Satronho NX: memory the running game uses, in MiB (-1 with no game). */
     external fun satronhoGuestMemoryMib(): Long
 

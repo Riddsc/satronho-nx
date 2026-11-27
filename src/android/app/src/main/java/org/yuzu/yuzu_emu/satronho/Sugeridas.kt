@@ -173,28 +173,10 @@ object Sugeridas {
 
         // Satronho NX: the phone boost (Android performance hints), when the phone has it.
         if (NativeLibrary.satronhoPerformanceHintsSupported()) {
-            val row = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(0, Satronho.dp(context, 12), 0, 0)
-            }
-            val texts = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            texts.addView(TextView(context).apply {
-                text = context.getString(R.string.satronho_boost)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            })
-            texts.addView(TextView(context).apply {
-                text = context.getString(R.string.satronho_boost_description)
-                setTextColor(Satronho.DIM)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            })
-            row.addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-            row.addView(MaterialSwitch(context).apply {
-                isChecked = Satronho.performanceHints
-                contentDescription = context.getString(R.string.satronho_boost)
-                setOnCheckedChangeListener { _, checked -> Satronho.performanceHints = checked }
-            })
-            root.addView(row)
+            root.addView(switchRow(
+                context, R.string.satronho_boost, R.string.satronho_boost_description,
+                Satronho.performanceHints
+            ) { Satronho.performanceHints = it })
         }
 
         // Satronho NX: the memory of Switch 2 games is set up by the app for this phone.
@@ -204,6 +186,22 @@ object Sugeridas {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
             setPadding(0, Satronho.dp(context, 12), 0, 0)
         })
+
+        // Satronho NX: Diagnóstico, to find what goes wrong in a game. Both off by default.
+        root.addView(TextView(context).apply {
+            text = context.getString(R.string.satronho_diagnostics)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            paint.isFakeBoldText = true
+            setPadding(0, Satronho.dp(context, 20), 0, 0)
+        })
+        root.addView(switchRow(
+            context, R.string.satronho_diag_draw_count, R.string.satronho_diag_draw_count_description,
+            Satronho.drawCount
+        ) { Satronho.drawCount = it })
+        root.addView(switchRow(
+            context, R.string.satronho_diag_frame, R.string.satronho_diag_frame_description,
+            Satronho.framePictures
+        ) { Satronho.framePictures = it })
 
         val applyPicked = {
             val index = (group.checkedRadioButtonId - 1000).coerceIn(0, list.size - 1)
@@ -215,6 +213,38 @@ object Sugeridas {
             ).show()
         }
         return Content(ScrollView(context).apply { addView(root) }, applyPicked)
+    }
+
+    /** A setting with its title, a short description under it and a switch on the right. */
+    private fun switchRow(
+        context: Context,
+        titleId: Int,
+        descriptionId: Int,
+        checked: Boolean,
+        onChange: (Boolean) -> Unit
+    ): LinearLayout {
+        val row = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(0, Satronho.dp(context, 12), 0, 0)
+        }
+        val texts = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+        texts.addView(TextView(context).apply {
+            text = context.getString(titleId)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        })
+        texts.addView(TextView(context).apply {
+            text = context.getString(descriptionId)
+            setTextColor(Satronho.DIM)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
+        })
+        row.addView(texts, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        row.addView(MaterialSwitch(context).apply {
+            isChecked = checked
+            contentDescription = context.getString(titleId)
+            setOnCheckedChangeListener { _, value -> onChange(value) }
+        })
+        return row
     }
 
     fun show(context: Context) {

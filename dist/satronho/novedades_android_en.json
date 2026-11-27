@@ -1,6 +1,41 @@
 {
   "builds": [
     {
+      "tag": "build-60",
+      "fecha": "November 27, 2026",
+      "titulo": "Ocarina of Time reaches Hyrule",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Satronho NX's own fix: Ocarina of Time closed while loading Hyrule. Ridds' logs showed why: the game keeps data shared between cores at an address that is not aligned, and the phone's processor (ARM) refuses that operation where a PC allows it. The emulator now does it another safe way, and the game ran over 18 minutes without closing."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Satronho NX ships its own FFmpeg for Android with AV1: the videos of Switch 2 games (like Ocarina's scenes) now show. It uses the phone's video decoder and, if that fails, a software one (dav1d)."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Our own fix: videos no longer show blocks or lose parts; the emulator waits for the phone's decoder to have room before sending it more."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "The memory of Switch 2 games is set up for your phone automatically: no more switches to change. «Free unused memory» was removed, as it could close the game."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "The CPU translator uses much less memory for each block of code, and memory stays steady while playing."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Update notice: the app tells you when there is a new Satronho NX build and downloads it from GitHub."
+        },
+        {
+          "tipo": "nuevo",
+          "texto": "Diagnostics, at the bottom of Suggested settings (off by default): «Count draws per frame» and «Save a picture of a frame». The picture is taken and shared from the in-game menu, to find picture problems on any phone."
+        }
+      ]
+    },
+    {
       "tag": "build-59",
       "fecha": "November 26, 2026",
       "titulo": "Ocarina of Time boots on the phone",

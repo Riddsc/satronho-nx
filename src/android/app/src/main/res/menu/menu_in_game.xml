@@ -19,6 +19,18 @@
         android:title="@string/satronho_share_log" />
 
     <item
+        android:id="@+id/menu_satronho_frame_take"
+        android:icon="@drawable/ic_satronho"
+        android:title="@string/satronho_frame_take"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/menu_satronho_frame_share"
+        android:icon="@drawable/ic_share"
+        android:title="@string/satronho_frame_share"
+        android:visible="false" />
+
+    <item
         android:id="@+id/menu_quick_overlay"
         android:icon="@drawable/ic_controller"
         android:title="@string/emulation_show_overlay"/>

@@ -106,5 +106,14 @@ TEST_CASE("Frame dump schedule follows EDEN_NX2_FRAME_DUMP_AT", "[frame_dump_sch
     }
     REQUIRE(by_file.Tick(1000.0) == Step::Start);
     REQUIRE(by_file.Frame() == 90);
+    REQUIRE(by_file.Tick(1000.0) == Step::Finish);
+    REQUIRE_FALSE(std::filesystem::exists(trigger));
+    // The file coming back takes another picture.
+    for (int frame = 92; frame < 120; ++frame) {
+        REQUIRE(by_file.Tick(1000.0) == Step::None);
+    }
+    std::ofstream{trigger}.put('\n');
+    REQUIRE(by_file.Tick(1000.0) == Step::Start);
+    REQUIRE(by_file.Frame() == 120);
     std::filesystem::remove_all(directory);
 }
