@@ -101,12 +101,25 @@ struct BlockRelocation {
     BlockRelocationType type;
 };
 
+// Satronho NX: plain vectors instead of hash maps. Each block kept two maps, and their smallest
+// allocation alone was hundreds of bytes, so the tables of a phone's six cores ran into GBs.
+struct BlockLinkRelocation {
+    IR::LocationDescriptor target;
+    BlockRelocation relocation;
+};
+
+struct FastmemPatchEntry {
+    std::ptrdiff_t code_offset;
+    FastmemPatchInfo info;
+};
+
 struct EmittedBlockInfo {
     CodePtr entry_point;
     std::size_t size;
     std::vector<Relocation> relocations;
-    ::Common::unordered_map<IR::LocationDescriptor, std::vector<BlockRelocation>> block_relocations;
-    ::Common::unordered_map<std::ptrdiff_t, FastmemPatchInfo> fastmem_patch_info;
+    std::vector<BlockLinkRelocation> block_relocations;
+    /// Sorted by code_offset.
+    std::vector<FastmemPatchEntry> fastmem_patch_info;
 };
 
 struct EmitConfig {

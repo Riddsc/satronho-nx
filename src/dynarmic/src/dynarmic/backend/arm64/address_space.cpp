@@ -8,6 +8,7 @@
 
 #include <cstdio>
 
+#include <algorithm>
 #include <bit>
 
 #include "dynarmic/backend/arm64/a64_address_space.h"
@@ -118,8 +119,8 @@ void AddressSpace::FreeInvalidatedBlocks() {
         if (info == block_infos.end()) {
             continue;
         }
-        for (const auto& relocation : info->second.block_relocations) {
-            if (const auto refs = block_references.find(relocation.first); refs != block_references.end()) {
+        for (const auto& link : info->second.block_relocations) {
+            if (const auto refs = block_references.find(link.target); refs != block_references.end()) {
                 refs->second.erase(entry_point);
                 if (refs->second.empty()) {
                     block_references.erase(refs);
@@ -174,6 +175,13 @@ CodePtr AddressSpace::Emit(IR::Block block) {
     Link(block_info);
     // The relocations are only needed to link this block once; keeping them cost memory per block.
     block_info.relocations = {};
+    if (!std::is_sorted(block_info.fastmem_patch_info.begin(), block_info.fastmem_patch_info.end(),
+                        [](const auto& a, const auto& b) { return a.code_offset < b.code_offset; })) {
+        std::sort(block_info.fastmem_patch_info.begin(), block_info.fastmem_patch_info.end(),
+                  [](const auto& a, const auto& b) { return a.code_offset < b.code_offset; });
+    }
+    block_info.fastmem_patch_info.shrink_to_fit();
+    block_info.block_relocations.shrink_to_fit();
     const auto [stored, inserted] = block_infos.emplace(entry_point, std::move(block_info));
     ASSERT(inserted);
 
@@ -327,17 +335,18 @@ void AddressSpace::Link(EmittedBlockInfo& block_info) {
         }
     }
 
-    for (auto [target_descriptor, list] : block_info.block_relocations) {
-        block_references[target_descriptor].insert(block_info.entry_point);
-        LinkBlockLinks(block_info.entry_point, Get(target_descriptor), list);
+    for (const auto& link : block_info.block_relocations) {
+        block_references[link.target].insert(block_info.entry_point);
+        LinkBlockLink(block_info.entry_point, Get(link.target), link.relocation);
     }
 }
 
-void AddressSpace::LinkBlockLinks(const CodePtr entry_point, const CodePtr target_ptr, const std::vector<BlockRelocation>& block_relocations_list) {
+void AddressSpace::LinkBlockLink(const CodePtr entry_point, const CodePtr target_ptr, const BlockRelocation& block_relocation) {
     using namespace oaknut;
     using namespace oaknut::util;
 
-    for (auto [ptr_offset, type] : block_relocations_list) {
+    {
+        const auto [ptr_offset, type] = block_relocation;
         CodeGenerator c{mem.ptr(), mem.ptr()};
         c.set_xptr(reinterpret_cast<u32*>(entry_point + ptr_offset));
 
@@ -367,8 +376,10 @@ void AddressSpace::RelinkForDescriptor(IR::LocationDescriptor target_descriptor,
         if (auto block_iter = block_infos.find(code_ptr); block_iter != block_infos.end()) {
             const EmittedBlockInfo& block_info = block_iter->second;
 
-            if (auto relocation_iter = block_info.block_relocations.find(target_descriptor); relocation_iter != block_info.block_relocations.end()) {
-                LinkBlockLinks(block_info.entry_point, target_ptr, relocation_iter->second);
+            for (const auto& link : block_info.block_relocations) {
+                if (link.target == target_descriptor) {
+                    LinkBlockLink(block_info.entry_point, target_ptr, link.relocation);
+                }
             }
 
             mem.invalidate(reinterpret_cast<u32*>(block_info.entry_point), block_info.size);
@@ -390,15 +401,18 @@ FakeCall AddressSpace::FastmemCallback(u64 host_pc) {
             goto fail;
         }
 
-        const auto patch_entry = block_info->second.fastmem_patch_info.find(host_ptr - entry_point);
-        if (patch_entry == block_info->second.fastmem_patch_info.end()) {
+        const auto& patches = block_info->second.fastmem_patch_info;
+        const std::ptrdiff_t offset = host_ptr - entry_point;
+        const auto patch_entry = std::lower_bound(patches.begin(), patches.end(), offset,
+                                                  [](const FastmemPatchEntry& entry, std::ptrdiff_t value) { return entry.code_offset < value; });
+        if (patch_entry == patches.end() || patch_entry->code_offset != offset) {
             goto fail;
         }
 
-        const auto fc = patch_entry->second.fc;
+        const auto fc = patch_entry->info.fc;
 
-        if (patch_entry->second.recompile) {
-            const auto marker = patch_entry->second.marker;
+        if (patch_entry->info.recompile) {
+            const auto marker = patch_entry->info.marker;
             fastmem_manager.MarkDoNotFastmem(marker);
             InvalidateBasicBlocks({std::get<0>(marker)});
         }
