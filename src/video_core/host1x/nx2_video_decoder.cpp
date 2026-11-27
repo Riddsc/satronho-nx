@@ -112,8 +112,20 @@ struct Nx2VideoDecoder::Impl {
         hardware.reset();
     }
 
-    void Receive(std::vector<Nx2Picture>& pictures, bool drain = false) {
-        while (auto frame = context->ReceiveFrame()) {
+    std::optional<NvdecCommon::VideoCodec> codec_id;
+    u64 decode_errors{};
+
+    void OpenDefault(NvdecCommon::VideoCodec codec, std::string_view mime,
+                     std::chrono::steady_clock::time_point start);
+
+    /// Takes up to max_frames decoded frames; returns how many.
+    size_t Receive(std::vector<Nx2Picture>& pictures, size_t max_frames) {
+        size_t received = 0;
+        while (received < max_frames) {
+            auto frame = context->ReceiveFrame();
+            if (!frame) {
+                break;
+            }
             const AVFrame* f = frame->GetFrame();
             const s64 stamp = f->best_effort_timestamp != AV_NOPTS_VALUE ? f->best_effort_timestamp
                                                                          : f->pts;
@@ -129,12 +141,53 @@ struct Nx2VideoDecoder::Impl {
             }
             pictures.push_back({static_cast<u32>(f->width), static_cast<u32>(f->height), pts,
                                 std::move(frame)});
-            if (one_frame_per_input && !drain) {
-                break;
-            }
+            ++received;
         }
+        return received;
     }
 };
+
+void Nx2VideoDecoder::Impl::OpenDefault(NvdecCommon::VideoCodec codec, std::string_view mime,
+                                        std::chrono::steady_clock::time_point start) {
+    decoder.emplace(codec);
+    if (decoder->GetCodec() == nullptr) {
+        LOG_ERROR(HW_GPU, "nx2 video: FFmpeg has no decoder for \"{}\"", mime);
+        return;
+    }
+    this->context.emplace(*decoder);
+    AVCodecContext* const codec_context = this->context->GetCodecContext();
+    const std::string_view decoder_name = decoder->GetCodec()->name;
+#ifdef __ANDROID__
+    if (decoder_name == "libdav1d") {
+        // Low delay limits dav1d to one frame at a time, which on a phone is one slow core. The
+        // service queues the movie's input ahead, so let it decode several frames in parallel.
+        codec_context->flags &= ~AV_CODEC_FLAG_LOW_DELAY;
+    }
+#endif
+    const bool gpu = Settings::values.nvdec_emulation.GetValue() == Settings::NvdecEmulation::Gpu;
+    if (gpu) {
+        hardware.emplace();
+        hardware->InitializeForDecoder(*this->context, *decoder);
+    }
+    open = this->context->OpenContext(*decoder);
+    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now() - start)
+                        .count();
+    if (!open) {
+        LOG_ERROR(HW_GPU, "nx2 video: {} failed to open for \"{}\"", decoder_name, mime);
+    } else if (codec_context->hw_device_ctx) {
+        const auto* device =
+            reinterpret_cast<const AVHWDeviceContext*>(codec_context->hw_device_ctx->data);
+        LOG_INFO(HW_GPU, "nx2 video: \"{}\" decodes on the GPU ({}) with {}, opened in {} ms", mime,
+                 av_hwdevice_get_type_name(device->type), decoder_name, ms);
+    } else {
+        LOG_INFO(HW_GPU,
+                 "nx2 video: \"{}\" decodes on the CPU with {}, {} threads ({}), opened in {} ms",
+                 mime, decoder_name,
+                 codec_context->thread_count ? std::to_string(codec_context->thread_count) : "default",
+                 gpu ? "no usable GPU decoder" : "NVDEC emulation is CPU", ms);
+    }
+}
 
 Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime, u32 width, u32 height)
     : impl{std::make_unique<Impl>()} {
@@ -145,6 +198,7 @@ Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime, u32 width, u32 height)
         LOG_ERROR(HW_GPU, "nx2 video: no decoder for codec \"{}\"", mime);
         return;
     }
+    impl->codec_id = codec;
 #ifdef __ANDROID__
     // Satronho NX: AV1 on the phone's hardware decoder first. libdav1d on a phone's CPU, next to
     // the emulated cores, managed a few frames a second of a 1080p movie (Ocarina's intro).
@@ -174,44 +228,7 @@ Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime, u32 width, u32 height)
         }
     }
 #endif
-    impl->decoder.emplace(*codec);
-    if (impl->decoder->GetCodec() == nullptr) {
-        LOG_ERROR(HW_GPU, "nx2 video: FFmpeg has no decoder for \"{}\"", mime);
-        return;
-    }
-    impl->context.emplace(*impl->decoder);
-    AVCodecContext* const context = impl->context->GetCodecContext();
-    const std::string_view decoder_name = impl->decoder->GetCodec()->name;
-#ifdef __ANDROID__
-    if (decoder_name == "libdav1d") {
-        // Low delay limits dav1d to one frame at a time, which on a phone is one slow core. The
-        // service queues the movie's input ahead, so let it decode several frames in parallel.
-        context->flags &= ~AV_CODEC_FLAG_LOW_DELAY;
-    }
-#endif
-    const bool gpu = Settings::values.nvdec_emulation.GetValue() == Settings::NvdecEmulation::Gpu;
-    if (gpu) {
-        impl->hardware.emplace();
-        impl->hardware->InitializeForDecoder(*impl->context, *impl->decoder);
-    }
-    impl->open = impl->context->OpenContext(*impl->decoder);
-    const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - start)
-                        .count();
-    if (!impl->open) {
-        LOG_ERROR(HW_GPU, "nx2 video: {} failed to open for \"{}\"", decoder_name, mime);
-    } else if (context->hw_device_ctx) {
-        const auto* device =
-            reinterpret_cast<const AVHWDeviceContext*>(context->hw_device_ctx->data);
-        LOG_INFO(HW_GPU, "nx2 video: \"{}\" decodes on the GPU ({}) with {}, opened in {} ms", mime,
-                 av_hwdevice_get_type_name(device->type), decoder_name, ms);
-    } else {
-        LOG_INFO(HW_GPU,
-                 "nx2 video: \"{}\" decodes on the CPU with {}, {} threads ({}), opened in {} ms",
-                 mime, decoder_name,
-                 context->thread_count ? std::to_string(context->thread_count) : "default",
-                 gpu ? "no usable GPU decoder" : "NVDEC emulation is CPU", ms);
-    }
+    impl->OpenDefault(*codec, mime, start);
 }
 
 Nx2VideoDecoder::~Nx2VideoDecoder() = default;
@@ -243,8 +260,36 @@ void Nx2VideoDecoder::Decode(std::span<const u8> data, u64 pts, std::vector<Nx2P
         impl->pending_pts.erase(impl->pending_pts.begin());
     }
     impl->pending_pts.insert(pts);
-    impl->context->SendPacket(packet);
-    impl->Receive(pictures);
+    AVCodecContext* const context = impl->context->GetCodecContext();
+    int ret = avcodec_send_packet(context, packet.GetPacket());
+    // The decoder still holds an earlier packet: take its output first, then hand this one over.
+    // A packet left out (the send's EAGAIN ignored) left blocks of old AV1 frames on screen.
+    for (int tries = 0; ret == AVERROR(EAGAIN) && tries < 64; ++tries) {
+        impl->Receive(pictures, 1);
+        ret = avcodec_send_packet(context, packet.GetPacket());
+    }
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
+        if (impl->decode_errors++ % 600 == 0) {
+            char error[AV_ERROR_MAX_STRING_SIZE]{};
+            av_strerror(ret, error, sizeof(error));
+            LOG_ERROR(HW_GPU, "nx2 video: {} could not take a packet ({} so far): {}",
+                      impl->decoder->GetCodec()->name, impl->decode_errors, error);
+        }
+#ifdef __ANDROID__
+        // Satronho NX: the phone's decoder stopped working: go on with libdav1d (from the next
+        // key frame the picture is right again).
+        if (impl->one_frame_per_input && impl->codec_id) {
+            LOG_WARNING(HW_GPU, "nx2 video: av1_mediacodec failed, switching to libdav1d");
+            impl->one_frame_per_input = false;
+            impl->open = false;
+            impl->context.reset();
+            impl->decoder.reset();
+            impl->OpenDefault(*impl->codec_id, impl->name, std::chrono::steady_clock::now());
+        }
+#endif
+        return;
+    }
+    impl->Receive(pictures, impl->one_frame_per_input ? 1 : SIZE_MAX);
 }
 
 void Nx2VideoDecoder::Drain(std::vector<Nx2Picture>& pictures) {
@@ -252,7 +297,7 @@ void Nx2VideoDecoder::Drain(std::vector<Nx2Picture>& pictures) {
         return;
     }
     avcodec_send_packet(impl->context->GetCodecContext(), nullptr);
-    impl->Receive(pictures, true);
+    impl->Receive(pictures, SIZE_MAX);
     Reset();
 }
 
