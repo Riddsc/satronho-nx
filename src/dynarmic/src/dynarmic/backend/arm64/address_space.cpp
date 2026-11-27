@@ -71,8 +71,7 @@ CodePtr AddressSpace::GetOrEmit(IR::LocationDescriptor descriptor) {
         return block_entry;
     }
     GenerateIR(ir_block, descriptor);
-    const EmittedBlockInfo block_info = Emit(std::move(ir_block));
-    return block_info.entry_point;
+    return Emit(std::move(ir_block));
 }
 
 void AddressSpace::InvalidateBasicBlocks(const ::Common::unordered_set<IR::LocationDescriptor>& descriptors) {
@@ -88,6 +87,11 @@ void AddressSpace::InvalidateBasicBlocks(const ::Common::unordered_set<IR::Locat
         // and the currently executing block may have references to itself which need to be unlinked.
         RelinkForDescriptor(descriptor, nullptr);
 
+#ifdef __ANDROID__
+        // Its tables may still be needed until this run ends (a fastmem fault in the block that
+        // is executing), so they are freed at the start of the next one.
+        invalidated_blocks.push_back(iter->second);
+#endif
         block_entries.erase(iter);
     }
 
@@ -100,42 +104,77 @@ void AddressSpace::ClearCache() {
     block_infos.clear();
     block_references.clear();
     code.set_offset(prelude_info.end_of_prelude);
+#ifdef __ANDROID__
+    full_clear_requested = false;
+    invalidated_blocks.clear();
+#endif
 }
+
+#ifdef __ANDROID__
+void AddressSpace::FreeInvalidatedBlocks() {
+    for (const CodePtr entry_point : invalidated_blocks) {
+        const auto info = block_infos.find(entry_point);
+        if (info == block_infos.end()) {
+            continue;
+        }
+        for (const auto& relocation : info->second.block_relocations) {
+            if (const auto refs = block_references.find(relocation.first); refs != block_references.end()) {
+                refs->second.erase(entry_point);
+                if (refs->second.empty()) {
+                    block_references.erase(refs);
+                }
+            }
+        }
+        block_infos.erase(info);
+        reverse_block_entries.erase(entry_point);
+    }
+    invalidated_blocks.clear();
+}
+#endif
 
 std::size_t AddressSpace::GetRemainingSize() {
     return code_cache_size - static_cast<std::size_t>(code.offset());
 }
 
-EmittedBlockInfo AddressSpace::Emit(IR::Block block) {
+CodePtr AddressSpace::Emit(IR::Block block) {
     if (GetRemainingSize() < 1024 * 1024) {
         ClearCache();
     }
 #ifdef __ANDROID__
-    // Satronho NX: each block keeps a few KiB of link and fastmem tables beside its code, so on a
-    // phone those tables reached GBs (Ocarina, 6 cores) long before the 128 MiB of code filled
-    // and the emulator ran out of memory. Start over once a core holds this many blocks.
-    else if (block_infos.size() >= 32768) {
-        ClearCache();
+    // Satronho NX: each block keeps link and fastmem tables beside its code, so on a phone those
+    // tables reached GBs (Ocarina, 6 cores) long before the 128 MiB of code filled and the
+    // emulator ran out of memory. Start over once a core holds this many blocks. Clearing here,
+    // while code runs, would leave the return stack buffer pointing into reused code, so the JIT
+    // is asked to clear at the start of its next run instead.
+    else if (block_infos.size() >= 32768 && !full_clear_requested && request_full_clear) {
+        full_clear_requested = true;
+        request_full_clear();
     }
 #endif
 
     UnprotectCodeMemory();
 
     EmittedBlockInfo block_info = EmitArm64(code, std::move(block), GetEmitConfig(), fastmem_manager);
+    const CodePtr entry_point = block_info.entry_point;
+    const std::size_t size = block_info.size;
 
-    ASSERT(block_entries.insert({block.Location(), block_info.entry_point}).second);
-    ASSERT(reverse_block_entries.insert({block_info.entry_point, block.Location()}).second);
-    ASSERT(block_infos.insert({block_info.entry_point, block_info}).second);
+    ASSERT(block_entries.insert({block.Location(), entry_point}).second);
+    ASSERT(reverse_block_entries.insert({entry_point, block.Location()}).second);
 
     Link(block_info);
-    RelinkForDescriptor(block.Location(), block_info.entry_point);
+    // The relocations are only needed to link this block once; keeping them cost memory per block.
+    block_info.relocations = {};
+    const auto [stored, inserted] = block_infos.emplace(entry_point, std::move(block_info));
+    ASSERT(inserted);
 
-    mem.invalidate(reinterpret_cast<u32*>(block_info.entry_point), block_info.size);
+    RelinkForDescriptor(block.Location(), entry_point);
+
+    mem.invalidate(reinterpret_cast<u32*>(entry_point), size);
     ProtectCodeMemory();
 
-    RegisterNewBasicBlock(block, block_info);
+    RegisterNewBasicBlock(block, stored->second);
 
-    return block_info;
+    return entry_point;
 }
 
 void AddressSpace::Link(EmittedBlockInfo& block_info) {

@@ -8,8 +8,10 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 #include <optional>
+#include <vector>
 
 #include "common/common_types.h"
 #include <oaknut/code_block.hpp>
@@ -45,6 +47,16 @@ public:
     void InvalidateBasicBlocks(const ::Common::unordered_set<IR::LocationDescriptor>& descriptors);
 
     void ClearCache();
+
+#ifdef __ANDROID__
+    // Satronho NX: full clears asked for while code runs are left to the JIT (it clears at the
+    // start of the next run, where the return stack buffer is reset too).
+    void SetFullClearRequest(std::function<void()> request) {
+        request_full_clear = std::move(request);
+    }
+    // Frees the tables of blocks invalidated since the last call. Only call it while no code runs.
+    void FreeInvalidatedBlocks();
+#endif
 protected:
     virtual EmitConfig GetEmitConfig() = 0;
     virtual void RegisterNewBasicBlock(const IR::Block& block, const EmittedBlockInfo& block_info) = 0;
@@ -62,7 +74,7 @@ protected:
     }
 
     std::size_t GetRemainingSize();
-    EmittedBlockInfo Emit(IR::Block ir_block);
+    CodePtr Emit(IR::Block ir_block);
     void Link(EmittedBlockInfo& block);
     void LinkBlockLinks(const CodePtr entry_point, const CodePtr target_ptr, const std::vector<BlockRelocation>& block_relocations_list);
     void RelinkForDescriptor(IR::LocationDescriptor target_descriptor, CodePtr target_ptr);
@@ -80,6 +92,12 @@ protected:
     ::Common::unordered_map<IR::LocationDescriptor, CodePtr> block_entries;
     ::Common::unordered_map<CodePtr, EmittedBlockInfo> block_infos;
     ::Common::unordered_map<IR::LocationDescriptor, ::Common::unordered_set<CodePtr>> block_references;
+
+#ifdef __ANDROID__
+    std::function<void()> request_full_clear;
+    bool full_clear_requested = false;
+    std::vector<CodePtr> invalidated_blocks;
+#endif
 
     ExceptionHandler exception_handler;
     FastmemManager fastmem_manager;

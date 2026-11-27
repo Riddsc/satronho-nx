@@ -28,11 +28,18 @@ struct Jit::Impl final {
     Impl(Jit*, A64::UserConfig conf)
             : conf(conf)
             , current_address_space(conf)
-            , core(conf) {}
+            , core(conf) {
+#ifdef __ANDROID__
+        current_address_space.SetFullClearRequest([this] { ClearCache(); });
+#endif
+    }
 
     HaltReason Run() {
         ASSERT(!is_executing);
         PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&halt_reason)));
+#ifdef __ANDROID__
+        current_address_space.FreeInvalidatedBlocks();
+#endif
         is_executing = true;
         HaltReason hr = core.Run(current_address_space, current_state, &halt_reason);
         PerformRequestedCacheInvalidation(hr);
@@ -43,6 +50,9 @@ struct Jit::Impl final {
     HaltReason Step() {
         ASSERT(!is_executing);
         PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&halt_reason)));
+#ifdef __ANDROID__
+        current_address_space.FreeInvalidatedBlocks();
+#endif
         is_executing = true;
         HaltReason hr = core.Step(current_address_space, current_state, &halt_reason);
         PerformRequestedCacheInvalidation(hr);
