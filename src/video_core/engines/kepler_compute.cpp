@@ -1085,9 +1085,13 @@ bool KeplerCompute::BypassOotNetwork(u64 program_id, u64 native_key) {
     // first frame) the network runs as usual. Its first passes are skipped only while the output
     // pass is being replaced, so a failed replacement brings the whole network back next frame.
     Maxwell3D::Regs::RenderTargetConfig tonemapped;
+    u32 drawn_width{};
+    u32 drawn_height{};
     {
         std::scoped_lock lock{bypass->mutex};
         tonemapped = bypass->tonemapped;
+        drawn_width = bypass->tonemapped_width;
+        drawn_height = bypass->tonemapped_height;
     }
     if (tonemapped.Address() == 0) {
         return false;
@@ -1098,13 +1102,20 @@ bool KeplerCompute::BypassOotNetwork(u64 program_id, u64 native_key) {
     if (native_key != OutputProgramKey) {
         return false;
     }
-    // The copy needs the tonemapped image to be a B10G11R11 block-linear image of the output's size.
+    // The copy needs the tonemapped image to be a B10G11R11 block-linear image. Satronho NX: it
+    // may be smaller than the output (the game renders at a dynamic resolution, 854x480 in a
+    // 864x480 image on a phone with a 1920x1080 output); the drawn part is then scaled up with a
+    // linear filter, as the network's output pass upscales it.
     const auto output = ConstBuffer0Image(OutputImageHandleOffset);
+    if (drawn_width == 0 || drawn_height == 0) {
+        drawn_width = tonemapped.width;
+        drawn_height = tonemapped.height;
+    }
     if (!output || output->format != Texture::TextureFormat::B10G11R11 || output->Address() == 0 ||
         output->Address() == tonemapped.Address() || !output->IsBlockLinear() ||
         tonemapped.format != Tegra::RenderTargetFormat::B10G11R11_FLOAT ||
-        tonemapped.tile_mode.is_pitch_linear || tonemapped.width != output->Width() ||
-        tonemapped.height != output->Height()) {
+        tonemapped.tile_mode.is_pitch_linear || drawn_width > output->Width() ||
+        drawn_height > output->Height()) {
         bypass->output_replaced.store(false, std::memory_order_relaxed);
         static bool warned = false;
         if (!std::exchange(warned, true)) {
@@ -1129,6 +1140,8 @@ bool KeplerCompute::BypassOotNetwork(u64 program_id, u64 native_key) {
     destination.addr_upper = static_cast<u32>(output->Address() >> 32);
     destination.addr_lower = static_cast<u32>(output->Address());
     Fermi2D::Surface source = destination;
+    source.width = tonemapped.width;
+    source.height = tonemapped.height;
     source.block_width.Assign(tonemapped.tile_mode.block_width);
     source.block_height.Assign(tonemapped.tile_mode.block_height);
     source.block_depth.Assign(tonemapped.tile_mode.block_depth);
@@ -1136,9 +1149,10 @@ bool KeplerCompute::BypassOotNetwork(u64 program_id, u64 native_key) {
     source.addr_lower = tonemapped.address_low;
     const s32 width = static_cast<s32>(output->Width());
     const s32 height = static_cast<s32>(output->Height());
+    const bool scaled = drawn_width != output->Width() || drawn_height != output->Height();
     const Fermi2D::Config config{
         .operation = Fermi2D::Operation::SrcCopy,
-        .filter = Fermi2D::Filter::Point,
+        .filter = scaled ? Fermi2D::Filter::Bilinear : Fermi2D::Filter::Point,
         .must_accelerate = true,
         .dst_x0 = 0,
         .dst_y0 = 0,
@@ -1146,17 +1160,17 @@ bool KeplerCompute::BypassOotNetwork(u64 program_id, u64 native_key) {
         .dst_y1 = height,
         .src_x0 = 0,
         .src_y0 = 0,
-        .src_x1 = width,
-        .src_y1 = height,
+        .src_x1 = static_cast<s32>(drawn_width),
+        .src_y1 = static_cast<s32>(drawn_height),
     };
     const bool copied = rasterizer->AccelerateSurfaceCopy(source, destination, config);
     bypass->output_replaced.store(copied, std::memory_order_relaxed);
     static bool logged = false;
     if (!std::exchange(logged, true)) {
         LOG_INFO(HW_GPU,
-                 "Ocarina of Time: anti-aliasing network bypassed ({}): {:#x} -> {:#x} {}x{}",
+                 "Ocarina of Time: anti-aliasing network bypassed ({}): {:#x} {}x{} -> {:#x} {}x{}",
                  copied ? "copy of the tonemapped image" : "copy failed", tonemapped.Address(),
-                 output->Address(), width, height);
+                 drawn_width, drawn_height, output->Address(), width, height);
     }
     return copied;
 }

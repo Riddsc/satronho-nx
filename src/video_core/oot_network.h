@@ -45,6 +45,10 @@ struct BypassState {
     std::mutex mutex;
     /// Render target 0 of the latest tonemap draw (address 0 until one is seen), under mutex.
     Tegra::Engines::Maxwell3D::Regs::RenderTargetConfig tonemapped{};
+    /// Size of the tonemap draw's viewport: the part of the tonemapped image the game drew (the
+    /// game renders at a dynamic resolution inside a larger image), under mutex.
+    u32 tonemapped_width{};
+    u32 tonemapped_height{};
     std::atomic<bool> output_replaced{}; ///< the latest output pass was replaced
 };
 

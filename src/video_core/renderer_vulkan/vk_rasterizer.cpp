@@ -1831,6 +1831,13 @@ void RasterizerVulkan::TrackOotTonemappedImage(const GraphicsPipeline& pipeline)
                  target.width, target.height);
     }
     oot_network_bypass.tonemapped = target;
+    const auto& viewport = maxwell3d->regs.viewport_transform[0];
+    const auto clamp_size = [](f32 size, u32 limit) {
+        const u32 value = size > 0.0f ? static_cast<u32>(size + 0.5f) : 0;
+        return value == 0 || value > limit ? limit : value;
+    };
+    oot_network_bypass.tonemapped_width = clamp_size(viewport.GetWidth(), target.width);
+    oot_network_bypass.tonemapped_height = clamp_size(viewport.GetHeight(), target.height);
 }
 
 void RasterizerVulkan::TraceDrawFailure(std::string_view reason) {
