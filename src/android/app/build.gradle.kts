@@ -102,11 +102,11 @@ android {
                         ))
                     }
 
+                // Satronho NX: the update checker is always built. It only looks for a newer release
+                // when the APK knows its build-N tag (releases); test APKs have none and skip it.
+                arguments.add("-DENABLE_UPDATE_CHECKER=ON")
                 if (isNightly) {
-                    arguments.addAll(listOf(
-                        "-DENABLE_UPDATE_CHECKER=ON",
-                        "-DNIGHTLY_BUILD=ON",
-                    ))
+                    arguments.add("-DNIGHTLY_BUILD=ON")
                 }
 
                 abiFilters("arm64-v8a")
