@@ -129,7 +129,8 @@ struct Nx2VideoDecoder::Impl {
     }
 };
 
-Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime) : impl{std::make_unique<Impl>()} {
+Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime, u32 width, u32 height)
+    : impl{std::make_unique<Impl>()} {
     impl->name = std::string{mime};
     const auto start = std::chrono::steady_clock::now();
     const auto codec = CodecFromMime(mime);
@@ -137,6 +138,34 @@ Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime) : impl{std::make_unique<
         LOG_ERROR(HW_GPU, "nx2 video: no decoder for codec \"{}\"", mime);
         return;
     }
+#ifdef __ANDROID__
+    // Satronho NX: AV1 on the phone's hardware decoder first. libdav1d on a phone's CPU, next to
+    // the emulated cores, managed a few frames a second of a 1080p movie (Ocarina's intro).
+    if (*codec == NvdecCommon::VideoCodec::AV1 && width != 0 && height != 0) {
+        if (const AVCodec* mediacodec = avcodec_find_decoder_by_name("av1_mediacodec")) {
+            impl->decoder.emplace(mediacodec);
+            impl->context.emplace(*impl->decoder);
+            AVCodecContext* const context = impl->context->GetCodecContext();
+            context->width = static_cast<int>(width);
+            context->height = static_cast<int>(height);
+            context->coded_width = static_cast<int>(width);
+            context->coded_height = static_cast<int>(height);
+            impl->open = impl->context->OpenContext(*impl->decoder);
+            if (impl->open) {
+                LOG_INFO(HW_GPU, "nx2 video: \"{}\" {}x{} decodes on the phone's hardware with "
+                                 "av1_mediacodec, opened in {} ms",
+                         mime, width, height,
+                         std::chrono::duration_cast<std::chrono::milliseconds>(
+                             std::chrono::steady_clock::now() - start)
+                             .count());
+                return;
+            }
+            LOG_WARNING(HW_GPU, "nx2 video: av1_mediacodec did not open, using libdav1d");
+            impl->context.reset();
+            impl->decoder.reset();
+        }
+    }
+#endif
     impl->decoder.emplace(*codec);
     if (impl->decoder->GetCodec() == nullptr) {
         LOG_ERROR(HW_GPU, "nx2 video: FFmpeg has no decoder for \"{}\"", mime);
@@ -145,6 +174,13 @@ Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime) : impl{std::make_unique<
     impl->context.emplace(*impl->decoder);
     AVCodecContext* const context = impl->context->GetCodecContext();
     const std::string_view decoder_name = impl->decoder->GetCodec()->name;
+#ifdef __ANDROID__
+    if (decoder_name == "libdav1d") {
+        // Low delay limits dav1d to one frame at a time, which on a phone is one slow core. The
+        // service queues the movie's input ahead, so let it decode several frames in parallel.
+        context->flags &= ~AV_CODEC_FLAG_LOW_DELAY;
+    }
+#endif
     const bool gpu = Settings::values.nvdec_emulation.GetValue() == Settings::NvdecEmulation::Gpu;
     if (gpu) {
         impl->hardware.emplace();

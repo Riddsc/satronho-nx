@@ -134,6 +134,8 @@ public:
     YUZU_NON_MOVEABLE(Decoder);
 
     explicit Decoder(Tegra::Host1x::NvdecCommon::VideoCodec codec);
+    /// Satronho NX: a decoder FFmpeg was asked for by name (av1_mediacodec on Android).
+    explicit Decoder(const AVCodec* codec) : m_codec{codec} {}
     ~Decoder() = default;
 
     bool SupportsDecodingOnDevice(AVPixelFormat* out_pix_fmt, AVHWDeviceType type) const;

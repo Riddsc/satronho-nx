@@ -3641,6 +3641,26 @@ private:
                 }
                 ++m_frames_out;
                 const s64 written_us = HostTimeUs();
+                // Satronho NX: how fast the movie comes out, every 120 frames.
+                if (m_rate_start_us == 0) {
+                    m_rate_start_us = written_us;
+                } else if (++m_rate_frames == 120) {
+                    const double seconds =
+                        static_cast<double>(written_us - m_rate_start_us) / 1'000'000.0;
+                    LOG_INFO(Service,
+                             "{} {} frames out in {:.1f} s ({:.1f} a second); decoding took {:.1f} "
+                             "ms an input over {} inputs",
+                             GetServiceName(), m_rate_frames, seconds,
+                             seconds > 0.0 ? m_rate_frames / seconds : 0.0,
+                             m_rate_inputs ? static_cast<double>(m_rate_decode_us) / 1000.0 /
+                                                 static_cast<double>(m_rate_inputs)
+                                           : 0.0,
+                             m_rate_inputs);
+                    m_rate_start_us = written_us;
+                    m_rate_frames = 0;
+                    m_rate_decode_us = 0;
+                    m_rate_inputs = 0;
+                }
                 if (!m_stream_start) {
                     m_stream_start = {written_us, frame.pts};
                 }
@@ -3666,6 +3686,8 @@ private:
                 m_ready->room.store(m_inputs.BelowReadyWatermark(), std::memory_order_relaxed);
             }
             std::string codec = m_codec;
+            const u32 configured_width = m_width;
+            const u32 configured_height = m_height;
             if (codec.empty() && Tegra::Host1x::IsH264Stream(input.data)) {
                 codec = "video/avc";
                 m_codec = codec;
@@ -3682,7 +3704,8 @@ private:
                                               std::min(input.data.size(), size_t{16})),
                                           " "));
                 }
-                decoder = std::make_unique<Tegra::Host1x::Nx2VideoDecoder>(codec);
+                decoder = std::make_unique<Tegra::Host1x::Nx2VideoDecoder>(
+                    codec, configured_width, configured_height);
             }
             pictures.clear();
             const auto decode_start = std::chrono::steady_clock::now();
@@ -3695,6 +3718,8 @@ private:
                                        .count();
             lk.lock();
             m_decoded_frames += pictures.size();
+            m_rate_decode_us += static_cast<u64>(decode_us);
+            ++m_rate_inputs;
             if (Nx2VideoTraceEnabled()) {
                 LOG_INFO(Service,
                          "nx2:vdec trace decode syncpoint={} codec={} open={} pts={} eos={} "
@@ -3915,6 +3940,10 @@ private:
     std::string m_codec;
     u32 m_width{};
     u32 m_height{};
+    s64 m_rate_start_us{}; ///< Satronho NX: movie speed log
+    u32 m_rate_frames{};
+    u64 m_rate_decode_us{};
+    u32 m_rate_inputs{};
     u32 m_handed{}; ///< Output images handed out (registered or released) so far
     u64 m_frames_out{};
     u64 m_decoded_frames{};
