@@ -95,8 +95,10 @@ end
 EOF
 mv libavcodec-merged.a libavcodec.a
 "$TC/llvm-ranlib" libavcodec.a
+# Read the symbols into a file first: with pipefail, grep -q closing the pipe early fails the check.
+"$TC/llvm-nm" libavcodec.a > "$WORK/avcodec-symbols.txt" 2>/dev/null || true
 for symbol in ff_libdav1d_decoder ff_av1_mediacodec_decoder dav1d_open; do
-    if ! "$TC/llvm-nm" libavcodec.a 2>/dev/null | grep -qE " [A-TV-Z] $symbol$"; then
+    if ! grep -qE " [A-TV-Z] $symbol$" "$WORK/avcodec-symbols.txt"; then
         echo "::error::$symbol is missing from libavcodec.a"
         exit 1
     fi
