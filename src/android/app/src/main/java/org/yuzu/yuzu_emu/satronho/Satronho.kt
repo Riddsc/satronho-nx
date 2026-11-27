@@ -161,7 +161,9 @@ object Satronho {
     fun applyMemoryOptions() {
         val dir = appContext?.cacheDir?.absolutePath ?: ""
         org.yuzu.yuzu_emu.NativeLibrary.satronhoSetMemoryOptions(
-            freeZeroMemory,
+            // Off: punching out zero pages could drop a write the game made between the check
+            // and the punch (Ocarina crashed loading data with it on).
+            false,
             smallerGameMemory,
             gameMemoryInFile,
             dir

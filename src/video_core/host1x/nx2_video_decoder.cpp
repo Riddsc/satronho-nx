@@ -96,6 +96,10 @@ struct Nx2VideoDecoder::Impl {
     std::optional<FFmpeg::DecoderContext> context;
     SwsContext* scaler{};
     bool open{};
+    /// Satronho NX: FFmpeg's MediaCodec decoder waits up to 8 ms for an output on every receive
+    /// that finds none, so asking again after a frame doubled the time an input took (16 ms, at
+    /// the edge of a 60 fps movie). One receive per input; a drain still takes everything.
+    bool one_frame_per_input{};
     H264PacketConverter h264_packets;
     /// Timestamps of submitted frames not yet output. Frames copied back from a host GPU decoder
     /// lose theirs and take the earliest one instead.
@@ -108,7 +112,7 @@ struct Nx2VideoDecoder::Impl {
         hardware.reset();
     }
 
-    void Receive(std::vector<Nx2Picture>& pictures) {
+    void Receive(std::vector<Nx2Picture>& pictures, bool drain = false) {
         while (auto frame = context->ReceiveFrame()) {
             const AVFrame* f = frame->GetFrame();
             const s64 stamp = f->best_effort_timestamp != AV_NOPTS_VALUE ? f->best_effort_timestamp
@@ -125,6 +129,9 @@ struct Nx2VideoDecoder::Impl {
             }
             pictures.push_back({static_cast<u32>(f->width), static_cast<u32>(f->height), pts,
                                 std::move(frame)});
+            if (one_frame_per_input && !drain) {
+                break;
+            }
         }
     }
 };
@@ -151,6 +158,7 @@ Nx2VideoDecoder::Nx2VideoDecoder(std::string_view mime, u32 width, u32 height)
             context->coded_width = static_cast<int>(width);
             context->coded_height = static_cast<int>(height);
             impl->open = impl->context->OpenContext(*impl->decoder);
+            impl->one_frame_per_input = impl->open;
             if (impl->open) {
                 LOG_INFO(HW_GPU, "nx2 video: \"{}\" {}x{} decodes on the phone's hardware with "
                                  "av1_mediacodec, opened in {} ms",
@@ -244,7 +252,7 @@ void Nx2VideoDecoder::Drain(std::vector<Nx2Picture>& pictures) {
         return;
     }
     avcodec_send_packet(impl->context->GetCodecContext(), nullptr);
-    impl->Receive(pictures);
+    impl->Receive(pictures, true);
     Reset();
 }
 

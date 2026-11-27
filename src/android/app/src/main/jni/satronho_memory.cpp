@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <jni.h>
 #include <sys/prctl.h>
+#include <sys/ucontext.h>
 #include <unistd.h>
 #include <unwind.h>
 
@@ -34,6 +35,8 @@ namespace {
 int g_abort_fd = -1;
 std::atomic_bool g_handlers_installed{false};
 struct sigaction g_previous_abort {};
+struct sigaction g_previous_segv {};
+struct sigaction g_previous_bus {};
 
 void WriteText(const char* text) {
     if (g_abort_fd >= 0 && text != nullptr) {
@@ -51,6 +54,25 @@ void WriteHex(uintptr_t value) {
     }
     buffer[18] = '\0';
     WriteText(buffer);
+}
+
+// Module and offset of a code address (and the nearest exported symbol), or the bare address
+// (code the CPU translator wrote, or memory no library owns).
+void WriteLocation(uintptr_t pc) {
+    Dl_info info{};
+    if (dladdr(reinterpret_cast<void*>(pc), &info) != 0 && info.dli_fname) {
+        const char* name = std::strrchr(info.dli_fname, '/');
+        WriteText(name != nullptr ? name + 1 : info.dli_fname);
+        WriteText("+");
+        WriteHex(pc - reinterpret_cast<uintptr_t>(info.dli_fbase));
+        if (info.dli_sname != nullptr) {
+            WriteText(" ");
+            WriteText(info.dli_sname);
+        }
+    } else {
+        WriteHex(pc);
+        WriteText(" (no library: translated code or unknown)");
+    }
 }
 
 struct Frames {
@@ -71,20 +93,8 @@ void WriteBacktrace() {
     Frames frames{};
     _Unwind_Backtrace(CollectFrame, &frames);
     for (int i = 0; i < frames.count; ++i) {
-        Dl_info info{};
         WriteText("  ");
-        if (dladdr(reinterpret_cast<void*>(frames.pcs[i]), &info) != 0 && info.dli_fname) {
-            const char* name = std::strrchr(info.dli_fname, '/');
-            WriteText(name != nullptr ? name + 1 : info.dli_fname);
-            WriteText("+");
-            WriteHex(frames.pcs[i] - reinterpret_cast<uintptr_t>(info.dli_fbase));
-            if (info.dli_sname != nullptr) {
-                WriteText(" ");
-                WriteText(info.dli_sname);
-            }
-        } else {
-            WriteHex(frames.pcs[i]);
-        }
+        WriteLocation(frames.pcs[i]);
         WriteText("\n");
     }
 }
@@ -107,6 +117,47 @@ void OnAbort(int signal, siginfo_t* info, void* context) {
         g_previous_abort.sa_handler(signal);
     }
     raise(SIGABRT);
+}
+
+// Satronho NX: SIGSEGV and SIGBUS the CPU translator did not handle (it passes those on to the
+// handler installed before it, this one). Android's exit reason only gives the signal number.
+std::atomic_bool g_fatal_written{false};
+
+void OnFatalSignal(int signal, siginfo_t* info, void* context) {
+    if (g_fatal_written.exchange(true)) {
+        // Already written (another thread, or the CPU translator's handler, which keeps a copy
+        // of this one, called it again): let Android's default action end the process.
+        ::signal(signal, SIG_DFL);
+        return;
+    }
+    char thread[17]{};
+    prctl(PR_GET_NAME, thread, 0, 0, 0);
+    WriteText(signal == SIGBUS ? "Satronho: the emulator crashed with SIGBUS"
+                               : "Satronho: the emulator crashed with SIGSEGV");
+    WriteText(" (code ");
+    WriteHex(static_cast<uintptr_t>(info != nullptr ? info->si_code : 0));
+    WriteText(") at address ");
+    WriteHex(reinterpret_cast<uintptr_t>(info != nullptr ? info->si_addr : nullptr));
+    WriteText(" on thread ");
+    WriteText(thread);
+    WriteText("\n");
+#if defined(__aarch64__)
+    if (context != nullptr) {
+        const auto* uc = static_cast<const ucontext_t*>(context);
+        WriteText("  pc ");
+        WriteLocation(static_cast<uintptr_t>(uc->uc_mcontext.pc));
+        WriteText("\n  lr ");
+        WriteLocation(static_cast<uintptr_t>(uc->uc_mcontext.regs[30]));
+        WriteText("\n");
+    }
+#endif
+    WriteBacktrace();
+    if (g_abort_fd >= 0) {
+        fsync(g_abort_fd);
+    }
+    // Back to the previous handler; returning runs the faulting instruction again under it, so
+    // Android still writes its own crash report.
+    sigaction(signal, signal == SIGBUS ? &g_previous_bus : &g_previous_segv, nullptr);
 }
 
 [[noreturn]] void OnTerminate() {
@@ -142,6 +193,14 @@ void InstallHandlers(const std::string& abort_path) {
     action.sa_flags = SA_SIGINFO | SA_ONSTACK;
     sigemptyset(&action.sa_mask);
     sigaction(SIGABRT, &action, &g_previous_abort);
+    // Installed before the game starts, so before the CPU translator's own handler, which passes
+    // the faults it does not own on to this one.
+    struct sigaction fatal {};
+    fatal.sa_sigaction = OnFatalSignal;
+    fatal.sa_flags = SA_SIGINFO | SA_ONSTACK;
+    sigemptyset(&fatal.sa_mask);
+    sigaction(SIGSEGV, &fatal, &g_previous_segv);
+    sigaction(SIGBUS, &fatal, &g_previous_bus);
 }
 
 void SetOrClear(const char* name, bool on, const char* value) {

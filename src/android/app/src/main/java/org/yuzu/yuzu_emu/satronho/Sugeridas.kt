@@ -223,12 +223,6 @@ object Sugeridas {
             root.addView(row)
         }
         memoryRow(
-            R.string.satronho_free_zero_memory,
-            R.string.satronho_free_zero_memory_description,
-            { Satronho.freeZeroMemory },
-            { Satronho.freeZeroMemory = it }
-        )
-        memoryRow(
             R.string.satronho_smaller_game_memory,
             R.string.satronho_smaller_game_memory_description,
             { Satronho.smallerGameMemory },
