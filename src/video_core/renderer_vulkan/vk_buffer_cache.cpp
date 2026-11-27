@@ -414,8 +414,23 @@ BufferCacheRuntime::BufferCacheRuntime(const Device& device_, MemoryAllocator& m
     limit_dynamic_storage_buffers = driver_id == VK_DRIVER_ID_QUALCOMM_PROPRIETARY ||
                                     driver_id == VK_DRIVER_ID_ARM_PROPRIETARY;
     if (limit_dynamic_storage_buffers) {
-        max_dynamic_storage_buffers = device.GetMaxDescriptorSetStorageBuffersDynamic();
-    }    
+        // Satronho NX: guest storage buffers are plain (not dynamic) STORAGE_BUFFER descriptors,
+        // and the shader recompiler caps them by the per-stage and per-set limits
+        // (StorageBufferLimit), so the buffer cache uses the same ones. With the dynamic limit
+        // (32 on Mali) a 33-buffer compute shader of Ocarina of Time (Switch 2) lost a binding,
+        // its descriptor count no longer matched and the dispatch was skipped every frame: the
+        // picture was left as stripes of old memory under the HUD.
+        max_dynamic_storage_buffers = (std::min)(device.GetMaxPerStageDescriptorStorageBuffers(),
+                                                 device.GetMaxDescriptorSetStorageBuffers());
+    }
+    if (limit_dynamic_storage_buffers) {
+        LOG_INFO(Render_Vulkan,
+                 "Storage buffer limit {} (dynamic {}, per stage {}, per set {})",
+                 max_dynamic_storage_buffers, device.GetMaxDescriptorSetStorageBuffersDynamic(),
+                 device.GetMaxPerStageDescriptorStorageBuffers(),
+                 device.GetMaxDescriptorSetStorageBuffers());
+    }
+
     if (device.SupportsUint8Indices()) {
         uint8_pass = std::make_unique<Uint8Pass>(device, scheduler, descriptor_pool, staging_pool,
                                                  compute_pass_descriptor_queue);
