@@ -104,6 +104,7 @@ void AddressSpace::ClearCache() {
     block_infos.clear();
     block_references.clear();
     code.set_offset(prelude_info.end_of_prelude);
+    OnCacheCleared();
 #ifdef __ANDROID__
     full_clear_requested = false;
     invalidated_blocks.clear();
@@ -143,12 +144,21 @@ CodePtr AddressSpace::Emit(IR::Block block) {
 #ifdef __ANDROID__
     // Satronho NX: each block keeps link and fastmem tables beside its code, so on a phone those
     // tables reached GBs (Ocarina, 6 cores) long before the 128 MiB of code filled and the
-    // emulator ran out of memory. Start over once a core holds this many blocks. Clearing here,
-    // while code runs, would leave the return stack buffer pointing into reused code, so the JIT
-    // is asked to clear at the start of its next run instead.
-    else if (block_infos.size() >= 32768 && !full_clear_requested && request_full_clear) {
-        full_clear_requested = true;
-        request_full_clear();
+    // emulator ran out of memory. Start over once a core holds this many blocks; if the last
+    // start over was less than 30 s ago the game's code does not fit, so keep more blocks first
+    // (up to 4x) instead of translating the same code again and again. Clearing here, while code
+    // runs, would leave the return stack buffer pointing into reused code, so the JIT is asked to
+    // clear at the start of its next run instead.
+    else if (block_infos.size() >= full_clear_blocks && !full_clear_requested && request_full_clear) {
+        constexpr std::size_t max_full_clear_blocks = 131072;
+        const auto now = std::chrono::steady_clock::now();
+        if (now - last_full_clear < std::chrono::seconds{30} && full_clear_blocks < max_full_clear_blocks) {
+            full_clear_blocks *= 2;
+        } else {
+            last_full_clear = now;
+            full_clear_requested = true;
+            request_full_clear();
+        }
     }
 #endif
 

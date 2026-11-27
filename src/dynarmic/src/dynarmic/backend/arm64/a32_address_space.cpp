@@ -449,4 +449,10 @@ void A32AddressSpace::RegisterNewBasicBlock(const IR::Block& block, const Emitte
     block_ranges.AddRange(range, descriptor);
 }
 
+
+void A32AddressSpace::OnCacheCleared() {
+    // The blocks are gone, so are their guest ranges (they used to pile up across clears).
+    block_ranges.ClearCache();
+}
+
 }  // namespace Dynarmic::Backend::Arm64

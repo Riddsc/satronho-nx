@@ -23,6 +23,10 @@
 #include "core/hle/kernel/k_process.h"
 #include "native.h"
 
+namespace Core {
+void SatronhoJitTotals(u64& blocks_compiled, u64& cache_clears);
+}
+
 // Satronho NX: memory options for Switch 2 games on phones, and a note of why the emulator
 // aborted (Android's own exit reason only says "signal 6").
 namespace {
@@ -174,6 +178,20 @@ JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPurgeNative
 #ifdef M_PURGE
     mallopt(M_PURGE, 0);
 #endif
+    // How much the CPU translator works: many blocks a second and frequent clears mean it keeps
+    // translating the same code again.
+    static u64 last_compiled = 0;
+    static u64 last_clears = 0;
+    u64 compiled = 0;
+    u64 clears = 0;
+    Core::SatronhoJitTotals(compiled, clears);
+    if (compiled != last_compiled || clears != last_clears) {
+        LOG_INFO(Frontend, "Satronho JIT: {} blocks compiled and {} full cache clears since the last "
+                 "line ({} and {} in total)",
+                 compiled - last_compiled, clears - last_clears, compiled, clears);
+    }
+    last_compiled = compiled;
+    last_clears = clears;
 }
 
 JNIEXPORT jlong JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoGuestMemoryMib(JNIEnv* env,

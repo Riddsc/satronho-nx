@@ -637,6 +637,18 @@ void A64AddressSpace::RegisterNewBasicBlock(const IR::Block& block, const Emitte
     }
     const auto range = boost::icl::discrete_interval<u64>::closed(descriptor.PC(), end_location.PC() - 1);
     block_ranges.AddRange(range, descriptor);
+    if (conf.counters) {
+        ++conf.counters->blocks_compiled;
+    }
+}
+
+
+void A64AddressSpace::OnCacheCleared() {
+    // The blocks are gone, so are their guest ranges (they used to pile up across clears).
+    block_ranges.ClearCache();
+    if (conf.counters) {
+        ++conf.counters->cache_clears;
+    }
 }
 
 }  // namespace Dynarmic::Backend::Arm64

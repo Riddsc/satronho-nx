@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <functional>
 #include <map>
 #include <optional>
@@ -60,6 +61,8 @@ public:
 protected:
     virtual EmitConfig GetEmitConfig() = 0;
     virtual void RegisterNewBasicBlock(const IR::Block& block, const EmittedBlockInfo& block_info) = 0;
+    /// Called by ClearCache so the derived class can drop what it keeps per block.
+    virtual void OnCacheCleared() {}
 
     void ProtectCodeMemory() {
 #if defined(DYNARMIC_ENABLE_NO_EXECUTE_SUPPORT) || defined(__APPLE__) || defined(__OpenBSD__)
@@ -96,6 +99,8 @@ protected:
 #ifdef __ANDROID__
     std::function<void()> request_full_clear;
     bool full_clear_requested = false;
+    std::size_t full_clear_blocks = 32768;
+    std::chrono::steady_clock::time_point last_full_clear{};
     std::vector<CodePtr> invalidated_blocks;
 #endif
 

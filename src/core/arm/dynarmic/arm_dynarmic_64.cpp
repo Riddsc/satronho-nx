@@ -30,6 +30,18 @@ namespace {
 std::array<Dynarmic::A64::UserConfig::Counters, Hardware::NUM_CPU_CORES> g_jit_counters{};
 } // Anonymous namespace
 
+#ifdef __ANDROID__
+// Satronho NX: blocks compiled and full code cache clears of all cores so far, for the log.
+void SatronhoJitTotals(u64& blocks_compiled, u64& cache_clears) {
+    blocks_compiled = 0;
+    cache_clears = 0;
+    for (const auto& counters : g_jit_counters) {
+        blocks_compiled += counters.blocks_compiled;
+        cache_clears += counters.cache_clears;
+    }
+}
+#endif
+
 DynarmicCallbacks64::DynarmicCallbacks64(ArmDynarmic64& parent, Kernel::KProcess* process)
     : m_parent{parent}, m_memory(process->GetMemory())
     , m_process(process), m_debugger_enabled{parent.m_system.DebuggerEnabled()}
@@ -476,7 +488,12 @@ void ArmDynarmic64::MakeJit(Common::PageTable* page_table, std::size_t address_s
         config.fastmem_pointer = std::nullopt;
         config.fastmem_exclusive_access = false;
     }
-    if (Kernel::Nx2ThreadStats::g_enabled && m_core_index < g_jit_counters.size()) {
+#ifdef __ANDROID__
+    constexpr bool count_jit = true;
+#else
+    const bool count_jit = Kernel::Nx2ThreadStats::g_enabled;
+#endif
+    if (count_jit && m_core_index < g_jit_counters.size()) {
         config.counters = &g_jit_counters[m_core_index];
     }
     m_jit.emplace(config);
