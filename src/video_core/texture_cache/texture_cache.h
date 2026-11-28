@@ -367,6 +367,12 @@ void TextureCache<P>::ApplyThresholdOverrides(bool log) {
             // no swap left after a few minutes of Ocarina (device usage 2.1 GiB).
             critical_memory = (std::min)(critical_memory, u64{1792_MiB});
             expected_memory = (std::min)(expected_memory, u64{1024_MiB});
+            // Phones with 8 GB or less (Dimensity 7400, 8 GB: closed by Android for low memory
+            // in Ocarina's opening video): 768 MiB/1.25 GiB.
+            if (static_cast<u64>(pages) * static_cast<u64>(page_size) <= 8_GiB + 512_MiB) {
+                critical_memory = (std::min)(critical_memory, u64{1280_MiB});
+                expected_memory = (std::min)(expected_memory, u64{768_MiB});
+            }
             minimum_memory = (std::min)(minimum_memory, u64{512_MiB});
         }
     }

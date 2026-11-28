@@ -84,6 +84,10 @@ object MemoryWatch {
                     }
                     logSnapshot(am, "periodic")
                     logMappings()
+                    try {
+                        org.yuzu.yuzu_emu.NativeLibrary.satronhoLeakReport()
+                    } catch (e: Throwable) {
+                    }
                     Thread.sleep(PERIOD_MS)
                 }
             } catch (e: InterruptedException) {

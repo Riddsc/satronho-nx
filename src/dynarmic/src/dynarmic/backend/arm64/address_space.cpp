@@ -10,6 +10,9 @@
 
 #include <algorithm>
 #include <atomic>
+#ifdef __ANDROID__
+#include <unistd.h>
+#endif
 #include <bit>
 
 #include "dynarmic/backend/arm64/a64_address_space.h"
@@ -156,9 +159,19 @@ CodePtr AddressSpace::Emit(IR::Block block) {
     // runs, would leave the return stack buffer pointing into reused code, so the JIT is asked to
     // clear at the start of its next run instead.
     else if (block_infos.size() >= full_clear_blocks && !full_clear_requested && request_full_clear) {
-        // Satronho NX: 196608 (was 131072); Ocarina still started over 1-5 times every 12 s in
-        // Kokiri Forest, ~300 thousand blocks translated again each time.
-        constexpr std::size_t max_full_clear_blocks = 196608;
+        // Satronho NX: 196608 (was 131072) on phones with more than 9 GiB: Ocarina started over
+        // 1-5 times every 12 s in Kokiri Forest, and ~60 % less often with this. The tables cost
+        // memory (malloc reached 3.2 GiB on a Pixel 6 Pro), so phones with 9 GiB or less (one
+        // with 8 GB was closed by Android for low memory) stop at 65536.
+        static const std::size_t max_full_clear_blocks = [] {
+            const long pages = sysconf(_SC_PHYS_PAGES);
+            const long page_size = sysconf(_SC_PAGE_SIZE);
+            const bool small = pages > 0 && page_size > 0 &&
+                               static_cast<std::uint64_t>(pages) *
+                                       static_cast<std::uint64_t>(page_size) <=
+                                   (std::uint64_t{9} << 30);
+            return small ? std::size_t{65536} : std::size_t{196608};
+        }();
         const auto now = std::chrono::steady_clock::now();
         if (now - last_full_clear < std::chrono::seconds{30} && full_clear_blocks < max_full_clear_blocks) {
             full_clear_blocks *= 2;
