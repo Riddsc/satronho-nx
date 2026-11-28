@@ -1,6 +1,25 @@
 {
   "builds": [
     {
+      "tag": "build-61",
+      "fecha": "27 de noviembre de 2026",
+      "titulo": "Ocarina of Time se ve limpio en el teléfono",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Android, corrección propia de Satronho NX: Ocarina of Time (Switch 2) ya no sale con rayas y va unas 30 veces más rápido en el teléfono. El escalado final del juego fallaba y tardaba más de 3 segundos por cuadro; en Android se cambia por un agrandado simple de la escena."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Android: en teléfonos Mali y Adreno los programas de la GPU de los juegos de Switch 2 ya no pierden datos por un límite mal elegido."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "«Sin nitidez» en el antialiasing de Ocarina of Time funciona también cuando el juego dibuja a menos resolución que la pantalla."
+        }
+      ]
+    },
+    {
       "tag": "build-60",
       "fecha": "27 de noviembre de 2026",
       "titulo": "Ocarina of Time entra a Hyrule",

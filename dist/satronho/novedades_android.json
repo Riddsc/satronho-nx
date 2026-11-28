@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-61",
+      "fecha": "27 de noviembre de 2026",
+      "titulo": "Ocarina of Time se ve limpio en el teléfono",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia de Satronho NX: en Ocarina of Time la imagen del juego salía llena de rayas horizontales (solo el HUD y los menús se veían bien). Con la nueva foto de un cuadro de Diagnóstico encontramos que la escena se dibujaba bien y lo que fallaba era el escalado final del juego. En Android ese paso se cambia por un agrandado simple de la escena, y la imagen queda limpia."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Ocarina of Time va unas 30 veces más rápido en el teléfono: ese escalado del juego tardaba más de 3 segundos por cuadro en un Pixel 6 Pro y ahora el cuadro tarda alrededor de una décima de segundo."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Corrección propia: en teléfonos Mali y Adreno el emulador dejaba usar menos datos a la vez de los que el teléfono permite, y algunos programas de la GPU de los juegos de Switch 2 se saltaban en cada cuadro. Ahora usa el límite real del teléfono."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "En Android, el antialiasing de Ocarina of Time queda en «Sin nitidez» por defecto: es el modo que hace posible el agrandado simple."
+        }
+      ]
+    },
+    {
       "tag": "build-60",
       "fecha": "27 de noviembre de 2026",
       "titulo": "Ocarina of Time entra a Hyrule",

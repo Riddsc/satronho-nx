@@ -1,6 +1,29 @@
 {
   "builds": [
     {
+      "tag": "build-61",
+      "fecha": "November 27, 2026",
+      "titulo": "Ocarina of Time looks clean on the phone",
+      "cambios": [
+        {
+          "tipo": "arreglo",
+          "texto": "Satronho NX's own fix: in Ocarina of Time the game's picture was full of horizontal stripes (only the HUD and menus looked right). With the new frame picture in Diagnostics we found the scene was drawn fine and the game's final upscale was what failed. On Android that step is replaced by a simple upscale of the scene, and the picture is clean."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "Ocarina of Time runs about 30 times faster on the phone: that upscale took over 3 seconds a frame on a Pixel 6 Pro, and a frame now takes about a tenth of a second."
+        },
+        {
+          "tipo": "arreglo",
+          "texto": "Our own fix: on Mali and Adreno phones the emulator allowed less data at once than the phone does, and some GPU programs of Switch 2 games were skipped every frame. It now uses the phone's real limit."
+        },
+        {
+          "tipo": "mejora",
+          "texto": "On Android, Ocarina of Time's anti-aliasing defaults to «No sharpening»: the mode that enables the simple upscale."
+        }
+      ]
+    },
+    {
       "tag": "build-60",
       "fecha": "November 27, 2026",
       "titulo": "Ocarina of Time reaches Hyrule",
