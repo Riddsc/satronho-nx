@@ -357,14 +357,16 @@ void TextureCache<P>::ApplyThresholdOverrides(bool log) {
 #ifdef __ANDROID__
     // On phones the GPU shares the system RAM, so a texture cache sized like a 4 GiB card pushes
     // the whole process past what Android keeps alive (Pixel 6 Pro, 12 GB: killed at ~3.4 GB RSS
-    // seconds after Ocarina's first frame). Phones with 12 GB or less keep it at 1.5/2.25 GiB.
+    // seconds after Ocarina's first frame). Phones with 12 GB or less keep it at 1/1.75 GiB.
     {
         const long pages = sysconf(_SC_PHYS_PAGES);
         const long page_size = sysconf(_SC_PAGE_SIZE);
         if (pages > 0 && page_size > 0 &&
             static_cast<u64>(pages) * static_cast<u64>(page_size) <= 12_GiB + 512_MiB) {
-            critical_memory = (std::min)(critical_memory, u64{2304_MiB});
-            expected_memory = (std::min)(expected_memory, u64{1536_MiB});
+            // Satronho NX: 1/1.75 GiB. At 1.5/2.25 GiB the Pixel 6 Pro had ~350 MB free and
+            // no swap left after a few minutes of Ocarina (device usage 2.1 GiB).
+            critical_memory = (std::min)(critical_memory, u64{1792_MiB});
+            expected_memory = (std::min)(expected_memory, u64{1024_MiB});
             minimum_memory = (std::min)(minimum_memory, u64{512_MiB});
         }
     }
@@ -1072,6 +1074,9 @@ bool TextureCache<P>::RescaleRenderTargets() {
         }
         check_rescale(render_targets.depth_buffer_id, tmp_depth_image);
 
+        if (!can_rescale && Settings::values.resolution_info.downscale) {
+            LogRescaleBlocker(tmp_color_images[0]);
+        }
         if (can_rescale) {
             rescaled = any_rescaled || scale_rating >= 2;
             const auto scale_up = [this](ImageId image_id) {
@@ -2746,6 +2751,53 @@ bool TextureCache<P>::ImageCanRescale(ImageBase& image) {
     image.flags &= ~ImageFlagBits::CheckingRescalable;
     image.flags |= ImageFlagBits::IsRescalable;
     return true;
+}
+
+template <class P>
+void TextureCache<P>::LogRescaleBlocker(ImageId image_id) {
+    // Satronho NX: why a big color target stays at full size with a resolution below 1x (the
+    // first 24 distinct cases), to find what keeps a game from being scaled down.
+    if (image_id == CORRUPT_ID) {
+        return;
+    }
+    const ImageBase& image = slot_images[image_id];
+    if (image.info.size.width < 640 ||
+        GetFormatType(image.info.format) != SurfaceType::ColorTexture) {
+        return;
+    }
+    const auto blocker = [](const ImageBase& candidate) -> const char* {
+        if (!candidate.info.rescaleable) {
+            return "not rescaleable (layout, mips or small)";
+        }
+        if (!candidate.info.downscaleable) {
+            return "too short to scale down";
+        }
+        return nullptr;
+    };
+    std::string reason;
+    if (const char* own = blocker(image)) {
+        reason = own;
+    } else {
+        for (const auto& alias : image.aliased_images) {
+            const ImageBase& other = slot_images[alias.id];
+            if (const char* other_reason = blocker(other)) {
+                reason = fmt::format("aliased with {}x{} format {} ({})", other.info.size.width,
+                                     other.info.size.height, other.info.format, other_reason);
+                break;
+            }
+        }
+    }
+    if (reason.empty()) {
+        reason = "an aliased or overlapping image";
+    }
+    static std::vector<std::string> logged;
+    std::string key = fmt::format("{}x{} format {}: {}", image.info.size.width,
+                                  image.info.size.height, image.info.format, reason);
+    if (logged.size() >= 24 || std::ranges::find(logged, key) != logged.end()) {
+        return;
+    }
+    LOG_INFO(HW_GPU, "Not scaled down: {}", key);
+    logged.push_back(std::move(key));
 }
 
 template <class P>

@@ -614,6 +614,7 @@ private:
                                                       bool mark_as_modified);
 
     bool ImageCanRescale(ImageBase& image);
+    void LogRescaleBlocker(ImageId image_id);
     void InvalidateScale(Image& image);
     bool ScaleUp(Image& image);
     bool ScaleDown(Image& image);

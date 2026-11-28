@@ -30,7 +30,13 @@ using VideoCore::Surface::PixelFormat;
 using VideoCore::Surface::SurfaceType;
 
 constexpr u32 RescaleHeightThreshold = 288;
+#ifdef __ANDROID__
+// Satronho NX: Switch 2 games render their scene at a dynamic resolution, as low as 854x480 in
+// Ocarina of Time on a phone; with 512 the 1/2x setting never reached it.
+constexpr u32 DownscaleHeightThreshold = 400;
+#else
 constexpr u32 DownscaleHeightThreshold = 512;
+#endif
 
 ImageInfo::ImageInfo(const TICEntry& config) noexcept {
     forced_flushed = config.IsPitchLinear() && !Settings::ReactiveFlushing();
