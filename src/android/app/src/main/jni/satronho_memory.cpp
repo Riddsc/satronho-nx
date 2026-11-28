@@ -27,6 +27,11 @@
 namespace Core {
 void SatronhoJitTotals(u64& blocks_compiled, u64& cache_clears);
 }
+#if defined(__aarch64__)
+namespace Dynarmic::Backend::Arm64 {
+extern std::atomic<std::uint64_t> g_code_full_clears;
+}
+#endif
 
 // Satronho NX: memory options for Switch 2 games on phones, and a note of why the emulator
 // aborted (Android's own exit reason only says "signal 6").
@@ -257,10 +262,14 @@ JNIEXPORT void JNICALL Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoPurgeNative
     u64 compiled = 0;
     u64 clears = 0;
     Core::SatronhoJitTotals(compiled, clears);
+    u64 code_full = 0;
+#if defined(__aarch64__)
+    code_full = Dynarmic::Backend::Arm64::g_code_full_clears.load(std::memory_order_relaxed);
+#endif
     if (compiled != last_compiled || clears != last_clears) {
         LOG_INFO(Frontend, "Satronho JIT: {} blocks compiled and {} full cache clears since the last "
-                 "line ({} and {} in total)",
-                 compiled - last_compiled, clears - last_clears, compiled, clears);
+                 "line ({} and {} in total; {} of the clears with the code cache full)",
+                 compiled - last_compiled, clears - last_clears, compiled, clears, code_full);
     }
     last_compiled = compiled;
     last_clears = clears;

@@ -9,6 +9,7 @@
 #include <cstdio>
 
 #include <algorithm>
+#include <atomic>
 #include <bit>
 
 #include "dynarmic/backend/arm64/a64_address_space.h"
@@ -24,6 +25,9 @@
 #include "dynarmic/ir/location_descriptor.h"
 
 namespace Dynarmic::Backend::Arm64 {
+
+// Satronho NX: clears forced by a full code cache (not by the block limit), for the phone's log.
+std::atomic<std::uint64_t> g_code_full_clears{0};
 
 AddressSpace::AddressSpace(std::size_t code_cache_size)
     : ir_block{IR::LocationDescriptor{0}}
@@ -140,6 +144,7 @@ std::size_t AddressSpace::GetRemainingSize() {
 
 CodePtr AddressSpace::Emit(IR::Block block) {
     if (GetRemainingSize() < 1024 * 1024) {
+        g_code_full_clears.fetch_add(1, std::memory_order_relaxed);
         ClearCache();
     }
 #ifdef __ANDROID__
@@ -151,7 +156,9 @@ CodePtr AddressSpace::Emit(IR::Block block) {
     // runs, would leave the return stack buffer pointing into reused code, so the JIT is asked to
     // clear at the start of its next run instead.
     else if (block_infos.size() >= full_clear_blocks && !full_clear_requested && request_full_clear) {
-        constexpr std::size_t max_full_clear_blocks = 131072;
+        // Satronho NX: 196608 (was 131072); Ocarina still started over 1-5 times every 12 s in
+        // Kokiri Forest, ~300 thousand blocks translated again each time.
+        constexpr std::size_t max_full_clear_blocks = 196608;
         const auto now = std::chrono::steady_clock::now();
         if (now - last_full_clear < std::chrono::seconds{30} && full_clear_blocks < max_full_clear_blocks) {
             full_clear_blocks *= 2;

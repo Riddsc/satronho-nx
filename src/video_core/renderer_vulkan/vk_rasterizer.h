@@ -280,6 +280,8 @@ private:
     bool OcarinaCheapUpscale(const ComputePipeline& pipeline) const;
     /// The blit; false when the pass's images don't fit it (the game's pass then runs).
     bool BlitOcarinaUpscale(const ComputePipeline& pipeline);
+    /// Satronho NX (Android): a pass that only feeds Ocarina's replaced upscale.
+    bool OcarinaSkippedPrepass(const ComputePipeline& pipeline) const;
     void ReadOcarinaActor(struct OcarinaActorMesh& mesh);
     /// Records the uniform and storage buffers of the current draw or dispatch for the frame dump.
     bool FrameDumpBuffers(bool compute, std::span<const u64> shader_hashes);
@@ -338,6 +340,8 @@ private:
     std::unique_ptr<class OcarinaUpscaler> oot_live_dlss;
     bool oot_live_failed{};
     const char* oot_fallback_reason{};
+    /// Satronho NX: the last Ocarina upscale was replaced by the blit (its own passes are skipped).
+    bool oot_cheap_upscale_active{};
     u32 oot_fallback_repeats{};
     std::optional<u64> oot_dlss_frame;
     std::array<f32, 2> oot_jitter_applied{}; ///< in the viewport state now (render pixels)

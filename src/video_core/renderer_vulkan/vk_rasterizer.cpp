@@ -2363,6 +2363,12 @@ void RasterizerVulkan::DispatchCompute() {
         if (kepler_compute->IsNativeMode()) throw Shader::RuntimeError("Native compute pipeline unavailable");
         return;
     }
+    if (OcarinaSkippedPrepass(*pipeline)) {
+        // Satronho NX (Android): only the game's upscale used what this pass writes, and the
+        // blit replaces it. Its storage views of the scene in another format also kept the scene
+        // from being scaled down with a resolution below 1x.
+        return;
+    }
     std::scoped_lock lock{texture_cache.mutex, buffer_cache.mutex};
     std::optional<ByteAddressedShadow> byte_addressed_shadow;
     buffer_cache.Nx2CollectListCopies(true);
@@ -3375,7 +3381,30 @@ bool RasterizerVulkan::OcarinaCheapUpscale(const ComputePipeline& pipeline) cons
 #endif
 }
 
+bool RasterizerVulkan::OcarinaSkippedPrepass(const ComputePipeline& pipeline) const {
+#ifdef __ANDROID__
+    if (!oot_cheap_upscale_active) {
+        return false;
+    }
+    const u64 hash = pipeline.ShaderHash();
+    const bool skipped = hash == 0xa107e12b6771be48ULL || hash == 0xd9ee412f00ce399aULL ||
+                         hash == 0xa2fcaa95c5a162f3ULL;
+    if (skipped) {
+        static bool logged = false;
+        if (!std::exchange(logged, true)) {
+            LOG_INFO(Render_Vulkan,
+                     "Ocarina of Time: the upscale's own passes are skipped (first {:016x})", hash);
+        }
+    }
+    return skipped;
+#else
+    static_cast<void>(pipeline);
+    return false;
+#endif
+}
+
 bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
+    oot_cheap_upscale_active = false;
     const auto fail = [](const char* reason) {
         static const char* last = nullptr;
         if (reason != last) {
@@ -3458,6 +3487,7 @@ bool RasterizerVulkan::BlitOcarinaUpscale(const ComputePipeline& pipeline) {
     if (!texture_cache.BlitImage(dst, src, config)) {
         return fail("blit failed");
     }
+    oot_cheap_upscale_active = true;
     static bool logged = false;
     if (!std::exchange(logged, true)) {
         LOG_INFO(Render_Vulkan,
