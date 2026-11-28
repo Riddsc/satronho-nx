@@ -14,6 +14,8 @@
 #include <optional>
 #include <vector>
 
+#include <boost/container/small_vector.hpp>
+
 #include "common/common_types.h"
 #include <oaknut/code_block.hpp>
 #include <oaknut/oaknut.hpp>
@@ -94,7 +96,9 @@ protected:
     std::map<CodePtr, IR::LocationDescriptor> reverse_block_entries;
     ::Common::unordered_map<IR::LocationDescriptor, CodePtr> block_entries;
     ::Common::unordered_map<CodePtr, EmittedBlockInfo> block_infos;
-    ::Common::unordered_map<IR::LocationDescriptor, ::Common::unordered_set<CodePtr>> block_references;
+    // Satronho NX: most targets are linked from one or two blocks, so their list lives inside the
+    // table; a hash set per target cost a separate allocation each (~0.5 GiB in Ocarina).
+    ::Common::unordered_map<IR::LocationDescriptor, boost::container::small_vector<CodePtr, 2>> block_references;
 
 #ifdef __ANDROID__
     std::function<void()> request_full_clear;

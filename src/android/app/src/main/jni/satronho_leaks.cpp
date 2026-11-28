@@ -371,7 +371,7 @@ Java_org_yuzu_yuzu_1emu_NativeLibrary_satronhoLeakReport(JNIEnv* env, jobject ob
              g_sampled_live.load(std::memory_order_relaxed) >> 20,
              static_cast<std::uint64_t>(info.uordblks) >> 20,
              g_dropped.load(std::memory_order_relaxed));
-    const std::size_t shown = (std::min)(tops.size(), std::size_t{6});
+    const std::size_t shown = (std::min)(tops.size(), std::size_t{12});
     for (std::size_t n = 0; n < shown; ++n) {
         const auto& entry = g_stacks[tops[n].slot];
         std::string frames;

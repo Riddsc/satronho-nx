@@ -128,8 +128,12 @@ void AddressSpace::FreeInvalidatedBlocks() {
         }
         for (const auto& link : info->second.block_relocations) {
             if (const auto refs = block_references.find(link.target); refs != block_references.end()) {
-                refs->second.erase(entry_point);
-                if (refs->second.empty()) {
+                auto& list = refs->second;
+                if (const auto it = std::find(list.begin(), list.end(), entry_point); it != list.end()) {
+                    *it = list.back();
+                    list.pop_back();
+                }
+                if (list.empty()) {
                     block_references.erase(refs);
                 }
             }
@@ -356,7 +360,10 @@ void AddressSpace::Link(EmittedBlockInfo& block_info) {
     }
 
     for (const auto& link : block_info.block_relocations) {
-        block_references[link.target].insert(block_info.entry_point);
+        auto& list = block_references[link.target];
+        if (std::find(list.begin(), list.end(), block_info.entry_point) == list.end()) {
+            list.push_back(block_info.entry_point);
+        }
         LinkBlockLink(block_info.entry_point, Get(link.target), link.relocation);
     }
 }
@@ -392,7 +399,12 @@ void AddressSpace::LinkBlockLink(const CodePtr entry_point, const CodePtr target
 }
 
 void AddressSpace::RelinkForDescriptor(IR::LocationDescriptor target_descriptor, CodePtr target_ptr) {
-    for (auto code_ptr : block_references[target_descriptor]) {
+    // find, not operator[]: looking up a target nobody links to must not add an empty entry.
+    const auto refs = block_references.find(target_descriptor);
+    if (refs == block_references.end()) {
+        return;
+    }
+    for (auto code_ptr : refs->second) {
         if (auto block_iter = block_infos.find(code_ptr); block_iter != block_infos.end()) {
             const EmittedBlockInfo& block_info = block_iter->second;
 
